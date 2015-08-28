@@ -2,3 +2,6 @@
 !/README.md
 
 temp.*
+*.temp
+*.log
+/.idea
