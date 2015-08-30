@@ -6,7 +6,7 @@ import random
 
 class BST(object):
     class Node:
-        def __init__(self, key=None, value=None):
+        def __init__(self, key = None, value = None):
             self.key = key
             self.value = value
             self.left = None
@@ -83,17 +83,19 @@ class BST(object):
         self.root = _recur(self.root, key)
 
     def search(self, key):
-        def _recur(bst, key):
-            if bst == None:
-                return None
-            if key < bst.key:
-                return _recur(bst.left, key)
-            elif key > bst.key:
-                return _recur(bst.right, key)
-            else:
-                return bst.value
+        return self._search(self.root, key)
 
-        return _recur(self.root, key)
+    @staticmethod
+    def _search(bst, key):
+        it = bst
+        while it:
+            if key < it.key:
+                it = it.left
+            elif key > it.key:
+                it = it.right
+            else:
+                break
+        return it.value if it else None
 
     def getMax(self):
         return self._getMax(self.root)
@@ -158,9 +160,9 @@ class BSTTest(object):
         for i, j in self.dic.viewitems():
             self.tree.insert(i, j)
             self.tree.check()
+            assert (self.tree.search(i) == j)
             c += 1
             assert (self.tree.size() == c)
-            assert (self.tree.search(i) == j)
         assert (self.tree.size() == len(self.dic))
 
     def deleteMaxMin(self):
@@ -170,9 +172,9 @@ class BSTTest(object):
                 m = getattr(self.tree, get)()
                 getattr(self.tree, delete)()
                 self.tree.check()
+                assert (self.tree.search(m.key) == None)
                 c -= 1
                 assert (self.tree.size() == c)
-                assert (self.tree.search(m.key) == None)
             assert (self.tree.size() == 0)
 
         self.new()
@@ -184,11 +186,12 @@ class BSTTest(object):
         self.new()
         c = self.tree.size()
         for i in self.dic:
+            assert (self.tree.search(i))
             self.tree.delete(i)
             self.tree.check()
+            assert (self.tree.search(i) == None)
             c -= 1
             assert (self.tree.size() == c)
-            assert (self.tree.search(i) == None)
         assert (self.tree.size() == 0)
 
 

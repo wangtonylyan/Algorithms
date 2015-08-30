@@ -3,9 +3,10 @@
 
 import bst
 
+
 class AVL(bst.BST):
     class Node:
-        def __init__(self, key=None, value=None):
+        def __init__(self, key = None, value = None):
             self.key = key
             self.value = value
             self.left = None
@@ -14,8 +15,6 @@ class AVL(bst.BST):
 
     def __init__(self):
         self.root = None
-
-
 
 
 if __name__ == '__main__':
