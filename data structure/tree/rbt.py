@@ -19,7 +19,7 @@ import bst
 
 class RBT(bst.BST):
     class Node:
-        def __init__(self, key = None, value = None):
+        def __init__(self, key=None, value=None):
             self.key = key
             self.value = value
             self.left = None
@@ -330,7 +330,7 @@ class RBT(bst.BST):
 
 
 if __name__ == '__main__':
-    test = bst.BSTTest(RBT, 100)
+    test = bst.BSTTest(RBT, 1000)
     test.deleteMaxMin()
     test.delete()
     print 'done'

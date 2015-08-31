@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 # data structure: binary search tree
 
-import random
-
 
 class BST(object):
     class Node:
-        def __init__(self, key = None, value = None):
+        def __init__(self, key=None, value=None):
             self.key = key
             self.value = value
             self.left = None
@@ -142,8 +140,11 @@ class BST(object):
         _recur(self.root)
 
 
+import time, random
+
+
 class BSTTest(object):
-    def __init__(self, clsobj, num):
+    def __init__(self, clsobj, num, check=False, time=True):
         assert (issubclass(clsobj, BST))
         self.tcls = clsobj
         self.tree = None
@@ -153,28 +154,44 @@ class BSTTest(object):
             r = random.randint(0, 100000)
             self.dic[r] = r + 1
         print "dic's size: ", len(self.dic)
+        self.check = check
+        self.time = time
+        self.start_t = 0
+        self.end_t = 0
 
     def new(self):
         self.tree = self.tcls()
         c = 0
+        if self.time:
+            self.start_t = time.time()
         for i, j in self.dic.viewitems():
             self.tree.insert(i, j)
-            self.tree.check()
+            if self.check:
+                self.tree.check()
             assert (self.tree.search(i) == j)
             c += 1
             assert (self.tree.size() == c)
+        if self.time:
+            self.end_t = time.time()
+            print 'new:\t\t', self.end_t - self.start_t
         assert (self.tree.size() == len(self.dic))
 
     def deleteMaxMin(self):
         def test(get, delete):
             c = s = self.tree.size()
+            if self.time:
+                self.start_t = time.time()
             for i in range(s):
                 m = getattr(self.tree, get)()
                 getattr(self.tree, delete)()
-                self.tree.check()
+                if self.check:
+                    self.tree.check()
                 assert (self.tree.search(m.key) == None)
                 c -= 1
                 assert (self.tree.size() == c)
+            if self.time:
+                self.end_t = time.time()
+                print delete + ':\t', self.end_t - self.start_t
             assert (self.tree.size() == 0)
 
         self.new()
@@ -185,13 +202,19 @@ class BSTTest(object):
     def delete(self):
         self.new()
         c = self.tree.size()
+        if self.time:
+            self.start_t = time.time()
         for i in self.dic:
             assert (self.tree.search(i))
             self.tree.delete(i)
-            self.tree.check()
+            if self.check:
+                self.tree.check()
             assert (self.tree.search(i) == None)
             c -= 1
             assert (self.tree.size() == c)
+        if self.time:
+            self.end_t = time.time()
+            print 'delete:\t\t', self.end_t - self.start_t
         assert (self.tree.size() == 0)
 
 
