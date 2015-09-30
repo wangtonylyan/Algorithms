@@ -224,32 +224,32 @@ def merge():
 
 
 def heap():
-    def _sink_iter(arr, i, l):  # == heap.MaxHeap._sink()
-        while i * 2 < l:
-            j = i * 2
-            if j + 1 < l and arr[j] < arr[j + 1]:
-                j += 1
-            if arr[i] >= arr[j]:
-                break
-            arr[i], arr[j] = arr[j], arr[i]
-            i = j
+    # 实现中只利用了sink()这一基本操作，且是原地排序
+    def iter(lst):
+        def _sink(lst, i, l):  # == heap.MaxHeap._sink()
+            while i * 2 < l:
+                j = i * 2
+                if j + 1 < l and lst[j + 1] > lst[j]:
+                    j += 1
+                if lst[i] >= lst[j]:
+                    break
+                lst[i], lst[j] = lst[j], lst[i]
+                i = j
+            return lst
 
-    # heapsort只利用了max-heap.sink()这一基本操作，且是原地排序
-    def iter_main(arr):
-        arr = [0] + arr
-        # make heap: 从下至上地利用heap.sink()建堆比从上至下地利用heap.insert()快
-        for i in range((len(arr) - 1) / 2, 0, -1):
-            _sink_iter(arr, i, len(arr))
-        # heapsort: 应基于heap.pop()，而其也是由heap.sink()实现的
-        for i in range(len(arr) - 1, 1, -1):
-            arr[1], arr[i] = arr[i], arr[1]
-            _sink_iter(arr, 1, i)
-        arr.pop(0)
-        return arr
+        # 1)make heap：从下至上地利用sink()建堆，此方式比从上至下地利用float()更效率
+        lst = [0] + lst
+        for i in range((len(lst) - 1) / 2, 0, -1):
+            lst = _sink(lst, i, len(lst))
+        # 2)heapsort：不断地执行heap.pop()操作并保留其结果，就可以得到整个递增数列
+        for i in range(len(lst) - 1, 1, -1):
+            lst[1], lst[i] = lst[i], lst[1]  # 相当于heap.pop()操作
+            lst = _sink(lst, 1, i)
+        return lst[1:]
 
     print '==========================================='
-    print 'heap:   ', iter_main(g_arr[:])
-    print 'origin: ', g_arr
+    print 'heap'
+    print iter(gList[:])
     print '==========================================='
 
 
@@ -262,7 +262,5 @@ if __name__ == '__main__':
     bubble()
     quick()
     merge()
-    '''
     heap()
-    '''
     print 'done'
