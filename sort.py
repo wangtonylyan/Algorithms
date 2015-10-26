@@ -8,11 +8,11 @@
 
 def insertion():
     def iter(lst):
-        # at the beginning of each loop, i will be reset to the value next to the former i
+        # at the beginning of each outer loop, i will be reset to the value next to the former i
         for i in range(1, len(lst)):
             t = lst[i]
-            i -= 1
             # so in the inner loop, i can be reused
+            i -= 1
             while i >= 0 and lst[i] > t:
                 lst[i + 1] = lst[i]
                 i -= 1
