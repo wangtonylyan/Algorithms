@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 # design pattern: prototype
 # purpose: create a new object through clone
+# 在Java中，java.lang.Object定义了一个protected方法clone()，供继承自Object的类定制clone操作
+# 同时还提供了Cloneable接口，其将在运行时告知Java虚拟机所有实现了该接口的类都拥有安全的clone方法
+# 否则调用clone()将会导致异常。于是任何类只需继承Object类并实现Cloneable接口，就可以支持原型模式了
+
 
 import copy
 

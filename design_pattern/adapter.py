@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # design pattern: adapter (wrapper)
-# 与代理和装饰模式不同的是，它们不会修改被代理/修饰类的接口，只是提供一层indirection
-# 而适配器模式的目的则正好在于要改变被适配类/对象的当前接口
+# 与代理和装饰模式不同的是，它们提供的是与被代理/修饰类完全相同的接口，只是提供一层indirection
+# 而适配器模式的目的则正好在于要转变被适配类/对象的当前接口
 
 class AdapterPattern():
     # Adapter adapts Adaptee to Interface

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# design pattern: factory method & abstract factory
+# design pattern: factory method & abstract factory (kit)
 # 名字中的factory可以被理解为产品的生产线
 # 前者适用于需要生产同一种类但型号不同的产品（即继承于同一个父类）
 # 而后者适用于生产不同组合的成套产品（即针对于组合关系）
