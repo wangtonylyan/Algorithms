@@ -2,7 +2,7 @@
 # design pattern: proxy & decorator
 # 两种模式的实现非常相似，但两者的设计目的是截然不同的
 # 前者introduces a level of indirection when accessing an object，提供控制某个对象的访问管理
-# 后者更注重扩展：装饰类可以与被代理类处于同一个继承层次，通过装饰被代理类而不是继承之，实现更为灵活的扩展
+# 后者更注重扩展：装饰类可以与被装饰类处于同一个继承层次，通过装饰而不是继承之，实现更为灵活的扩展
 
 import inspect
 
@@ -17,15 +17,13 @@ class ProxyPattern():
     class SubjectStatic(AbstractSubject):
         def doSomething(self):
             print 'do something via proxy'
-
     class ProxyStatic(AbstractSubject):
         def __init__(self, subject):
             # Proxy can also be bound to a Subject class rather than an object
             self.subject = subject
-
         # you can also specify the Subject as a parameter of this method
         def doSomething(self):
-            self.subject.doSomething()
+            return self.subject.doSomething()
 
     # strategy2: 强制代理，直接调用对象的接口将会导致异常，且代理将由对象而非用户创建
     # 非强制，则还是允许直接调用对象本身的接口
@@ -33,12 +31,10 @@ class ProxyPattern():
     class SubjectCompulsive(AbstractSubject):
         def __init__(self):
             self.proxy = None
-
         def getProxy(self):
             if self.proxy == None:
                 self.proxy = ProxyPattern.ProxyStatic(self)
             return self.proxy
-
         def doSomething(self):
             # use python inspection to check if this is called via Proxy
             # 若语言中没有此类语法机制，通常只能检查self.proxy是否为None，以确认用户是否已尝试获取了代理
@@ -56,7 +52,6 @@ class ProxyPattern():
         def __init__(self):
             self.subject = None  # 被代理类的对象
             self.methods = []
-
         def newProxyInstance(self, cls):
             self.methods = []  # reset
             self.subject = apply(cls, ())  # 创建一个被代理类的对象
@@ -64,7 +59,6 @@ class ProxyPattern():
                 if not m.startswith('_') and not m.startswith('__') and not m.endswith('_') \
                         and callable(getattr(self.subject, m)):
                     self.methods.append(m)
-
         # 此内置方法可以截获所有对于当前类中不存在的属性或方法的调用
         def __getattr__(self, name):
             if name in self.methods and self.subject:
@@ -91,10 +85,10 @@ class ProxyPattern():
 
 
 class DecoratorPattern():
+    # 装饰类与被装饰类都继承于此接口
     class AbstractSubject():
         def doSomething(self):
             pass
-
     class Subject(AbstractSubject):
         def doSomething(self):
             print 'do something via decorator'
@@ -103,14 +97,11 @@ class DecoratorPattern():
     class AbstractDecorator(AbstractSubject):
         def __init__(self, subject):
             self.subject = subject
-
         def doSomething(self):  # this method can be purely virtual
             self.subject.doSomething()  # just for instance, it acts like Proxy
-
     class Decorator(AbstractDecorator):
         def __init__(self, subject):
             DecoratorPattern.AbstractDecorator.__init__(self, subject)
-
         def doSomething(self):
             # do anything before
             self.subject.doSomething()

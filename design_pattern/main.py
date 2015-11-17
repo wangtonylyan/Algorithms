@@ -22,12 +22,16 @@
 
 # 很多设计模式都是针对于静态语言的，而动态语言中的一些语法特性（或静态语言中的动态特性）可以很好地替代设计模式
 
-#设计模式可以针对于：1)单个类的设计，2)类之间的关联/组合，3)同一个继承树上的类的设计
+# 设计模式可以针对于：1)单个类的设计，2)类之间的关联/组合，3)同一个继承树上的类的设计
 
 
-#the testcase method in each design pattern class illustrates the actions of client as the pattern's user
+# the testcase method in each design pattern class illustrates the actions of client as the pattern's user
 
 
-#creational pattern: singleton, prototype, factory method, abstract factory, builder
-#structural pattern: proxy, decorator, facade
-#behavioral pattern:
+# creational pattern: singleton, prototype, factory method, abstract factory, builder
+# structural pattern: proxy, decorator, facade, adapter
+# behavioral pattern: template method,
+
+
+# 很多模式的目的都在于要避免继承，因为继承的层次过深会引入额外的复杂度
+# 例如proxy、decorator、adapter、delegate
