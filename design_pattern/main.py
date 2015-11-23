@@ -35,3 +35,9 @@
 
 # 很多模式的目的都在于要避免继承，因为继承的层次过深会引入额外的复杂度
 # 例如proxy、decorator、adapter、delegate
+
+
+# class inheritance & object composition
+# the former breaks encapsulation and changes behavior at compiler time
+# the later keeps encapsulation and remains in run time
+# Favor object composition over class inheritance.
