@@ -33,11 +33,15 @@
 # behavioral pattern: template method,
 
 
-# 很多模式的目的都在于要避免继承，因为继承的层次过深会引入额外的复杂度
-# 例如proxy、decorator、adapter、delegate
+# 很多模式的目的都在于要避免使用继承，因为继承的层次过深会引入额外的复杂度
+# 例如proxy、decorator、adapter、delegate、bridge、component
 
 
 # class inheritance & object composition
 # the former breaks encapsulation and changes behavior at compiler time
 # the later keeps encapsulation and remains in run time
 # Favor object composition over class inheritance.
+
+# 几个在实现或作用上比较相似的模式，便于关联地理解和记忆
+# 1）factory method & abstract factory & builder
+# 2）proxy & decorator & adapter & bridge & composite
