@@ -41,18 +41,15 @@ def insertion():
 
     def recur(lst):
         def _insert(lst):
-            if len(lst) < 2:
-                return lst
-            elif lst[-1] >= lst[-2]:
+            if len(lst) < 2 or lst[-2] <= lst[-1]:
                 return lst
             lst[-1], lst[-2] = lst[-2], lst[-1]
-            return _insert(lst[:-1]) + [lst[-1]]
+            lst[:-1] = _insert(lst[:-1])
+            return lst
 
         if len(lst) < 2:
             return lst
         lst[:-1] = recur(lst[:-1])  # outer loop
-        t = lst[-1]
-        i = len(lst) - 2
         return _insert(lst)  # inner loop
 
     print '==========================================='
@@ -146,8 +143,8 @@ def quick():
             flag = 0  # 指向小于lst[0]且索引值最大的slot
             for i in range(1, len(lst)):
                 if lst[i] < lst[0]:
-                    lst[i], lst[flag + 1] = lst[flag + 1], lst[i]
                     flag += 1
+                    lst[i], lst[flag] = lst[flag], lst[i]
             lst[0], lst[flag] = lst[flag], lst[0]
             return flag  # in-place partition, so returns flag only
 
