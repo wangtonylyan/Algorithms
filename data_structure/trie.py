@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-# data structure: trie search tree (digital tree, prefix tree)
+# data structure: trie search tree (aka. digital tree, prefix tree)
 # The term "trie" comes from retrieval, which is sometimes pronounced "try" to avoid confusion with "tree".
 # useful for key with string type
 
 class TrieST(object):
-    alphabet = 256
+    alphabet = 256  # ASCII
 
     class Node():
         def __init__(self):
