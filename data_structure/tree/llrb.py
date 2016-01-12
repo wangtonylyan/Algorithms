@@ -278,12 +278,12 @@ class LLRB(bst.BST):
                 rbt = self._balance(rbt)
             else:  # if rbt is the target
                 # 用左子树中的最大点还是右子树中的最小点来替换要被删除的目标点：_deleteMax(rbt.left) vs. _deleteMin(rbt.right)
-                # 两种策略是实现方式是完全对称的，由于左倾的特性，选择后者效率更高
+                # 两种策略的实现方式是完全对称的，但由于左倾的特性，选择后者效率更高
                 if rbt.right:
                     # step1) top-down
                     rbt = self._makeRightRed(rbt)
                     # step2) deletion or traversal
-                    if rbt.key != key:  # if rbt is no longer the origin one
+                    if rbt.key != key:  # if rbt is no longer the original one
                         assert (key > rbt.key)
                         rbt.right = _recur(rbt.right, key)  # go on traversing
                     else:
