@@ -162,7 +162,6 @@ def quick():
 def merge():
     # top-down mergesort
     def recur(lst):
-        # 若不使用递归实现_merge()，简单的方式是使用一个额外的辅助数组来存储合并后的结果
         def _merge(lst1, lst2):
             if len(lst1) == 0:
                 return lst2
@@ -179,22 +178,22 @@ def merge():
         return _merge(recur(lst[:mid]), recur(lst[mid:]))
 
     # bottom-up mergesort
-    # in-place sort
     def iter(lst):
         def _merge(lst1, lst2):
-            tlst = []  # auxliary space
+            tlst = lst1 + lst2  # auxliary space
             i, j = 0, 0
             while i < len(lst1) and j < len(lst2):
                 if lst1[i] <= lst2[j]:
-                    tlst.append(lst1[i])
+                    tlst[i + j] = lst1[i]
                     i += 1
                 else:
-                    tlst.append(lst2[j])
+                    tlst[i + j] = lst2[j]
                     j += 1
             if i == len(lst1):
-                return tlst + lst2[j:]
+                tlst[i + j:] = lst2[j:]
             else:
-                return tlst + lst1[i:]
+                tlst[i + j:] = lst1[i:]
+            return tlst
 
         step = 1
         while step < len(lst):
