@@ -2,7 +2,7 @@
 # data structure: red-black tree
 # 红黑树属于2-3树的一种变种
 
-import bst, bst_test
+import bst
 
 
 class RBT(bst.BST):
@@ -271,7 +271,7 @@ class RBT(bst.BST):
 
 
 if __name__ == '__main__':
-    test = bst_test.BSTTest(RBT, 30000, True)
+    test = bst.BSTTest(RBT, 500, True)
     test.deleteMaxMin()
     test.delete()
     print 'done'

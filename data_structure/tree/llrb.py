@@ -3,7 +3,7 @@
 # 属于传统红黑树的一种变种，增加了“左倾”这一约束，
 # 使得需要分类讨论的可能性变少了，因此实现上也相对地简单了
 
-import rbt, bst_test
+import rbt, bst
 
 # LLRB树的实现涉及有以下几种策略上的选择：
 # 选择不同的策略意味着树的表现特征会有所区别
@@ -149,7 +149,7 @@ class LLRB(rbt.RBT):
 
 
 if __name__ == '__main__':
-    test = bst_test.BSTTest(LLRB, 500, True)
+    test = bst.BSTTest(LLRB, 500, True)
     test.deleteMaxMin()
     test.delete()
     print 'done'

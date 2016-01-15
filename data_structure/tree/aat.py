@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # data structure: AA (Arne Andersson) tree
 
-import bst, bst_test
+import bst
 
 # invariant:
 # 1) the level of a leaf node is one
@@ -27,5 +27,5 @@ class AAT(bst.BST):
 
 
 if __name__ == '__main__':
-    test = bst_test.BSTTest(AAT, 1000)
+    test = bst.BSTTest(AAT, 1000)
     print 'done'

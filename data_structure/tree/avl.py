@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # data structure: AVL (Georgy Adelson-Velsky and Evgenii Landis) tree
 
-import bst, bst_test
+import bst
 
 
 class AVL(bst.BST):
@@ -18,5 +18,5 @@ class AVL(bst.BST):
 
 
 if __name__ == '__main__':
-    test = bst_test.BSTTest(AVL, 200)
+    test = bst.BSTTest(AVL, 200)
     print 'done'
