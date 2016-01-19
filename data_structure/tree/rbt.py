@@ -22,9 +22,9 @@ class RBT(bst.BST):
 
     # the following are three elementary and atomic operations
     # which can be used to balance an unbalanced red-black tree
-    # 1）rotate left：无side-effect
-    # 2）rotate right：无side-effect
-    # 3）flip color：有side-effect，会改变rbt.color
+    # 1）rotate left：no side-effect
+    # 2）rotate right：no side-effect
+    # 3）flip color：change of height of rbt subtree
     # rotate left与rotate right这两个操作是完全对称的，且互为可逆
     # 例如，对同一颗树先后各执行一次这两个操作，该树的结构不变
 
@@ -48,7 +48,7 @@ class RBT(bst.BST):
         ret.color, rbt.color = rbt.color, ret.color
         return ret
 
-    # @invariant: rbt subtree is a red-black tree
+    # @invariant: rbt subtree is a relaxed red-black tree
     # @what: turn rbt node from a 2-node into a 4-node, or reversely
     @staticmethod
     def _flipColor(rbt):
@@ -244,7 +244,7 @@ class RBT(bst.BST):
                 rbt = self._balance(rbt)
             elif rbt.left:
                 rbt.left.color = rbt.color
-                rbt = rbt.left
+                rbt = rbt.left  # deletion
                 # no need to re-balance due to premise
             else:
                 rbt = None  # deletion
