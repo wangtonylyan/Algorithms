@@ -37,13 +37,24 @@ class AAT(bst.BST):
         ret.level += 1
         return ret
 
+    # insertion: b + c
+    # deletion: a + b + c
     @classmethod
     def _balance(cls, aat):
         assert (aat)
-        if aat.left and aat.level == aat.left.level:
+        # a) decrease level
+        m = min(aat.left.level if aat.left else 0, aat.right.level if aat.right else 0) + 1
+        if m < aat.level:
+            aat.level = m
+            if aat.right and m < aat.right.level:
+                # assert aat and aat.right node were viewed as a single pseudo-node
+                aat.right.level = m
+        # b) skew
+        if aat.left and aat.left.level == aat.level:
             aat = cls._skew(aat)
-        if aat.right and aat.right.right and aat.level == aat.right.right.level:
-            assert(aat.level == aat.right.level)
+        # c) split
+        if aat.right and aat.right.right and aat.right.right.level == aat.level:
+            assert (aat.right.level == aat.level)
             aat = cls._split(aat)
         return aat
 
@@ -63,30 +74,10 @@ class AAT(bst.BST):
 
         self.root = _recur(self.root, key, value)
 
-    @staticmethod
-    def _lower(aat):
-        assert(aat)
-        m = min(aat.left.level if aat.left else 0, aat.right.level if aat.right else 0) + 1
-        if m < aat.level:
-            aat.level = m
-            if aat.right and m < aat.right.level:
-                aat.right.level = m
-        return aat
-
-    @classmethod
-    def _bal(aat):
-        if aat.left and aat.left.level == aat.level:
-            aat = self._skew(aat)
-        if aat.right and aat.right.left and aat.right.left.level == aat.right.level:
-            aat.right = self._skew(aat.right)
-        if aat.right and aat.right and aat.right.left and aat.right.left.level == aat.right.level:
-            aat.right.right = self._skew(aat.right.right)
-
-
     def delete(self, key):
         def _recur(aat, key):
             if aat == None:
-                return aat #deletion failed
+                return aat
             if key < aat.key:
                 aat.left = _recur(aat.left, key)
                 aat = self._balance(aat)
@@ -99,7 +90,6 @@ class AAT(bst.BST):
                     aat.right = _recur(aat.right, m.key)
                     aat.key = m.key
                     aat.value = m.value
-                    aat = self._lower(aat)
                     aat = self._balance(aat)
                 elif aat.left:
                     aat = aat.left
@@ -113,8 +103,8 @@ class AAT(bst.BST):
         def _recur(aat):
             if aat == None:
                 return
-            _recur(aat.left)
-            _recur(aat.right)
+            m = _recur(aat.left)
+            n = _recur(aat.right)
             if aat.left:
                 # level of a left child is strictly less than that of its parent
                 assert (aat.left.level < aat.level)
@@ -128,17 +118,16 @@ class AAT(bst.BST):
                 # level of a leaf node is one
                 assert (aat.level == 1)
             if aat.level > 1:
-                # 隐式特征
-                # every node of level greater than one must have two children
-                assert(aat.left and aat.right)
+                # 隐式特征: every node of level greater than one must have two children
+                assert (aat.left and aat.right)
 
         super(AAT, self).check()
         _recur(self.root)
 
 
 if __name__ == '__main__':
-    test = bst.BSTTest(AAT, 1000, True)
+    test = bst.BSTTest(AAT, 400, True)
     test.new()
-    test.deleteMaxMin()
+    #    test.deleteMaxMin()
     test.delete()
     print 'done'
