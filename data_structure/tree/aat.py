@@ -16,26 +16,36 @@ class AAT(bst.BST):
     def __init__(self):
         super(AAT, self).__init__()
 
+    # 相比于red-black tree的rotateLeft、rotateRight和flipColor三个基本操作而言
+    # 用于平衡AAT的两个基本操作skew和split是复合的，包含了条件判断
+    # 该AAT的删除实现区别于其他RBT在于，没有在top-down阶段预先准备，
+    # 而是在bottom-up阶段重新平衡，这就对balance函数的实现要求更高
+
     # no side-effect
     @staticmethod
-    def _skew(aat):  # == RBT._rotateRight
-        assert (aat and aat.left)
-        assert (aat.level == aat.left.level)
-        ret = aat.left
-        aat.left = ret.right
-        ret.right = aat
-        return ret
+    def _skew(aat):
+        assert (aat)
+        if aat.left and aat.level == aat.left.level:
+            # == RBT._rotateRight
+            ret = aat.left
+            aat.left = ret.right
+            ret.right = aat
+            aat = ret
+        return aat
 
     # side-effect: increase height of aat subtree
     @staticmethod
-    def _split(aat):  # == RBT._rotateLeft + RBT._flipColor
-        assert (aat and aat.right and aat.right.right)
-        assert (aat.level == aat.right.level == aat.right.right.level)
-        ret = aat.right
-        aat.right = ret.left
-        ret.left = aat
-        ret.level += 1
-        return ret
+    def _split(aat):
+        assert (aat)
+        if aat.right and aat.right.right and aat.level == aat.right.right.level:
+            # == RBT._rotateLeft + RBT._flipColor
+            assert (aat.level == aat.right.level == aat.right.right.level)
+            ret = aat.right
+            aat.right = ret.left
+            ret.left = aat
+            ret.level += 1
+            aat = ret
+        return aat
 
     # insertion: b + c
     # deletion: a + b + c
@@ -43,6 +53,7 @@ class AAT(bst.BST):
     def _balance(cls, aat):
         assert (aat)
         # a) decrease level
+        # if one of aat.left and aat.right subtree is lower after modification, correct aat subtree's level
         m = min(aat.left.level if aat.left else 0, aat.right.level if aat.right else 0) + 1
         if m < aat.level:
             aat.level = m
@@ -50,12 +61,15 @@ class AAT(bst.BST):
                 # assert aat and aat.right node were viewed as a single pseudo-node
                 aat.right.level = m
         # b) skew
-        if aat.left and aat.left.level == aat.level:
-            aat = cls._skew(aat)
+        aat = cls._skew(aat)
+        if aat.right:
+            aat.right = cls._skew(aat.right)
+        if aat.right and aat.right.right:
+            aat.right.right = cls._skew(aat.right.right)
         # c) split
-        if aat.right and aat.right.right and aat.right.right.level == aat.level:
-            assert (aat.right.level == aat.level)
-            aat = cls._split(aat)
+        aat = cls._split(aat)
+        if aat.right:
+            aat.right = cls._split(aat.right)
         return aat
 
     def insert(self, key, value):
@@ -64,10 +78,14 @@ class AAT(bst.BST):
                 return self.__class__.Node(key, value)
             if key < aat.key:
                 aat.left = _recur(aat.left, key, value)
-                aat = self._balance(aat)
+                aat = self._skew(aat)
+                aat = self._split(aat)
+#                aat = self._balance(aat)
             elif key > aat.key:
                 aat.right = _recur(aat.right, key, value)
-                aat = self._balance(aat)
+                aat = self._skew(aat)
+                aat = self._split(aat)
+#                aat = self._balance(aat)
             else:
                 aat.value = value
             return aat
