@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 # data structure: binary search tree
 
-
 class BST(object):
     class Node:
-        def __init__(self, key=None, value=None):
+        def __init__(self, key, value):
             self.key = key
             self.value = value
             self.left = None
@@ -116,12 +115,13 @@ class BST(object):
         return it
 
     def size(self):
-        def _recur(bst):
-            if bst == None:
-                return 0
-            return _recur(bst.left) + _recur(bst.right) + 1
+        return self._size(self.root)
 
-        return _recur(self.root)
+    @staticmethod
+    def _size(bst):
+        if bst == None:
+            return 0
+        return BST._size(bst.left) + BST._size(bst.right) + 1
 
     def clean(self):
         self.root = None
@@ -132,12 +132,43 @@ class BST(object):
                 return
             _recur(bst.left)
             _recur(bst.right)
+            # check symmetric order property
             if bst.left:
                 assert (bst.left.value < bst.value)
             if bst.right:
                 assert (bst.right.value > bst.value)
 
         _recur(self.root)
+
+
+# balanced binary search tree
+class BBST(BST):
+    def __index__(self):
+        super(BBST, self).__init__()
+
+    # the following are two restructuring primitives for almost all kinds of balanced BSTs
+    # which always hold the symmetric order property,
+    # and can be used to balance an unbalanced BST in composition
+    # rotate left与rotate right这两个操作是完全对称的，且互为可逆
+    # 例如，对同一个节点先后各执行一次这两个操作，以该节点为根的子树结构不变
+    def _rotateLeft(self, bbst):
+        if bbst and bbst.right:
+            ret = bbst.right
+            bbst.right = ret.left
+            ret.left = bbst
+            bbst = ret
+        return bbst
+
+    def _rotateRight(self, bbst):
+        if bbst and bbst.left:
+            ret = bbst.left
+            bbst.left = ret.right
+            ret.right = bbst
+            bbst = ret
+        return bbst
+
+    def _balance(self, bbst):
+        pass
 
 
 import time, random

@@ -4,9 +4,9 @@
 import bst
 
 
-class AVL(bst.BST):
+class AVL(bst.BBST):
     class Node:
-        def __init__(self, key=None, value=None):
+        def __init__(self, key, value):
             self.key = key
             self.value = value
             self.left = None
@@ -19,4 +19,6 @@ class AVL(bst.BST):
 
 if __name__ == '__main__':
     test = bst.BSTTest(AVL, 200)
+    test.deleteMaxMin()
+    test.delete()
     print 'done'

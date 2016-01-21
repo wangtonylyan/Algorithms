@@ -4,9 +4,9 @@
 import bst
 
 
-class AAT(bst.BST):
+class AAT(bst.BBST):
     class Node:
-        def __init__(self, key=None, value=None):
+        def __init__(self, key, value):
             self.key = key
             self.value = value
             self.left = None
@@ -22,36 +22,25 @@ class AAT(bst.BST):
     # 而仅仅在bottom-up阶段重新平衡，这就增加了balance的复杂度
     # 但由于AA树自身的特性以及skew/split的递归，恰好又使得其极易实现
 
-    # no side-effect
-    @staticmethod
-    def _skew(aat):
+    # same as RBT.rotateRight: no side-effect
+    def _skew(self, aat):
         if aat:
             if aat.left and aat.level == aat.left.level:
-                # == RBT._rotateRight
-                ret = aat.left
-                aat.left = ret.right
-                ret.right = aat
-                aat = ret
-            aat.right = AAT._skew(aat.right)
+                aat = self._rotateRight(aat)
+            aat.right = self._skew(aat.right)
         return aat
 
-    # side-effect: increase height of aat subtree
-    @staticmethod
-    def _split(aat):
+    # same as RBT.rotateLeft + RBT.flipColor: side-effect of increasing height of aat subtree
+    def _split(self, aat):
         if aat:
             if aat.right and aat.right.right and aat.level == aat.right.right.level:
                 assert (aat.level == aat.right.level == aat.right.right.level)
-                # == RBT._rotateLeft + RBT._flipColor
-                ret = aat.right
-                aat.right = ret.left
-                ret.left = aat
-                ret.level += 1
-                aat = ret
-            aat.right = AAT._split(aat.right)
+                aat = self._rotateLeft(aat)
+                aat.level += 1
+            aat.right = self._split(aat.right)
         return aat
 
-    @classmethod
-    def _balance(cls, aat):
+    def _balance(self, aat):
         assert (aat)
         # a) decrease level (only in deletion)
         # in case that one of aat.left and aat.right subtree is lower
@@ -62,9 +51,9 @@ class AAT(bst.BST):
                 # assert aat and aat.right node were viewed as a single pseudo-node
                 aat.right.level = m
         # b) go along the right path and skew
-        aat = cls._skew(aat)
+        aat = self._skew(aat)
         # c) go along the right path and split
-        aat = cls._split(aat)
+        aat = self._split(aat)
         return aat
 
     def insert(self, key, value):

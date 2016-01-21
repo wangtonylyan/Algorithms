@@ -27,26 +27,25 @@ class LLRB(rbt.RBT):
     # ------------------------------------------------------------------------------------
 
     # 相比于传统的红黑树，三个基本操作所产生的额外副作用
-    # 1）_rotateLeft()：将rbt.right.left这棵左子树变成了右子树
-    # 2）_rotateRight()：可能将rbt从一颗左子树变成了右子树
-    # 3）_flipColor()：无
+    # 1）rotateLeft()：将rbt.right.left这棵左子树变成了右子树
+    # 2）rotateRight()：可能将rbt从一颗左子树变成了右子树
+    # 3）flipColor()：无
     # 注意这三个操作是同时适用于2-3和2-3-4 tree、left-和right-leaning策略的
     # 因为其没有维护这些策略的各自特征，具体实现哪种策略取决于这些操作的使用场合和组合
 
     # based on the left-leaning characteristic
-    @classmethod
-    def _balance(cls, rbt):
+    def _balance(self, rbt):
         # [use case] a; b+c; a+b+c(==c)
         # Taking the side-effects of the three elementary operations and
         # the use cases listed above into consideration,
         # the following sequence can not only eliminate all the side-effects,
         # but also locally re-balance the rbt tree.
         if rbt.right and rbt.right.color:  # a
-            rbt = cls._rotateLeft(rbt)
+            rbt = self._rotateLeft(rbt)
         if rbt.left and rbt.left.color and rbt.left.left and rbt.left.left.color:  # b
-            rbt = cls._rotateRight(rbt)
+            rbt = self._rotateRight(rbt)
         if rbt.left and rbt.left.color and rbt.right and rbt.right.color:  # c
-            rbt = cls._flipColor(rbt)
+            rbt = self._flipColor(rbt)
         return rbt
 
     # ------------------------------------------------------------------------------------
@@ -90,8 +89,7 @@ class LLRB(rbt.RBT):
     # ------------------------------------------------------------------------------------
 
     # @what: turn rbt.left node into a 3- or 4- node, regardless of its leaning characteristic
-    @classmethod
-    def _makeLeftRed(cls, rbt):
+    def _makeLeftRed(self, rbt):
         assert (rbt.color or (rbt.left and rbt.left.color) or (rbt.right and rbt.right.color))
         if rbt.left == None:
             return rbt
@@ -99,19 +97,18 @@ class LLRB(rbt.RBT):
                 or (rbt.left.right and rbt.left.right.color):
             return rbt
         if rbt.color:
-            rbt = cls._flipColor(rbt)
+            rbt = self._flipColor(rbt)
             if rbt.right and rbt.right.left and rbt.right.left.color:
-                rbt.right = cls._rotateRight(rbt.right)  # keep the "left-leaning" characteristic of rbt.right subtree
-                rbt = cls._rotateLeft(rbt)
-                rbt = cls._flipColor(rbt)
+                rbt.right = self._rotateRight(rbt.right)  # keep the "left-leaning" characteristic of rbt.right subtree
+                rbt = self._rotateLeft(rbt)
+                rbt = self._flipColor(rbt)
         else:
-            rbt = cls._rotateLeft(rbt)
+            rbt = self._rotateLeft(rbt)
         assert (rbt.left.color or (rbt.left.left and rbt.left.left.color) \
                 or (rbt.left.right or rbt.left.right.color))
         return rbt
 
-    @classmethod
-    def _makeRightRed(cls, rbt):
+    def _makeRightRed(self, rbt):
         assert (rbt.color or (rbt.left and rbt.left.color) or (rbt.right and rbt.right.color))
         if rbt.right == None:
             return rbt
@@ -119,12 +116,12 @@ class LLRB(rbt.RBT):
                 or (rbt.right.right and rbt.right.right.color):
             return rbt
         if rbt.color:
-            rbt = cls._flipColor(rbt)
+            rbt = self._flipColor(rbt)
             if rbt.left and rbt.left.left and rbt.left.left.color:
-                rbt = cls._rotateRight(rbt)
-                rbt = cls._flipColor(rbt)
+                rbt = self._rotateRight(rbt)
+                rbt = self._flipColor(rbt)
         else:
-            rbt = cls._rotateRight(rbt)
+            rbt = self._rotateRight(rbt)
         assert (rbt.right.color or (rbt.right.left and rbt.right.left.color) \
                 or (rbt.right.right and rbt.right.right.color))
         return rbt

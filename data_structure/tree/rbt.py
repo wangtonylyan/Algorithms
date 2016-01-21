@@ -5,9 +5,9 @@
 import bst
 
 
-class RBT(bst.BST):
+class RBT(bst.BBST):
     class Node:
-        def __init__(self, key=None, value=None):
+        def __init__(self, key, value):
             self.key = key
             self.value = value
             self.left = None
@@ -20,38 +20,29 @@ class RBT(bst.BST):
 
     # ------------------------------------------------------------------------------------
 
-    # the following are three elementary and atomic operations
-    # which can be used to balance an unbalanced red-black tree
     # 1）rotate left：no side-effect
     # 2）rotate right：no side-effect
     # 3）flip color：change of height of rbt subtree
-    # rotate left与rotate right这两个操作是完全对称的，且互为可逆
-    # 例如，对同一颗树先后各执行一次这两个操作，该树的结构不变
 
     # @invariant: rbt subtree is a red-black tree
-    @staticmethod
-    def _rotateLeft(rbt):
+    def _rotateLeft(self, rbt):
         assert (rbt and rbt.right)
-        ret = rbt.right
-        rbt.right = ret.left
-        ret.left = rbt
-        ret.color, rbt.color = rbt.color, ret.color
-        return ret
+        rbt = super(RBT, self)._rotateLeft(rbt)
+        assert (rbt.left)
+        rbt.color, rbt.left.color = rbt.left.color, rbt.color
+        return rbt
 
     # @invariant: rbt subtree is a red-black tree
-    @staticmethod
-    def _rotateRight(rbt):
+    def _rotateRight(self, rbt):
         assert (rbt and rbt.left)
-        ret = rbt.left
-        rbt.left = ret.right
-        ret.right = rbt
-        ret.color, rbt.color = rbt.color, ret.color
-        return ret
+        rbt = super(RBT, self)._rotateRight(rbt)
+        assert (rbt.right)
+        rbt.color, rbt.right.color = rbt.right.color, rbt.color
+        return rbt
 
     # @invariant: rbt subtree is a relaxed red-black tree
     # @what: turn rbt node from a 2-node into a 4-node, or reversely
-    @staticmethod
-    def _flipColor(rbt):
+    def _flipColor(self, rbt):
         assert (rbt and rbt.left and rbt.right)
         rbt.color = not rbt.color
         rbt.left.color = not rbt.left.color
@@ -61,23 +52,22 @@ class RBT(bst.BST):
     # ------------------------------------------------------------------------------------
 
     # @what: re-balance rbt subtree
-    @classmethod
-    def _balance(cls, rbt):
+    def _balance(self, rbt):
         assert (rbt)
         if rbt.left and rbt.left.color:
             if rbt.left.left and rbt.left.left.color:
-                rbt = cls._rotateRight(rbt)
+                rbt = self._rotateRight(rbt)
             elif rbt.left.right and rbt.left.right.color:
-                rbt.left = cls._rotateLeft(rbt.left)
-                rbt = cls._rotateRight(rbt)
+                rbt.left = self._rotateLeft(rbt.left)
+                rbt = self._rotateRight(rbt)
         elif rbt.right and rbt.right.color:
             if rbt.right.left and rbt.right.left.color:
-                rbt.right = cls._rotateRight(rbt.right)
-                rbt = cls._rotateLeft(rbt)
+                rbt.right = self._rotateRight(rbt.right)
+                rbt = self._rotateLeft(rbt)
             elif rbt.right.right and rbt.right.right.color:
-                rbt = cls._rotateLeft(rbt)
+                rbt = self._rotateLeft(rbt)
         if rbt.left and rbt.left.color and rbt.right and rbt.right.color:
-            rbt = cls._flipColor(rbt)
+            rbt = self._flipColor(rbt)
         return rbt
 
     # ------------------------------------------------------------------------------------
@@ -112,8 +102,7 @@ class RBT(bst.BST):
     # @what: turn rbt.left node into a 3-node
     # @how: move red from rbt or rbt.right node to rbt.left node
     # @when: before traversing the rbt.left subtree
-    @classmethod
-    def _makeLeftRed(cls, rbt):
+    def _makeLeftRed(self, rbt):
         assert (rbt.color or (rbt.left and rbt.left.color) or (rbt.right and rbt.right.color))
         if rbt.left == None:
             return rbt  # rbt.left node doesn't exist
@@ -121,24 +110,23 @@ class RBT(bst.BST):
                 or (rbt.left.right and rbt.left.right.color):
             return rbt  # rbt.left node is already a 3-node
         if rbt.color:
-            rbt = cls._flipColor(rbt)  # move red from rbt node to rbt.left and rbt.right node
+            rbt = self._flipColor(rbt)  # move red from rbt node to rbt.left and rbt.right node
             # if rbt.right subtree is no longer a red-black tree
             if rbt.right and ((rbt.right.left and rbt.right.left.color) \
                                       or (rbt.right.right and rbt.right.right.color)):
                 if rbt.right.left and rbt.right.left.color:
-                    rbt.right = cls._rotateRight(rbt.right)
-                rbt = cls._rotateLeft(rbt)
-                rbt = cls._flipColor(rbt)
+                    rbt.right = self._rotateRight(rbt.right)
+                rbt = self._rotateLeft(rbt)
+                rbt = self._flipColor(rbt)
                 assert (rbt.left.left.color)  # color of the original rbt.left node is already red
         else:  # if rbt.right.color
-            rbt = cls._rotateLeft(rbt)  # move red from rbt.right node to rbt.left node
+            rbt = self._rotateLeft(rbt)  # move red from rbt.right node to rbt.left node
         assert (rbt.left.color or (rbt.left.left and rbt.left.left.color) \
                 or (rbt.left.right or rbt.left.right.color))
         return rbt
 
     # it's completely symmetric to _makeLeftRed()
-    @classmethod
-    def _makeRightRed(cls, rbt):
+    def _makeRightRed(self, rbt):
         assert (rbt.color or (rbt.left and rbt.left.color) or (rbt.right and rbt.right.color))
         if rbt.right == None:
             return rbt
@@ -146,16 +134,16 @@ class RBT(bst.BST):
                 or (rbt.right.right and rbt.right.right.color):
             return rbt
         if rbt.color:
-            rbt = cls._flipColor(rbt)
+            rbt = self._flipColor(rbt)
             if rbt.left and ((rbt.left.left and rbt.left.left.color) \
                                      or (rbt.left.right and rbt.left.right.color)):
                 if rbt.left.right and rbt.left.right.color:
-                    rbt.left = cls._rotateLeft(rbt.left)
-                rbt = cls._rotateRight(rbt)
-                rbt = cls._flipColor(rbt)
+                    rbt.left = self._rotateLeft(rbt.left)
+                rbt = self._rotateRight(rbt)
+                rbt = self._flipColor(rbt)
                 assert (rbt.right.right.color)
         else:
-            rbt = cls._rotateRight(rbt)
+            rbt = self._rotateRight(rbt)
         assert (rbt.right.color or (rbt.right.left and rbt.right.left.color) \
                 or (rbt.right.right and rbt.right.right.color))
         return rbt

@@ -11,7 +11,7 @@
 import bst, random
 
 
-class Treap(bst.BST):
+class Treap(bst.BBST):
     class Node:
         def __init__(self, key, value, priority):
             self.key = key
@@ -25,22 +25,6 @@ class Treap(bst.BST):
         self.total = total * 5
         # 利用该数组来维护property的唯一性，也有算法在实现上会利用哈希表
         self.prioritySet = [0 for i in range(self.total)]
-
-    @staticmethod
-    def _rotateLeft(tp):
-        assert (tp and tp.right)
-        ret = tp.right
-        tp.right = ret.left
-        ret.left = tp
-        return ret
-
-    @staticmethod
-    def _rotateRight(tp):
-        assert (tp and tp.left)
-        ret = tp.left
-        tp.left = ret.right
-        ret.right = tp
-        return ret
 
     def insert(self, key, value):
         def _recur(tp, key, value):
