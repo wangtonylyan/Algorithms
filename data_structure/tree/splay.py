@@ -15,8 +15,7 @@ class Splay(bst.BBST):
             self.value = value
             self.left = None
             self.right = None
-            # 该属性使得平衡算法的实现得到了简化
-            # 但对于其自身的维护也增加了额外的复杂度
+            # 该属性简化了平衡算法，但对于其自身的维护也增加了额外的复杂度
             self.parent = parent
             if self.parent:
                 if self.key < self.parent.key:
