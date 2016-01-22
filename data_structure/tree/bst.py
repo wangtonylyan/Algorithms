@@ -26,27 +26,35 @@ class BST(object):
 
         self.root = _recur(self.root, key, value)
 
-    def deleteMin(self):
-        if self.root == None:
-            return
-        elif self.root.left == None:
-            self.root = self.root.right
-            return
-        it = self.root
-        while it.left.left:
-            it = it.left
-        it.left = it.left.right
-
     def deleteMax(self):
-        if self.root == None:
-            return
-        elif self.root.right == None:
-            self.root = self.root.left
-            return
-        it = self.root
-        while it.right.right:
-            it = it.right
-        it.right = it.right.left
+        self.root = self._deleteMax(self.root)
+
+    @staticmethod
+    def _deleteMax(bst):
+        if bst:
+            if bst.right:
+                it = bst
+                while it.right.right:
+                    it = it.right
+                it.right = it.right.left
+            else:
+                bst = bst.left
+        return bst
+
+    def deleteMin(self):
+        self.root = self._deleteMin(self.root)
+
+    @staticmethod
+    def _deleteMin(bst):
+        if bst:
+            if bst.left:
+                it = bst
+                while it.left.left:
+                    it = it.left
+                it.left = it.left.right
+            else:
+                bst = bst.right
+        return bst
 
     def delete(self, key):
         def _recur(bst, key):
@@ -84,35 +92,32 @@ class BST(object):
 
     @staticmethod
     def _search(bst, key):
-        it = bst
-        while it:
-            if key < it.key:
-                it = it.left
-            elif key > it.key:
-                it = it.right
+        while bst:
+            if key < bst.key:
+                bst = bst.left
+            elif key > bst.key:
+                bst = bst.right
             else:
                 break
-        return it.value if it else None
+        return bst.value if bst else None
 
     def getMax(self):
         return self._getMax(self.root)
 
     @staticmethod
     def _getMax(bst):
-        it = bst
-        while it and it.right:
-            it = it.right
-        return it
+        while bst and bst.right:
+            bst = bst.right
+        return bst
 
     def getMin(self):
         return self._getMin(self.root)
 
     @staticmethod
     def _getMin(bst):
-        it = bst
-        while it and it.left:
-            it = it.left
-        return it
+        while bst and bst.left:
+            bst = bst.left
+        return bst
 
     def size(self):
         return self._size(self.root)
@@ -250,7 +255,7 @@ class BSTTest(object):
 
 
 if __name__ == '__main__':
-    test = BSTTest(BST, 1000, True)
+    test = BSTTest(BST, 800, True)
     test.deleteMaxMin()
     test.delete()
     print 'done'

@@ -6,7 +6,7 @@ import bst
 
 # does rotations bottom-up along the access path and moves the accessed item all the way to the root.
 # splay operation should preserve the symmetric order
-# which means spt.parent should still be the same side of spt after rotation
+# which means spt.parent node should still be the same side of spt node after rotation
 
 class Splay(bst.BBST):
     class Node():
@@ -15,14 +15,7 @@ class Splay(bst.BBST):
             self.value = value
             self.left = None
             self.right = None
-            # 该属性简化了平衡算法，但对于其自身的维护也增加了额外的复杂度
-            self.parent = parent
-            if self.parent:
-                if self.key < self.parent.key:
-                    self.parent.left = self
-                else:
-                    assert (self.key > self.parent.key)
-                    self.parent.right = self
+            self.parent = parent  # 该属性简化了平衡算法，但对于其自身的维护也增加了额外的复杂度
 
     def __init__(self):
         super(Splay, self).__init__()
@@ -89,6 +82,17 @@ class Splay(bst.BBST):
 
         self.root = _bottom_up(spt)
 
+    def _access(self, key):
+        iter = self.root
+        while iter:
+            if key < iter.key:
+                iter = iter.left
+            elif key > iter.key:
+                iter = iter.right
+            else:
+                self._splay(iter)
+                break
+
     def insert(self, key, value):
         prev = None
         iter = self.root
@@ -104,12 +108,71 @@ class Splay(bst.BBST):
                 break
         if iter == None:
             iter = self.__class__.Node(key, value, prev)
+            if prev:
+                if iter.key < prev.key:
+                    prev.left = iter
+                else:
+                    assert (iter.key > prev.key)
+                    prev.right = iter
         self._splay(iter)
+
+    @staticmethod
+    def _deleteMax(spt):
+        if spt:
+            if spt.right:
+                it = spt
+                while it.right.right:
+                    it = it.right
+                it.right = it.right.left
+                if it.right:
+                    it.right.parent = it
+            elif spt.left:
+                spt.left.parent = spt.parent
+                spt = spt.left
+            else:
+                spt = None
+        return spt
+
+    @staticmethod
+    def _deleteMin(spt):
+        if spt:
+            if spt.left:
+                it = spt
+                while it.left.left:
+                    it = it.left
+                it.left = it.left.right
+                if it.left:
+                    it.left.parent = it
+            elif spt.right:
+                spt.right.parent = spt.parent
+                spt = spt.right
+            else:
+                spt = None
+        return spt
+
+    def delete(self, key):
+        self._access(key)
+        if self.root and self.root.key == key:  # find it
+            if self.root.left:
+                m = self._getMax(self.root.left)
+                self.root.left = self._deleteMax(self.root.left)
+                self.root.key = m.key
+                self.root.value = m.value
+            elif self.root.right:
+                self.root = self.root.right
+                self.root.parent = None
+            else:
+                self.root = None
+
+    def check(self):
+        super(Splay, self).check()
+        if self.root:
+            assert (self.root.parent == None)
 
 
 if __name__ == '__main__':
-    test = bst.BSTTest(Splay, 1000, True)
+    test = bst.BSTTest(Splay, 800, True)
     test.new()
-    #    test.deleteMaxMin()
-    #    test.delete()
+    test.deleteMaxMin()
+    test.delete()
     print 'done'
