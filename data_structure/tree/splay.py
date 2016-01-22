@@ -55,7 +55,51 @@ class Splay(bst.BBST):
                 spt.parent.right = spt
         return spt
 
+    # Splay操作有两种实现策略：
+    # 1）top down
+    # 从树根开始遍历的同时就进行旋转操作，当遍历到目标节点时也就完成了整棵树的伸展
+    # 若目标节点不存在，则与目标节点的key较接近的某个叶子节点将成为新的树根
+    # 2）bottom up
+    # 从树根开始遍历直至找到目标节点，再将目标节点向上旋转直至树根
+    # 需要维护access path信息，无论是使用栈还是parent指针
     def _splay(self, spt, root):
+        # 本数据结构是完全基于bottom up的，因此top down的实现仅作参考
+        # push root, rather than root.child, down until spt
+        # strategy: split root subtree into three parts
+        def _top_down(root, spt):
+            middle = self.__class__.Node(0, 0, 0)
+            liter = middle.left
+            riter = middle.right
+            while root.key != spt.key:
+                if spt.key < root.key and root.left:
+                    # rotate right
+                    if spt.key < root.left.key:
+                        root = super(Splay, self)._rotateRight(root)
+                        if root.left == None:
+                            break
+                    # link right
+                    riter.left = root
+                    riter = root
+                    root = root.left
+                elif spt.key > root.key and root.right:
+                    # rotate left
+                    if spt.key > root.right.key:
+                        root = super(Splay, self)._rotateLeft(root)
+                        if root.right == None:
+                            break
+                    # link left
+                    liter.right = root
+                    liter = root
+                    root = root.right
+                else:
+                    break
+            # assemble
+            liter.right = root.left
+            riter.left = root.right
+            root.left = middle.right
+            root.right = middle.left
+            return root
+
         # push spt up until root.child
         def _bottom_up(spt, root):
             while spt.parent != root:
@@ -164,7 +208,17 @@ class Splay(bst.BBST):
                 self.root = None
 
     def check(self):
+        def _recur(spt):
+            if spt:
+                if spt.left:
+                    assert (spt.left.parent == spt)
+                    _recur(spt.left)
+                if spt.right:
+                    assert (spt.right.parent == spt)
+                    _recur(spt.right)
+
         super(Splay, self).check()
+        _recur(self.root)
         assert (not (self.root and self.root.parent))
 
 
