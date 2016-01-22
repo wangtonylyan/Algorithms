@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 # data structure: splay tree
+# 伸展树的核心是围绕splay操作
+# Splay operation does rotations bottom-up along the access path
+# and moves the accessed node all the way up to the root,
+# which still preserves the symmetric order of the whole tree.
+# 利用splay操作有时可以完成一些其他BST无法做到的行为
+# 例如需要删除某个区间(a,b)内所有节点，区间树就很难完成，但对于伸展树而言就很简单
+# 将a结点splay至根，将b结点伸展至根的右节点，最后再将b节点的左子树整体删除即可
 
 import bst
 
-
-# does rotations bottom-up along the access path and moves the accessed item all the way to the root.
-# splay operation should preserve the symmetric order
-# which means spt.parent node should still be the same side of spt node after rotation
 
 class Splay(bst.BBST):
     class Node():
@@ -52,12 +55,11 @@ class Splay(bst.BBST):
                 spt.parent.right = spt
         return spt
 
-    def _splay(self, spt):
-        def _top_down(spt):
-            pass
-
-        def _bottom_up(spt):
-            while spt.parent:
+    def _splay(self, spt, root):
+        # push spt up until root.child
+        def _bottom_up(spt, root):
+            while spt.parent != root:
+                assert (spt.parent)
                 if spt.parent.parent:
                     if spt == spt.parent.left and spt.parent == spt.parent.parent.left:
                         spt.parent = self._rotateRight(spt.parent.parent)
@@ -80,18 +82,13 @@ class Splay(bst.BBST):
                         spt = self._rotateLeft(spt.parent)
             return spt
 
-        self.root = _bottom_up(spt)
+        assert (spt)
+        return _bottom_up(spt, root)
 
-    def _access(self, key):
-        iter = self.root
-        while iter:
-            if key < iter.key:
-                iter = iter.left
-            elif key > iter.key:
-                iter = iter.right
-            else:
-                self._splay(iter)
-                break
+    def _balance(self, spt):
+        assert (spt)
+        self.root = self._splay(spt, None)
+        assert (self.root.key == spt.key)
 
     def insert(self, key, value):
         prev = None
@@ -114,7 +111,7 @@ class Splay(bst.BBST):
                 else:
                     assert (iter.key > prev.key)
                     prev.right = iter
-        self._splay(iter)
+        self._balance(iter)
 
     @staticmethod
     def _deleteMax(spt):
@@ -151,8 +148,10 @@ class Splay(bst.BBST):
         return spt
 
     def delete(self, key):
-        self._access(key)
-        if self.root and self.root.key == key:  # find it
+        spt = self._search(self.root, key)
+        if spt:
+            assert (spt.key == key)
+            self._balance(spt)
             if self.root.left:
                 m = self._getMax(self.root.left)
                 self.root.left = self._deleteMax(self.root.left)
@@ -166,13 +165,11 @@ class Splay(bst.BBST):
 
     def check(self):
         super(Splay, self).check()
-        if self.root:
-            assert (self.root.parent == None)
+        assert (not (self.root and self.root.parent))
 
 
 if __name__ == '__main__':
     test = bst.BSTTest(Splay, 800, True)
-    test.new()
     test.deleteMaxMin()
     test.delete()
     print 'done'

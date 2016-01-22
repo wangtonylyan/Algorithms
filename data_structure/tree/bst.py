@@ -88,7 +88,8 @@ class BST(object):
         self.root = _recur(self.root, key)
 
     def search(self, key):
-        return self._search(self.root, key)
+        bst = self._search(self.root, key)
+        return bst.value if bst else None
 
     @staticmethod
     def _search(bst, key):
@@ -99,7 +100,7 @@ class BST(object):
                 bst = bst.right
             else:
                 break
-        return bst.value if bst else None
+        return bst
 
     def getMax(self):
         return self._getMax(self.root)

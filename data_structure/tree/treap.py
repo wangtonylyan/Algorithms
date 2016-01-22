@@ -71,6 +71,7 @@ class Treap(bst.BBST):
                     tp = self._rotateRight(tp)
                     tp.right = _recur(tp.right, key)
                 else:
+                    assert (tp.left.priority > tp.right.priority)
                     tp = self._rotateLeft(tp)
                     tp.left = _recur(tp.left, key)
             return tp
@@ -92,7 +93,6 @@ class Treap(bst.BBST):
 
 if __name__ == '__main__':
     test = bst.BSTTest(Treap, 1000, True)
-    test.new()
     test.deleteMaxMin()
     test.delete()
     print 'done'
