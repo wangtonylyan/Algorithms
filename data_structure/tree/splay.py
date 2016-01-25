@@ -11,21 +11,21 @@
 import bst
 
 
-class Splay(bst.BBST):
-    class Node():
+class SplayTree(bst.BalancedBinarySearchTree):
+    class Node(object):
         def __init__(self, key, value, parent):
-            self.key = key
-            self.value = value
             self.left = None
             self.right = None
             self.parent = parent  # 该属性简化了平衡算法，但对于其自身的维护也增加了额外的复杂度
+            self.key = key
+            self.value = value
 
     def __init__(self):
-        super(Splay, self).__init__()
+        super(SplayTree, self).__init__()
 
     def _rotateLeft(self, spt):
         assert (spt and spt.right)
-        spt = super(Splay, self)._rotateLeft(spt)
+        spt = super(SplayTree, self)._rotateLeft(spt)
         assert (spt.left)
         if spt.left.right:
             spt.left.right.parent = spt.left
@@ -41,7 +41,7 @@ class Splay(bst.BBST):
 
     def _rotateRight(self, spt):
         assert (spt and spt.left)
-        spt = super(Splay, self)._rotateRight(spt)
+        spt = super(SplayTree, self)._rotateRight(spt)
         assert (spt.right)
         if spt.right.left:
             spt.right.left.parent = spt.right
@@ -157,8 +157,7 @@ class Splay(bst.BBST):
                     prev.right = iter
         self._balance(iter)
 
-    @staticmethod
-    def _deleteMax(spt):
+    def _deleteMax(self, spt):
         if spt:
             if spt.right:
                 it = spt
@@ -174,8 +173,7 @@ class Splay(bst.BBST):
                 spt = None
         return spt
 
-    @staticmethod
-    def _deleteMin(spt):
+    def _deleteMin(self, spt):
         if spt:
             if spt.left:
                 it = spt
@@ -217,13 +215,13 @@ class Splay(bst.BBST):
                     assert (spt.right.parent == spt)
                     _recur(spt.right)
 
-        super(Splay, self).check()
+        super(SplayTree, self).check()
         _recur(self.root)
         assert (not (self.root and self.root.parent))
 
 
 if __name__ == '__main__':
-    test = bst.BSTTest(Splay, 800, True)
+    test = bst.BinarySearchTreeTest(SplayTree, 800, True)
     test.deleteMaxMin()
     test.delete()
     print 'done'

@@ -11,13 +11,13 @@
 import bst, random
 
 
-class Treap(bst.BBST):
-    class Node:
+class Treap(bst.BalancedBinarySearchTree):
+    class Node(object):
         def __init__(self, key, value, priority):
-            self.key = key
-            self.value = value
             self.left = None
             self.right = None
+            self.key = key
+            self.value = value
             self.priority = priority
 
     def __init__(self, total=10000):
@@ -92,7 +92,7 @@ class Treap(bst.BBST):
 
 
 if __name__ == '__main__':
-    test = bst.BSTTest(Treap, 1000, True)
+    test = bst.BinarySearchTreeTest(Treap, 1000, True)
     test.deleteMaxMin()
     test.delete()
     print 'done'

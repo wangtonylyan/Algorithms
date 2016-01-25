@@ -3,14 +3,14 @@
 # The term "trie" comes from retrieval, which is sometimes pronounced "try" to avoid confusion with "tree".
 # useful for key with string type
 
-class TrieST(object):
+class TrieSearchTree(object):
     alphabet = 256  # ASCII
 
-    class Node():
+    class Node(object):
         def __init__(self):
+            self.next = [None for i in range(TrieSearchTree.alphabet)]
             # self.key is a character and not necessary for implementation
             self.value = None  # indicates it's a void node by default
-            self.next = [None for i in range(TrieST.alphabet)]
 
     def __init__(self):
         self.root = None
@@ -68,7 +68,7 @@ class TrieST(object):
 import time, random
 
 
-class TrieSTTest():
+class TrieSearchTreeTest():
     def __init__(self, num):
         self.tree = None
         self.dic = {}
@@ -81,7 +81,7 @@ class TrieSTTest():
         print "dic's size: ", len(self.dic)
 
     def new(self):
-        self.tree = TrieST()
+        self.tree = TrieSearchTree()
         c = 0
         for k, v in self.dic.items():
             self.tree.insert(k, v)
@@ -91,5 +91,5 @@ class TrieSTTest():
 
 
 if __name__ == '__main__':
-    tst = TrieSTTest(100)
+    tst = TrieSearchTreeTest(100)
     tst.new()

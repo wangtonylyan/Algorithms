@@ -4,17 +4,17 @@
 import bst
 
 
-class AAT(bst.BBST):
-    class Node:
+class AATree(bst.BalancedBinarySearchTree):
+    class Node(object):
         def __init__(self, key, value):
-            self.key = key
-            self.value = value
             self.left = None
             self.right = None
+            self.key = key
+            self.value = value
             self.level = 1
 
     def __init__(self):
-        super(AAT, self).__init__()
+        super(AATree, self).__init__()
 
     # 1）相比于red-black tree的三个基本操作而言，用于平衡AAT的两个基本操作
     # skew和split是复合（包含了条件判断）且递归的
@@ -119,12 +119,12 @@ class AAT(bst.BBST):
                 # 隐式特征: every node of level greater than one must have two children
                 assert (aat.left and aat.right)
 
-        super(AAT, self).check()
+        super(AATree, self).check()
         _recur(self.root)
 
 
 if __name__ == '__main__':
-    test = bst.BSTTest(AAT, 400, True)
+    test = bst.BSTTest(AATree, 400, True)
     test.new()
     #    test.deleteMaxMin()
     test.delete()

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 # data structure: binary search tree
 
-class BST(object):
-    class Node:
+class BinarySearchTree(object):
+    class Node(object):
         def __init__(self, key, value):
-            self.key = key
-            self.value = value
             self.left = None
             self.right = None
+            self.key = key
+            self.value = value
 
     def __init__(self):
         self.root = None
@@ -29,8 +29,7 @@ class BST(object):
     def deleteMax(self):
         self.root = self._deleteMax(self.root)
 
-    @staticmethod
-    def _deleteMax(bst):
+    def _deleteMax(self, bst):
         if bst:
             if bst.right:
                 it = bst
@@ -44,8 +43,7 @@ class BST(object):
     def deleteMin(self):
         self.root = self._deleteMin(self.root)
 
-    @staticmethod
-    def _deleteMin(bst):
+    def _deleteMin(self, bst):
         if bst:
             if bst.left:
                 it = bst
@@ -91,8 +89,7 @@ class BST(object):
         bst = self._search(self.root, key)
         return bst.value if bst else None
 
-    @staticmethod
-    def _search(bst, key):
+    def _search(self, bst, key):
         while bst:
             if key < bst.key:
                 bst = bst.left
@@ -105,8 +102,7 @@ class BST(object):
     def getMax(self):
         return self._getMax(self.root)
 
-    @staticmethod
-    def _getMax(bst):
+    def _getMax(self, bst):
         while bst and bst.right:
             bst = bst.right
         return bst
@@ -114,8 +110,7 @@ class BST(object):
     def getMin(self):
         return self._getMin(self.root)
 
-    @staticmethod
-    def _getMin(bst):
+    def _getMin(self, bst):
         while bst and bst.left:
             bst = bst.left
         return bst
@@ -123,11 +118,10 @@ class BST(object):
     def size(self):
         return self._size(self.root)
 
-    @staticmethod
-    def _size(bst):
+    def _size(self, bst):
         if bst == None:
             return 0
-        return BST._size(bst.left) + BST._size(bst.right) + 1
+        return self._size(bst.left) + self._size(bst.right) + 1
 
     def clean(self):
         self.root = None
@@ -140,17 +134,16 @@ class BST(object):
             _recur(bst.right)
             # check symmetric order property
             if bst.left:
-                assert (bst.left.value < bst.value)
+                assert (bst.left.key < bst.key)
             if bst.right:
-                assert (bst.right.value > bst.value)
+                assert (bst.right.key > bst.key)
 
         _recur(self.root)
 
 
-# balanced binary search tree
-class BBST(BST):
-    def __index__(self):
-        super(BBST, self).__init__()
+class BalancedBinarySearchTree(BinarySearchTree):
+    def __init__(self):
+        super(BalancedBinarySearchTree, self).__init__()
 
     # the following are two restructuring primitives for almost all kinds of balanced BSTs
     # which always hold the symmetric order property,
@@ -180,9 +173,9 @@ class BBST(BST):
 import time, random
 
 
-class BSTTest(object):
+class BinarySearchTreeTest(object):
     def __init__(self, clsobj, num, check=False, time=True):
-        assert (issubclass(clsobj, BST))
+        assert (issubclass(clsobj, BinarySearchTree))
         self.tcls = clsobj
         self.tree = None
         self.dic = {}
@@ -256,7 +249,7 @@ class BSTTest(object):
 
 
 if __name__ == '__main__':
-    test = BSTTest(BST, 800, True)
+    test = BinarySearchTreeTest(BinarySearchTree, 800, True)
     test.deleteMaxMin()
     test.delete()
     print 'done'

@@ -20,9 +20,9 @@ import rbt, bst
 # 于是随后的操作就与deleteMin()中的完全对称了
 
 
-class LLRB(rbt.RBT):
+class LeftLeaningRedBlackTree(rbt.RedBlackTree):
     def __init__(self):
-        super(LLRB, self).__init__()
+        super(LeftLeaningRedBlackTree, self).__init__()
 
     # ------------------------------------------------------------------------------------
 
@@ -142,12 +142,12 @@ class LLRB(rbt.RBT):
             if rbt.right:
                 assert (rbt.left)  # left-leaning (3)
 
-        super(LLRB, self).check()
+        super(LeftLeaningRedBlackTree, self).check()
         _recur(self.root)
 
 
 if __name__ == '__main__':
-    test = bst.BSTTest(LLRB, 500, True)
+    test = bst.BinarySearchTreeTest(LeftLeaningRedBlackTree, 500, True)
     test.deleteMaxMin()
     test.delete()
     print 'done'

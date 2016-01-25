@@ -4,21 +4,21 @@
 import bst
 
 
-class AVL(bst.BBST):
-    class Node:
+class AVLTree(bst.BalancedBinarySearchTree):
+    class Node(object):
         def __init__(self, key, value):
-            self.key = key
-            self.value = value
             self.left = None
             self.right = None
+            self.key = key
+            self.value = value
             self.factor = 0
 
     def __init__(self):
-        self.root = None
+        super(AVLTree, self).__init__()
 
 
 if __name__ == '__main__':
-    test = bst.BSTTest(AVL, 200)
+    test = bst.BinarySearchTreeTest(AVLTree, 200)
     test.deleteMaxMin()
     test.delete()
     print 'done'
