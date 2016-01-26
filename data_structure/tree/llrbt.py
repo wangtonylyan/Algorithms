@@ -18,8 +18,6 @@ import rbt, bst
 # 但由于倾向了“一侧”，因此对左右子树的处理可能会略有不同
 # 但也可以规避，例如deleteMax()的实现，在每次递归中，总是首先将当前层由左倾转换成右倾
 # 于是随后的操作就与deleteMin()中的完全对称了
-
-
 class LeftLeaningRedBlackTree(rbt.RedBlackTree):
     def __init__(self):
         super(LeftLeaningRedBlackTree, self).__init__()
@@ -35,11 +33,8 @@ class LeftLeaningRedBlackTree(rbt.RedBlackTree):
 
     # based on the left-leaning characteristic
     def _balance(self, rbt):
+        assert (rbt)
         # [use case] a; b+c; a+b+c(==c)
-        # Taking the side-effects of the three elementary operations and
-        # the use cases listed above into consideration,
-        # the following sequence can not only eliminate all the side-effects,
-        # but also locally re-balance the rbt tree.
         if rbt.right and rbt.right.color:  # a
             rbt = self._rotateLeft(rbt)
         if rbt.left and rbt.left.color and rbt.left.left and rbt.left.left.color:  # b

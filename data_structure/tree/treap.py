@@ -4,9 +4,12 @@
 # The heap and binary search tree properties together ensure that,
 # once the key and priority for each node are defined,
 # the shape of the Treap is completely determined.
-# 根据key属性维护的最小堆的性质，使得树根节点必定是priority最小的节点
-# 根据property属性维护的BST的性质，决定了每个节点位于其父节点的左还是右子树
-
+# 对于任意子树而言，其中优先级最小的节点必定就是根节点
+# 由于在普通的二叉树中，较早插入的节点一定是作为较晚节点的树根
+# 换言之，树堆就好比是在二叉树的基础上，随机化了输入集
+# 然后根据优先级大小先后插入，从而构建出整棵二叉树
+# 总之，树堆实现简单、效率快、支持多数操作，性价比很高
+# 树堆的设计思想就是：randomized BST是趋向于平衡的
 
 import bst, random
 
@@ -23,8 +26,16 @@ class Treap(bst.BalancedBinarySearchTree):
     def __init__(self, total=10000):
         super(Treap, self).__init__()
         self.total = total * 5
-        # 利用该数组来维护property的唯一性，也有算法在实现上会利用哈希表
+        # 利用该数组来维护priority的唯一性，也有算法在实现上会利用哈希表
         self.prioritySet = [0 for i in range(self.total)]
+
+    def _balance(self, tp):
+        assert (tp)
+        if tp.left and tp.left.priority < tp.priority:
+            tp = self._rotateRight(tp)
+        elif tp.right and tp.right.priority < tp.priority:
+            tp = self._rotateLeft(tp)
+        return tp
 
     def insert(self, key, value):
         def _recur(tp, key, value):
@@ -37,18 +48,18 @@ class Treap(bst.BalancedBinarySearchTree):
                 return self.__class__.Node(key, value, priority)  # insertion
             if key < tp.key:
                 tp.left = _recur(tp.left, key, value)
-                if tp.left.priority < tp.priority:
-                    tp = self._rotateRight(tp)
+                tp = self._balance(tp)
             elif key > tp.key:
                 tp.right = _recur(tp.right, key, value)
-                if tp.right.priority < tp.priority:
-                    tp = self._rotateLeft(tp)
+                tp = self._balance(tp)
             else:
                 tp.value = value
             return tp
 
         self.root = _recur(self.root, key, value)
 
+    # 删除操作只需在top-down阶段不断地将目标节点进行旋转
+    # 直至其成为叶子节点，并删除即可
     def delete(self, key):
         def _recur(tp, key):
             if tp == None:
@@ -67,7 +78,7 @@ class Treap(bst.BalancedBinarySearchTree):
                 elif tp.right == None:
                     tp = self._rotateRight(tp)
                     tp.right = _recur(tp.right, key)
-                elif tp.left.priority < tp.right.priority:
+                elif tp.left.priority < tp.right.priority:  # 维护最小堆的性质
                     tp = self._rotateRight(tp)
                     tp.right = _recur(tp.right, key)
                 else:

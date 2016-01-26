@@ -86,18 +86,18 @@ class BinarySearchTree(object):
         self.root = _recur(self.root, key)
 
     def search(self, key):
-        bst = self._search(self.root, key)
-        return bst.value if bst else None
+        def _iter(bst, key):
+            while bst:
+                if key < bst.key:
+                    bst = bst.left
+                elif key > bst.key:
+                    bst = bst.right
+                else:
+                    break
+            return bst
 
-    def _search(self, bst, key):
-        while bst:
-            if key < bst.key:
-                bst = bst.left
-            elif key > bst.key:
-                bst = bst.right
-            else:
-                break
-        return bst
+        bst = _iter(self.root, key)
+        return bst.value if bst else None
 
     def getMax(self):
         return self._getMax(self.root)
@@ -145,9 +145,10 @@ class BalancedBinarySearchTree(BinarySearchTree):
     def __init__(self):
         super(BalancedBinarySearchTree, self).__init__()
 
-    # the following are two restructuring primitives for almost all kinds of balanced BSTs
-    # which always hold the symmetric order property,
-    # and can be used to balance an unbalanced BST in composition
+    # The following are two restructuring primitives
+    # for almost all kinds of self-balancing BSTs.
+    # They always hold the symmetric order property,
+    # and can be used to balance an unbalanced BST in composition.
     # rotate left与rotate right这两个操作是完全对称的，且互为可逆
     # 例如，对同一个节点先后各执行一次这两个操作，以该节点为根的子树结构不变
     def _rotateLeft(self, bbst):
@@ -225,9 +226,9 @@ class BinarySearchTreeTest(object):
             assert (self.tree.size() == 0)
 
         self.new()
-        test('getMin', 'deleteMin')
-        self.new()
         test('getMax', 'deleteMax')
+        self.new()
+        test('getMin', 'deleteMin')
 
     def delete(self):
         self.new()
