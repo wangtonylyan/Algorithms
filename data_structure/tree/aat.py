@@ -124,8 +124,8 @@ class AATree(bst.BalancedBinarySearchTree):
 
 
 if __name__ == '__main__':
-    test = bst.BSTTest(AATree, 400, True)
+    test = bst.BinarySearchTreeTest(AATree, 40000, True)
     test.new()
     #    test.deleteMaxMin()
-    test.delete()
+    #test.delete()
     print 'done'
