@@ -205,19 +205,14 @@ class SplayTree(bst.BalancedBinarySearchTree):
             else:
                 self.root = None
 
-    def check(self):
-        def _recur(spt):
-            if spt:
-                if spt.left:
-                    assert (spt.left.parent == spt)
-                    _recur(spt.left)
-                if spt.right:
-                    assert (spt.right.parent == spt)
-                    _recur(spt.right)
-
-        super(SplayTree, self).check()
-        _recur(self.root)
-        assert (not (self.root and self.root.parent))
+    def _check(self, spt, left, right):
+        super(SplayTree, self)._check(spt, left, right)
+        if spt.left:
+            assert (spt.left.parent == spt)
+        if spt.right:
+            assert (spt.right.parent == spt)
+        if spt == self.root:
+            assert (not spt.parent)
 
 
 if __name__ == '__main__':

@@ -86,18 +86,18 @@ class BinarySearchTree(object):
         self.root = _recur(self.root, key)
 
     def search(self, key):
-        def _iter(bst, key):
-            while bst:
-                if key < bst.key:
-                    bst = bst.left
-                elif key > bst.key:
-                    bst = bst.right
-                else:
-                    break
-            return bst
-
-        bst = _iter(self.root, key)
+        bst = self._search(self.root, key)
         return bst.value if bst else None
+
+    def _search(self, bst, key):
+        while bst:
+            if key < bst.key:
+                bst = bst.left
+            elif key > bst.key:
+                bst = bst.right
+            else:
+                break
+        return bst
 
     def getMax(self):
         return self._getMax(self.root)
@@ -128,17 +128,17 @@ class BinarySearchTree(object):
 
     def check(self):
         def _recur(bst):
-            if bst == None:
-                return
-            _recur(bst.left)
-            _recur(bst.right)
-            # check symmetric order property
-            if bst.left:
-                assert (bst.left.key < bst.key)
-            if bst.right:
-                assert (bst.right.key > bst.key)
+            return self._check(bst, _recur(bst.left), _recur(bst.right)) if bst else None
 
         _recur(self.root)
+
+    def _check(self, bst, left, right):
+        assert (bst)
+        # check symmetric order property
+        if bst.left:
+            assert (bst.left.key < bst.key)
+        if bst.right:
+            assert (bst.right.key > bst.key)
 
 
 class BalancedBinarySearchTree(BinarySearchTree):

@@ -19,7 +19,7 @@ import bst, rbt
 def isIntervalsOverlapped((low1, high1), (low2, high2)):
     assert (low1 <= high1 and low2 <= high2)
     return (high1 >= low2 and high2 >= low1)
-    return (max(high1, high2) - min(low1, low2) <= high1 - low1 + high2 - low2) # closed interval
+    return (max(high1, high2) - min(low1, low2) <= high1 - low1 + high2 - low2)  # closed interval
 
 
 class SegmentTree(bst.BinarySearchTree):
@@ -96,17 +96,12 @@ class IntervalTree(rbt.RedBlackTree):
 
         return _recur(self.root)
 
-    def check(self):
-        def _recur(ivt):
-            if ivt == None:
-                return
-            _recur(ivt.left)
-            _recur(ivt.right)
-            assert (ivt.max == max(ivt.left.max if ivt.left else 0, \
-                                   ivt.right.max if ivt.right else 0, \
-                                   ivt.value[1]))
-
-        _recur(self.root)
+    def _check(self, ivt, left, right):
+        ret = super(IntervalTree, self)._check(ivt, left, right)
+        assert (ivt.max == max(ivt.left.max if ivt.left else 0, \
+                               ivt.right.max if ivt.right else 0, \
+                               ivt.value[1]))
+        return ret
 
 
 import random, time

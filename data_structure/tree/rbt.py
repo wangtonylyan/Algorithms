@@ -241,22 +241,18 @@ class RedBlackTree(bst.BalancedBinarySearchTree):
 
     # ------------------------------------------------------------------------------------
 
-    def check(self):
-        def _recur(rbt):
-            if rbt == None:
-                return 0
-            m = _recur(rbt.left if rbt.left else None)
-            n = _recur(rbt.right if rbt.right else None)
-            assert (m == n)  # left and right subtree hold the same black-height
-            assert (not (rbt.left and rbt.left.color and rbt.right and rbt.right.color))
-            if rbt.color:
-                assert (not (rbt.left and rbt.left.color) and not (rbt.right and rbt.right.color))
-                return m
-            return m + 1
-
-        super(RedBlackTree, self).check()
-        _recur(self.root)
-        assert (not (self.root and self.root.color))  # not necessary for a relaxed red-black tree
+    def _check(self, rbt, left, right):
+        super(RedBlackTree, self)._check(rbt, left, right)
+        left = 0 if left == None else left
+        right = 0 if right == None else right
+        assert (left == right)  # left and right subtree hold the same black-height
+        assert (not (rbt.left and rbt.left.color and rbt.right and rbt.right.color))
+        if rbt == self.root:
+            assert (not (self.root and self.root.color))  # not necessary for a relaxed red-black tree
+        if rbt.color:
+            assert (not (rbt.left and rbt.left.color) and not (rbt.right and rbt.right.color))
+            return left
+        return left + 1
 
 
 if __name__ == '__main__':

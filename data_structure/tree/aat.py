@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # data structure: AA (Arne Andersson) tree
+# AA树可视为是一种简化版的红黑树
 
 import bst
 
@@ -26,11 +27,12 @@ class AATree(bst.BalancedBinarySearchTree):
     def _skew(self, aat):
         if aat:
             if aat.left and aat.level == aat.left.level:
+                # result in side-effect of turning aat.left.right subtree into left
                 aat = self._rotateRight(aat)
-            aat.right = self._skew(aat.right)
+            aat.right = self._skew(aat.right)  # recursion will eliminate side-effect
         return aat
 
-    # same as RBT.rotateLeft + RBT.flipColor: side-effect of increasing height of aat subtree
+    # same as RBT.rotateLeft + RBT.flipColor: side-effect of increasing level of aat subtree
     def _split(self, aat):
         if aat:
             if aat.right and aat.right.right and aat.level == aat.right.right.level:
@@ -41,6 +43,20 @@ class AATree(bst.BalancedBinarySearchTree):
         return aat
 
     def _balance(self, aat):
+        # b+c组合之所以能重新平衡结构被破坏了的AA树在于：
+        # 递归的skew操作使得所有左倾结构都被转换成了右倾
+        # 递归的split操作又通过增加树的层次来消除多余的右倾
+        # 实际上，skew的有效递归至多三次，split的有效递归至多两次
+        # 即在deletion操作中，存在如下最坏情况（6个节点全在相同层次上）
+        #   a
+        #    \
+        #     b
+        #    / \
+        #   c   d
+        #    \   \
+        #     e   f
+        # a的左子树由于降低了层次，使得节点a和b也同时降低层次
+        # 而原本c与e、d与f就在同一个层次上
         assert (aat)
         # a) decrease level (only in deletion)
         # in case that one of aat.left and aat.right subtree is lower
@@ -84,48 +100,47 @@ class AATree(bst.BalancedBinarySearchTree):
                 aat = self._balance(aat)
             else:
                 if aat.right:
+
                     m = self._getMin(aat.right)
                     aat.right = _recur(aat.right, m.key)
+
+                    haha = self._search(aat.right, m.key)
+                    if haha:
+                        print haha.key, haha.value, haha.level, aat.level
                     aat.key = m.key
                     aat.value = m.value
                     aat = self._balance(aat)
                 elif aat.left:
                     aat = aat.left
                 else:
+                    assert (aat.level == 1)
                     aat = None
             return aat
 
         self.root = _recur(self.root, key)
 
-    def check(self):
-        def _recur(aat):
-            if aat == None:
-                return
-            m = _recur(aat.left)
-            n = _recur(aat.right)
-            if aat.left:
-                # level of a left child is strictly less than that of its parent
-                assert (aat.left.level < aat.level)
-            if aat.right:
-                # level of a right child is less than or equal to that of its parent
-                assert (aat.right.level <= aat.level)
-                if aat.right.right:
-                    # level of a right grandchild is strictly less than that of its grandparent
-                    assert (aat.right.right.level < aat.level)
-            if aat.left == None and aat.right == None:
-                # level of a leaf node is one
-                assert (aat.level == 1)
-            if aat.level > 1:
-                # 隐式特征: every node of level greater than one must have two children
-                assert (aat.left and aat.right)
-
-        super(AATree, self).check()
-        _recur(self.root)
+    def _check(self, aat, left, right):
+        super(AATree, self)._check(aat, left, right)
+        if aat.left:
+            # level of a left child is strictly less than that of its parent
+            assert (aat.left.level < aat.level)
+        if aat.right:
+            # level of a right child is less than or equal to that of its parent
+            assert (aat.right.level <= aat.level)
+            if aat.right.right:
+                # level of a right grandchild is strictly less than that of its grandparent
+                assert (aat.right.right.level < aat.level)
+        if aat.left == None and aat.right == None:
+            # level of a leaf node is one
+            assert (aat.level == 1)
+        if aat.level > 1:
+            # 隐式特征: every node of level greater than one must have two children
+            assert (aat.left and aat.right)
 
 
 if __name__ == '__main__':
-    test = bst.BinarySearchTreeTest(AATree, 40000, True)
+    test = bst.BinarySearchTreeTest(AATree, 5, True)
     test.new()
     #    test.deleteMaxMin()
-    #test.delete()
+    test.delete()
     print 'done'

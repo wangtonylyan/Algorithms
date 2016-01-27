@@ -123,22 +123,16 @@ class LeftLeaningRedBlackTree(rbt.RedBlackTree):
 
     # ------------------------------------------------------------------------------------
 
-    def check(self):
-        def _recur(rbt):
-            if rbt == None:
-                return
-            _recur(rbt.left if rbt.left else None)
-            _recur(rbt.right if rbt.right else None)
-            # 1) 显式特征：来源于树的定义
-            assert (not (rbt.right and rbt.right.color))  # left-leaning (1)
-            # 2) 隐式特征：根据对于树的结构的变更操作可推导得出
-            if rbt.left and not rbt.left.color:
-                assert (rbt.right)  # left-leaning (2)
-            if rbt.right:
-                assert (rbt.left)  # left-leaning (3)
-
-        super(LeftLeaningRedBlackTree, self).check()
-        _recur(self.root)
+    def _check(self, rbt, left, right):
+        ret = super(LeftLeaningRedBlackTree, self)._check(rbt, left, right)
+        # 1) 显式特征：来源于树的定义
+        assert (not (rbt.right and rbt.right.color))  # left-leaning (1)
+        # 2) 隐式特征：根据对于树的结构的变更操作可推导得出
+        if rbt.left and not rbt.left.color:
+            assert (rbt.right)  # left-leaning (2)
+        if rbt.right:
+            assert (rbt.left)  # left-leaning (3)
+        return ret
 
 
 if __name__ == '__main__':

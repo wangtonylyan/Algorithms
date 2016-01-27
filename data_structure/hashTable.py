@@ -4,10 +4,12 @@
 # 1) collision resolution
 # linear probing: 下一个空位
 # seperate chaining: 链表
+# secondary hash table: 进行两次哈希，且保证第二次哈希不会冲突
 # 2) parallism
 # 第一次哈希入链表，第二次哈希入哈希表
 
 import hash
+
 
 # implementation: linear probing hash table based on parallel arrays
 class HashTable1():
