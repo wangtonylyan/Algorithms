@@ -3,27 +3,27 @@
 
 class Stack():
     class Node():
-        def __init__(self, val = None):
-            self.value = val
+        def __init__(self, value):
+            self.value = value
             self.next = None
 
     def __init__(self):
         self.head = None
         self.count = 0
 
-    def push(self, val):
-        stk = self.__class__.Node(val)
+    def push(self, value):
+        stk = self.__class__.Node(value)
         stk.next = self.head
         self.head = stk
         self.count += 1
 
     def pop(self):
+        ret = None
         if self.head:
             ret = self.head.value
             self.head = self.head.next
             self.count -= 1
-            return ret
-        return None
+        return ret
 
     def size(self):
         return self.count

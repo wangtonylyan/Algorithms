@@ -16,34 +16,82 @@ import bst, rbt
 # (a) i and j overlap
 # (b) i is to the left of j, i.e. i.high < j.low
 # (c) i is to the right of j, i.e. j.high < i.low
-def isIntervalsOverlapped((low1, high1), (low2, high2)):
+def ifIntervalsOverlapped((low1, high1), (low2, high2)):
     assert (low1 <= high1 and low2 <= high2)
     return (high1 >= low2 and high2 >= low1)
     return (max(high1, high2) - min(low1, low2) <= high1 - low1 + high2 - low2)  # closed interval
 
 
+# 1）整棵线段树的构建是基于一个连续的区间
+# 2）所有叶子节点的数量就是构建这棵树的区间的长度
+# 3）中间节点所表示的区间通常都是通过二分法得到的
+# 这样就保证了树的高度与区间的长度之间的关系是对数级
+# 4）线段树本质上仍旧是一棵查找树，通过在每个节点中维护额外的信息
+# 可以高效率地实现很多与区间相关的查找问题
 class SegmentTree(bst.BinarySearchTree):
     class Node:
         def __init__(self, low, high):
-            self.left = None
-            self.right = None
             assert (low <= high)
-            self.itv = Interval(low, high)
+            self.low = low
+            self.high = high
+            # 每个节点所维护的额外信息在具体问题中会不尽相同
+            self.value = 0  # 此处只是举例
 
-    def __init__(self):
-        self.root = None
+    def __init__(self, total=10000):
+        super(SegmentTree, self).__init__()
+        self.total = total + 1  # start from index 1
+        # 线段树是一颗接近完全的二叉树，因此使用数组来存储整棵树
+        self.root = [None for i in range(self.total)]
 
-    def build(self, itv):
-        def _recur(low, high):
-            assert (low <= high)
-            sgt = self.__class__.Node(low, high)
-            if sgt.low != sgt.high:
-                mid = (sgt.low + sgt.high) / 2
-                sgt.left = _recur(sgt.low, mid)
-                sgt.right = _recur(mid + 1, sgt.high)
-            return sgt
+    def build(self, (low, high)):
+        def _recur(sgt, (low, high)):
+            # 在创建节点的同时初始化其value
+            self.root[sgt] = self.__class__.Node(low, high)
+            if self.root[sgt].low != self.root[sgt].high:
+                mid = (self.root[sgt].low + self.root[sgt].high) >> 1
+                _recur(sgt << 1, (low, mid))
+                _recur(sgt << 1 | 1, (mid + 1, high))
 
-        self.root = _iter(itv.low, itv.high)
+        assert (low <= high)
+        _recur(1, (low, high))
+
+    def query(self, (low, high)):
+        def _recur(sgt, (low, high)):
+            if self.root[sgt]:
+                if self.root[sgt].low == low and self.root[sgt].high == high:
+                    # e.g. 更新当前节点的value
+                    return self.root[sgt].value
+                # 1) top-down
+                pass
+                # 2) recursion
+                lval, rval = 0, 0
+                if ifIntervalsOverlapped((low, high), (self.root[sgt << 1].low, self.root[sgt << 1].high)):
+                    lval = _recur(sgt << 1, (low, high))  # travserse left subtree
+                if ifIntervalsOverlapped((low, high), (self.root[sgt << 1 | 1].low, self.root[sgt << 1 | 1].high)):
+                    rval = _recur(sgt << 1 | 1, (low, high))  # traverse right subtree
+                # 3) bottom-up
+                # e.g. 基于子节点变更后的value来更新当前节点的value
+                return lval + rval
+
+        assert (low <= high)
+        _recur(1, (low, high))
+
+
+if __name__ == '__main__':
+    t = SegmentTree()
+    t.build((1, 5))
+
+
+# test = IntervalSearchTreeTest(IntervalTree, 10000, True)
+#    test.new()
+
+
+
+
+
+
+
+
 
 
 # 区间树的实现不仅限于增强平衡二叉树，还可以用多叉树来实现
@@ -86,11 +134,11 @@ class IntervalTree(rbt.RedBlackTree):
         def _recur(ivt):
             lst = []
             if ivt:
-                if isIntervalsOverlapped(ivt.value, (low, high)):
+                if ifIntervalsOverlapped(ivt.value, (low, high)):
                     lst.append(ivt.value)
                 if ivt.left and ivt.left.max >= low:  # 检查遍历子树的必要性
                     lst += _recur(ivt.left)
-                if ivt.right and isIntervalsOverlapped((ivt.key, ivt.right.max), (low, high)):
+                if ivt.right and ifIntervalsOverlapped((ivt.key, ivt.right.max), (low, high)):
                     lst += _recur(ivt.right)
             return lst
 
@@ -128,7 +176,7 @@ class IntervalSearchTreeTest(bst.BinarySearchTreeTest):
             if self.check:
                 self.tree.check()
             lst = self.tree.search((i, j))
-            assert (reduce(lambda x, y: x and isIntervalsOverlapped(y, (i, j)), lst, True))
+            assert (reduce(lambda x, y: x and ifIntervalsOverlapped(y, (i, j)), lst, True))
             assert (reduce(lambda x, y: x or y == (i, j), lst, False))
             c += 1
             assert (self.tree.size() == c)
@@ -136,8 +184,3 @@ class IntervalSearchTreeTest(bst.BinarySearchTreeTest):
             self.end_t = time.time()
             print 'new:\t\t', self.end_t - self.start_t
         assert (self.tree.size() == len(self.dic))
-
-
-if __name__ == '__main__':
-    test = IntervalSearchTreeTest(IntervalTree, 10000, True)
-    test.new()
