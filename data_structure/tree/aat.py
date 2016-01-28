@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # data structure: AA (Arne Andersson) tree
-# AA树可视为是一种简化版的红黑树
+# AA树可视为是一种实现简化版的红黑树，形似一颗具有右倾特征的红黑树
+# 每个节点中维护的level综合了AVL树和红黑树的特性
 
 import bst
 
@@ -56,7 +57,7 @@ class AATree(bst.BalancedBinarySearchTree):
         #    \   \
         #     e   f
         # a的左子树由于降低了层次，使得节点a和b也同时降低层次
-        # 而原本c与e、d与f就在同一个层次上
+        # 且原本c与e、d与f就在同一个层次上
         assert (aat)
         # a) decrease level (only in deletion)
         # in case that one of aat.left and aat.right subtree is lower
@@ -88,6 +89,24 @@ class AATree(bst.BalancedBinarySearchTree):
 
         self.root = _recur(self.root, key, value)
 
+    def _deleteMax(self, aat):
+        if aat:
+            if aat.right:
+                aat.right = self._deleteMax(aat.right)
+                aat = self._balance(aat)
+            else:
+                aat = aat.left
+        return aat
+
+    def _deleteMin(self, aat):
+        if aat:
+            if aat.left:
+                aat.left = self._deleteMin(aat.left)
+                aat = self._balance(aat)
+            else:
+                aat = aat.right
+        return aat
+
     def delete(self, key):
         def _recur(aat, key):
             if aat == None:
@@ -100,13 +119,9 @@ class AATree(bst.BalancedBinarySearchTree):
                 aat = self._balance(aat)
             else:
                 if aat.right:
-
                     m = self._getMin(aat.right)
-                    aat.right = _recur(aat.right, m.key)
-
-                    haha = self._search(aat.right, m.key)
-                    if haha:
-                        print haha.key, haha.value, haha.level, aat.level
+                    aat.right = self._deleteMin(aat.right)
+                    assert (not self._search(aat.right, m.key))
                     aat.key = m.key
                     aat.value = m.value
                     aat = self._balance(aat)
@@ -120,6 +135,7 @@ class AATree(bst.BalancedBinarySearchTree):
         self.root = _recur(self.root, key)
 
     def _check(self, aat, left, right):
+        # 无需像红黑树那样统计左右子树的black height，因为level信息就已包含了
         super(AATree, self)._check(aat, left, right)
         if aat.left:
             # level of a left child is strictly less than that of its parent
@@ -139,8 +155,7 @@ class AATree(bst.BalancedBinarySearchTree):
 
 
 if __name__ == '__main__':
-    test = bst.BinarySearchTreeTest(AATree, 5, True)
-    test.new()
-    #    test.deleteMaxMin()
+    test = bst.BinarySearchTreeTest(AATree, 1000, True)
+    test.deleteMaxMin()
     test.delete()
     print 'done'

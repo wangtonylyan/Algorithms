@@ -197,6 +197,7 @@ class SplayTree(bst.BalancedBinarySearchTree):
             if self.root.left:
                 m = self._getMax(self.root.left)
                 self.root.left = self._deleteMax(self.root.left)
+                assert (not self._search(self.root.left, m.key))
                 self.root.key = m.key
                 self.root.value = m.value
             elif self.root.right:
