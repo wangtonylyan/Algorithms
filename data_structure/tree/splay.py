@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # data structure: splay tree
 # 伸展树的核心是围绕splay操作
-# Splay operation does rotations bottom-up along the access path
-# and moves the accessed node all the way up to the root,
+# Splay operation does rotations along the access path
+# and moves the target node all the way up to the root,
 # which still preserves the symmetric order of the whole tree.
 # 利用splay操作有时可以完成一些其他BST无法做到的行为
 # 例如需要删除某个区间(a,b)内所有节点，区间树就很难完成，但对于伸展树而言就很简单
@@ -16,7 +16,9 @@ class SplayTree(bst.BalancedBinarySearchTree):
         def __init__(self, key, value, parent):
             self.left = None
             self.right = None
-            self.parent = parent  # 该属性简化了平衡算法，但对于其自身的维护也增加了额外的复杂度
+            # 该父节点指针简化了平衡算法的表达
+            # 但对于其自身的维护也增加了额外的复杂度
+            self.parent = parent
             self.key = key
             self.value = value
 
@@ -26,6 +28,7 @@ class SplayTree(bst.BalancedBinarySearchTree):
     def _rotateLeft(self, spt):
         assert (spt and spt.right)
         spt = super(SplayTree, self)._rotateLeft(spt)
+        # 以下需要额外地维护父节点指针
         assert (spt.left)
         if spt.left.right:
             spt.left.right.parent = spt.left
@@ -61,9 +64,9 @@ class SplayTree(bst.BalancedBinarySearchTree):
     # 若目标节点不存在，则与目标节点的key较接近的某个叶子节点将成为新的树根
     # 2）bottom up
     # 从树根开始遍历直至找到目标节点，再将目标节点向上旋转直至树根
-    # 需要维护access path信息，无论是使用栈还是parent指针
+    # 需要维护access path信息，无论是使用栈还是父节点指针
     def _splay(self, spt, root):
-        # 本数据结构是完全基于bottom up的，因此top down的实现仅作参考
+        # 当前的数据结构是完全基于bottom up实现的，如下top down版本仅作参考
         # push root, rather than root.child, down until spt
         # strategy: split root subtree into three parts
         def _top_down(root, spt):

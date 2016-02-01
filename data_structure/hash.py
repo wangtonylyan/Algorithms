@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # algorithm: hash
-
 # hash value is in range of 32-bit
 
 # @param: integer
@@ -8,17 +7,17 @@ class IntegerHash():
     def __init__(self):
         pass
 
-    # 1)除法散列法
+    # 1)除法/取余哈希法
     def hash1(self, integer):
         hashVal = integer % 16
         return hashVal & 0xFFFFFFFF
 
-    # 2)平方散列法
+    # 2)平方哈希法
     def hash2(self, integer):
         hashVal = (integer * integer) >> 28
         return hashVal & 0xFFFFFFFF
 
-    # 3)Fibonacci散列法，由平方散列法演化而来，乘以的不是自身而是一个与黄金分割有关的“理想数”
+    # 3)Fibonacci哈希法，由平方哈希法演化而来，乘以的不是自身而是一个与黄金分割有关的“理想数”
     def hash3(self, integer):
         hashVal = (integer * 2654435769) >> 28  # 32位理想数就是2654435769
         return hashVal & 0xFFFFFFFF
