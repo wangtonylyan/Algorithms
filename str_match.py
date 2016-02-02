@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # problem: string matching
 # solution: brute force, Rabin-Karp, KMP
+# 返回值是所有匹配子字符串的偏移量
 
 def check_param(func):
     def f(self, s, p):
@@ -31,19 +32,23 @@ class BruteForce():
 # 从第一个字符起，对目标字符串中每个与模式字符串长度相同的连续子字符进行哈希
 # 通过比较每个子字符串与模式字符串的哈希值，以判断是否需要逐个字符地比较
 # 这就对哈希算法提出了两点要求：
+# 令m为模式字符串长度，d为字符集大小，s为目标字符串
 # (a) 哈希算法本身必须是高效的，不然还不如暴力算法
 # hash(s[i:i+m]) = s[i]*d^(m-1) + ... + s[i+j]*d^(m-1-j) + ... + s[i+m-1]*d^0
-# 其中m是模式字符串长度，d是字符集的大小，该哈希算法可理解为：
-# 以d为进制，并将字符串s中的每个字符(在字符集中)所被标识的数值作为d进制数的一个数位
-# 最终得到的哈希值就是一个d进制数
+# 该哈希算法可理解为：以d为进制
+# 并将字符串s中的每个字符(在字符集中)所被标识的数值作为d进制数的一个数位
+# 最终得到的哈希值就是一个“d进制”数
 # (b) 对于每个子字符串的哈希值的计算，应避免遍历整个子字符串
 # 通过前后两个相邻子字符串之间哈希值的递推关系式
 # hash(s[i+1:i+1+m]) = (hash(s[i:i+m]) - s[i]*d^(m-1))*d + s[i+m]
 class RabinKarp():
     def __init__(self):
         self.alphabet = 128  # 7-bit ASCII
-        # 与计算机字长相关，避免由于字符串过长而导致哈希值过大
-        # 该质数越大将则哈希冲突的可能性越小
+        # 1）为避免由于字符串过长或字符集过大
+        # 从而导致所得哈希值过大，超出数据类型
+        # 应将所有哈希值都对该质数进行取余
+        # 2）该质数越大将则哈希冲突的可能性越小
+        # 综上，最合理的值应满足其与字符集大小的乘积接近且小于计算机字长
         self.prime = 6999997
 
     def hash(self, str, strLen):
@@ -71,10 +76,21 @@ class RabinKarp():
         sHashFunc = self.hash(str, len(pat))
         # step2) search
         for i in range(0, len(str) - len(pat) + 1):
-            if pHash == sHashFunc.next():
+            if pHash == sHashFunc.next():  # spurious hit
                 if str[i:i + len(pat)] == pat:
                     ret.append(i)
         return ret
+
+class Automata():
+    def __init__(self):
+        pass
+
+    @check_param
+    def match(self, str, pat):
+        pass
+
+
+
 
 
 if __name__ == '__main__':
