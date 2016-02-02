@@ -14,9 +14,9 @@ def check_param(func):
 
 class BruteForce():
     @check_param
-    def matching(self, str, pat):
+    def match(self, str, pat):
         ret = []
-        # searching
+        # search
         for i in range(0, len(str) - len(pat) + 1):
             assert (i + len(pat) <= len(str))
             j = 0
@@ -32,34 +32,44 @@ class BruteForce():
 # 通过比较每个子字符串与模式字符串的哈希值，以判断是否需要逐个字符地比较
 # 这就对哈希算法提出了两点要求：
 # (a) 哈希算法本身必须是高效的，不然还不如暴力算法
+# hash(s[i:i+m]) = s[i]*d^(m-1) + ... + s[i+j]*d^(m-1-j) + ... + s[i+m-1]*d^0
+# 其中m是模式字符串长度，d是字符集的大小，该哈希算法可理解为：
+# 以d为进制，并将字符串s中的每个字符(在字符集中)所被标识的数值作为d进制数的一个数位
+# 最终得到的哈希值就是一个d进制数
 # (b) 对于每个子字符串的哈希值的计算，应避免遍历整个子字符串
-# 如下采用的哈希算法可以根据前一个子字符串的哈希值来计算后一个
+# 通过前后两个相邻子字符串之间哈希值的递推关系式
+# hash(s[i+1:i+1+m]) = (hash(s[i:i+m]) - s[i]*d^(m-1))*d + s[i+m]
 class RabinKarp():
     def __init__(self):
         self.alphabet = 128  # 7-bit ASCII
+        # 与计算机字长相关，避免由于字符串过长而导致哈希值过大
+        # 该质数越大将则哈希冲突的可能性越小
         self.prime = 6999997
 
     def hash(self, str, strLen):
         assert (strLen <= len(str))
-        factor = 1
+        # prepare
+        factor = 1  # == d^(m-1)
         for i in range(1, strLen):
             factor = (factor * self.alphabet) % self.prime
         assert (factor == pow(self.alphabet, strLen - 1) % self.prime)
+        # caculate hash value of the first strLen-length substring in str
         ret = 0
         for c in str[:strLen]:
             ret = (self.alphabet * ret + ord(c)) % self.prime
-        yield ret  # hash value of the first strLen-length substring in str
+        yield ret
+        # calculate hash value of the i-th strLen-length substring in str
         for i in range(1, len(str) - strLen + 1):
             ret = (self.alphabet * (ret - ord(str[i - 1]) * factor) + ord(str[i + strLen - 1])) % self.prime
-            yield ret  # hash value of the i-th strLen-length substring in str
+            yield ret
 
     @check_param
-    def matching(self, str, pat):
+    def match(self, str, pat):
         ret = []
-        # step1) preprocessing
+        # step1) preprocess
         pHash = self.hash(pat, len(pat)).next()
         sHashFunc = self.hash(str, len(pat))
-        # step2) searching
+        # step2) search
         for i in range(0, len(str) - len(pat) + 1):
             if pHash == sHashFunc.next():
                 if str[i:i + len(pat)] == pat:
@@ -71,7 +81,7 @@ if __name__ == '__main__':
     string = 'ababcabc'
     pattern = 'abc'
     bf = BruteForce()
-    ret = bf.matching(string, pattern)
+    ret = bf.match(string, pattern)
     print ret
     rk = RabinKarp()
-    assert (ret == rk.matching(string, pattern))
+    assert (ret == rk.match(string, pattern))
