@@ -51,6 +51,7 @@ class RedBlackTree(bst.BalancedBinarySearchTree):
 
     # ------------------------------------------------------------------------------------
 
+    # @premise: at most one of rbt, rbt.left and rbt.right is a 4-node
     # @what: eliminate 4-node results in balance of rbt subtree
     def _balance(self, rbt):
         assert (rbt)
@@ -99,7 +100,8 @@ class RedBlackTree(bst.BalancedBinarySearchTree):
 
     # the following are two primitives for deletion only in top-down step
     # @premise: rbt node is a 3-node
-    # @invariant: rbt.right subtree is always a balanced red-black tree, and won't be traversed after return
+    # @invariant: rbt.right subtree is a balanced red-black tree,
+    # which won't be traversed after return and doesn't need to be balanced
     # @what: turn rbt.left node into a 3-node
     # @how: move red from rbt or rbt.right node to rbt.left node
     # @when: before traversing the rbt.left subtree
