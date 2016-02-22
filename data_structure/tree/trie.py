@@ -4,12 +4,12 @@
 # useful for key with string type
 
 class TrieSearchTree(object):
-    alphabet = 256  # ASCII
+    alphabet = 128  # ASCII
 
     class Node(object):
         def __init__(self):
             self.next = [None for i in range(TrieSearchTree.alphabet)]
-            # self.key is a character and not necessary for implementation
+            # self.key is a character and not necessary for maintaining
             self.value = None  # indicates it's a void node by default
 
     def __init__(self):
@@ -25,44 +25,59 @@ class TrieSearchTree(object):
                 tst.next[ord(key[0])] = _recur(tst.next[ord(key[0])], key[1:], value)
             return tst
 
-        assert (key != None and isinstance(key, str) and len(key) > 0 and value != None)
+        assert (key != None and isinstance(key, str))
+        assert (len(key) > 0 and value != None)
         self.root = _recur(self.root, key, value)
 
     def delete(self, key):
-        def _recur(tst, key, value):
-            pass  # TODO
+        def _recur(tst, key):
+            if tst == None:
+                return tst
+            if len(key) == 0:
+                tst.value = None  # find it
+            else:
+                tst.next[ord(key[0])] = _recur(tst.next[ord(key[0])], key[1:])
+            for n in tst.next:
+                if n != None:
+                    return tst
+            return None  # delete tst subtree
 
-        _recur(self.root, key)
+        assert (key != None and isinstance(key, str))
+        self.root = _recur(self.root, key)
 
     def search(self, key):
-        def _iter(key):
-            it = self.root
-            c = 0
-            while it:
-                if c == len(key):
-                    return it.value
-                it = it.next[ord(key[c])]
-                c += 1
-            return None
+        assert (key != None and isinstance(key, str))
+        it = self.root
+        for c in key:
+            if it == None:
+                break
+            it = it.next[ord(c)]
+        return it.value if it else None
 
-        def _iter2(key):  # 也可以通过遍历key来实现
-            it = self.root
-            for c in key:
-                if it == None:
-                    return None
-                it = it.next[ord(c)]
-            return it.value if it else None
+    def size(self):
+        def _recur(tst):
+            ret = 0
+            if tst:
+                ret = reduce(lambda x, y: x + (_recur(y) if y else 0), tst.next, 0)
+                ret += 1 if tst.value else 0
+            return ret
 
-        return _iter(key)
+        return _recur(self.root)
 
     def check(self):
         def _recur(tst):
-            ret = True if tst.value else False
+            if tst == None:
+                return
+            flag = True
             for n in tst.next:
-                ret |= _recur(n) if n else False  # termination
-            return ret
+                if n != None:
+                    assert (isinstance(n, self.__class__.Node))
+                    _recur(n)
+                    flag = False
+            if flag:
+                assert (tst.value)
 
-        return _recur(self.root) if self.root else True
+        _recur(self.root)
 
 
 import time, random
@@ -70,12 +85,13 @@ import time, random
 
 class TrieSearchTreeTest():
     def __init__(self, num):
+        assert (0 < num < 100000)
         self.tree = None
         self.dic = {}
-        assert (0 < num < 100000)
+        alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
         for i in range(num):
             # random string with random length
-            k = str(random.sample('abcdefghijklmnopqrstuvwxyz', random.randint(1, 20)))
+            k = str(random.sample(alphabet, random.randint(1, len(alphabet) >> 1)))
             v = reduce(lambda v, c: v + ord(c), k, 0)
             self.dic[k] = v
         print "dic's size: ", len(self.dic)
@@ -85,11 +101,27 @@ class TrieSearchTreeTest():
         c = 0
         for k, v in self.dic.items():
             self.tree.insert(k, v)
+            self.tree.check()
             c += 1
             assert (self.tree.search(k) == v)
-            assert (self.tree.check())
+            assert (self.tree.size() == c)
+        assert (c == len(self.dic))
+        print 'test new() done'
+
+    def delete(self):
+        self.new()
+        c = len(self.dic)
+        for k, v in self.dic.items():
+            self.tree.delete(k)
+            self.tree.check()
+            c -= 1
+            assert (self.tree.search(k) == None)
+            assert (self.tree.size() == c)
+        assert (c == 0)
+        print 'test delete() done'
 
 
 if __name__ == '__main__':
     tst = TrieSearchTreeTest(100)
-    tst.new()
+    tst.delete()
+    print 'done'

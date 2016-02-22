@@ -68,25 +68,9 @@ def select2(lst, k):
     return (_max(lst[:], k), _min(lst[:], k))
 
 
-# binary search
-# @premise: lst是已排序的递增序列
-def binary_search(lst, val):
-    low = 0
-    high = len(lst) - 1
-    while low <= high:
-        mid = (low + high) / 2
-        if lst[mid] < val:
-            low = mid + 1
-        elif lst[mid] > val:
-            high = mid - 1
-        else:
-            return True
-    return False
-
-
 if __name__ == "__main__":
     lst = [5, 3, 6, 4, 3, 7, 8, 1]
     slst = [1, 3, 3, 4, 5, 6, 7, 8]
-    print select(lst[:], 1)  # (7,3)
-    print select2(lst[:], 1)  # (7,3)
-    print binary_search(slst, 3)
+    assert (select(lst[:], 1) == (7, 3))
+    assert (select2(lst[:], 1) == (7, 3))
+    print 'done'

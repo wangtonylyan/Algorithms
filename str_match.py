@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# problem: string matching
+# problem: string matching, string searching
 # solution: brute force, Rabin-Karp, KMP
 # 返回值是所有匹配子字符串的偏移量
 

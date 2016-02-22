@@ -66,6 +66,25 @@ class SettedBitProblem():
 
 
 class NumberProblem():
+    # @problem: compute the mid of two integers
+    # 此问题常见于二分的分治算法中
+    @staticmethod
+    def computeMidValue(m, n):
+        assert (m <= n)
+        # 1) 最简单的计算方式
+        return (m + n) / 2
+        # 方式1的不完善改进
+        # 当m+n的值超出其数据类型时，就会导致错误
+        return (m + n) >> 1
+        # 2) 将m和n强制类型转换成无符号整型
+        # 这样虽然节省了除法计算的消耗
+        # 但可能会增加额外的内存分配和数据拷贝
+        # 最终的实际执行效率未必会有所提高
+        return (unsigned(m) + unsigned(n)) >> 1
+        # 3) 最有效的计算方式
+        return m + (n - m) / 2
+        return m + ((n - m) >> 1)
+
     # @problem: compute the absolute value of an integer
     # @premise: n is a 32-bit signed integer
     @staticmethod
