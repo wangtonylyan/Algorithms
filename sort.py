@@ -6,67 +6,40 @@
 # 其中递归偏向于表现算法的核心思想，因而忽略空间复杂度、性能等方面
 # 对于quicksort和mergesort这两种算法，递归实现则是为最常见且简单的方式
 
-def insertion():
-    def iter(lst):
-        # at the beginning of each outer loop, i will be reset to the value next to the former i
-        for i in range(1, len(lst)):
-            t = lst[i]
-            # so in the inner loop, i can be reused
-            i -= 1
-            while i >= 0 and lst[i] > t:
-                lst[i + 1] = lst[i]
-                i -= 1
-            assert (i == -1 or lst[i] <= t)
-            lst[i + 1] = t
-        return lst
-
-    def iter2(lst):
-        # python中的for更接近于迭代器，而非C/C++中那样传统的循环结构
-        # 因此无法给for增加额外的条件判断
-        for i in range(1, len(lst)):
-            t = lst[i]
-            flag = True
-            # 由于需要区分循环的终止是由for条件失败还是break所导致的
-            # 因此需借助于额外的变量（即flag），与其这样还不如使用传统的循环结构while
-            for i in range(i - 1, -1, -1):  # reuse i
-                if lst[i] > t:
-                    lst[i + 1] = lst[i]
-                else:
-                    lst[i + 1] = t
-                    flag = False
-                    break
-            if flag:
-                lst[0] = t
-        return lst
-
-    def recur(lst):
-        def _insert(lst):
-            if len(lst) < 2 or lst[-2] <= lst[-1]:
-                return lst
-            lst[-1], lst[-2] = lst[-2], lst[-1]
-            lst[:-1] = _insert(lst[:-1])
-            return lst
-
-        if len(lst) < 2:
-            return lst
-        lst[:-1] = recur(lst[:-1])  # outer loop
-        return _insert(lst)  # inner loop
-
-    print '==========================================='
-    print 'insertion'
-    print iter(gList[:])
-    print iter2(gList[:])
-    print recur(gList[:])
-    print '==========================================='
+import random
 
 
-def shell():
-    pass
+class Sort(object):
+    def __init__(self):
+        self.funcs = []
+
+    def testcase(self):
+        def test(sort):
+            assert (sort([1]) == [1])
+            assert (sort([1, 2]) == [1, 2])
+            assert (sort([2, 1]) == [1, 2])
+            for i in range(20):
+                num = random.randint(5, 50)
+                lst = [i for i in range(num)]
+                for i in range(num):
+                    random.shuffle(lst)
+                    ret = sort(lst[:])  # pass by reference, so need to copy
+                    lst.sort()
+                    assert (ret == lst)
+            print 'pass:', sort
+
+        map(test, self.funcs)
 
 
-def selection():
-    def iter(lst):
-        for i in range(0, len(lst)):
+class SelectionSort(Sort):
+    def __init__(self):
+        super(SelectionSort, self).__init__()
+        self.funcs.append(self.main_iter_min)
+        self.funcs.append(self.main_iter_max)
+        self.funcs.append(self.main_recur)
+
+    def main_iter_min(self, lst):
+        for i in range(0, len(lst) - 1):
             m = i  # minimum
             for j in range(i + 1, len(lst)):
                 if lst[j] < lst[m]:
@@ -74,49 +47,50 @@ def selection():
             lst[i], lst[m] = lst[m], lst[i]
         return lst
 
-    def iter2(lst):
+    def main_iter_max(self, lst):
         for i in range(len(lst) - 1, 0, -1):
             m = i  # maximum
-            for j in range(i - 1, -1, -1):
+            for j in range(0, i):
                 if lst[j] > lst[m]:
                     m = j
             lst[i], lst[m] = lst[m], lst[i]
         return lst
 
-    def recur(lst):
-        # select and store the minimum at lst[0]
-        def _select(lst):
-            if len(lst) < 2:
-                return lst
-            lst[1:] = _select(lst[1:])
-            if lst[0] <= lst[1]:
-                return lst
-            else:
-                return [lst[1], lst[0]] + lst[2:]
+    def main_recur(self, lst):
+        # inner loop: select the minimum of lst[ind:] and return its index
+        def _select(ind):
+            if ind >= len(lst) - 1:
+                return ind
+            m = _select(ind + 1)
+            return ind if lst[ind] <= lst[m] else m
 
+        # outer loop: select and (tail) recursion
         if len(lst) < 2:
             return lst
-        lst = _select(lst)  # inner loop
-        return [lst[0]] + recur(lst[1:])  # outer loop
-
-    print '==========================================='
-    print 'selection'
-    print iter(gList[:])
-    print iter2(gList[:])
-    print recur(gList[:])
-    print '==========================================='
+        m = _select(0)
+        lst[0], lst[m] = lst[m], lst[0]
+        return [lst[0]] + self.main_recur(lst[1:])
 
 
-def bubble():
-    def iter(lst):
+class BubbleSort(Sort):
+    def __init__(self):
+        super(BubbleSort, self).__init__()
+        self.funcs.append(self.main_iter)
+        self.funcs.append(self.main_recur)
+
+    def main_iter(self, lst):
         for i in range(len(lst) - 1, 0, -1):
+            swap = False
             for j in range(0, i):
                 if lst[j] > lst[j + 1]:
                     lst[j], lst[j + 1] = lst[j + 1], lst[j]
+                    swap = True
+            if not swap:
+                break  # small optimization
         return lst
 
-    def recur(lst):
-        # bubble up and store the maximum at arr[-1]
+    def main_recur(self, lst):
+        # inner loop: bubble up the maximum into lst[-1]
         def _bubble(lst):
             if len(lst) < 2:
                 return lst
@@ -124,16 +98,17 @@ def bubble():
                 lst[0], lst[1] = lst[1], lst[0]
             return [lst[0]] + _bubble(lst[1:])
 
+        # outer loop: bubble and (tail) recursion
         if len(lst) < 2:
             return lst
-        lst = _bubble(lst)  # inner loop
-        return recur(lst[:-1]) + [lst[-1]]  # outer loop
+        lst = _bubble(lst)
+        return self.main_recur(lst[:-1]) + [lst[-1]]
 
-    print '==========================================='
-    print 'bubble'
-    print iter(gList[:])
-    print recur(gList[:])
-    print '==========================================='
+
+if __name__ == '__main__':
+    SelectionSort().testcase()
+    BubbleSort().testcase()
+    print 'done'
 
 
 def quick():
@@ -156,66 +131,6 @@ def quick():
     print '==========================================='
     print 'quick'
     print recur(gList[:])
-    print '==========================================='
-
-
-def merge():
-    # top-down mergesort
-    def recur(lst):
-        def _merge(lst1, lst2):
-            if len(lst1) == 0:
-                return lst2
-            elif len(lst2) == 0:
-                return lst1
-            if lst1[0] <= lst2[0]:
-                return [lst1[0]] + _merge(lst1[1:], lst2)
-            else:
-                return [lst2[0]] + _merge(lst1, lst2[1:])
-
-        if len(lst) < 2:
-            return lst
-        mid = int(len(lst) / 2)
-        return _merge(recur(lst[:mid]), recur(lst[mid:]))
-
-    # bottom-up mergesort
-    def iter(lst):
-        def _merge(lst1, lst2):
-            tlst = lst1 + lst2  # auxliary space
-            i, j = 0, 0
-            while i < len(lst1) and j < len(lst2):
-                if lst1[i] <= lst2[j]:
-                    tlst[i + j] = lst1[i]
-                    i += 1
-                else:
-                    tlst[i + j] = lst2[j]
-                    j += 1
-            if i == len(lst1):
-                tlst[i + j:] = lst2[j:]
-            else:
-                tlst[i + j:] = lst1[i:]
-            return tlst
-
-        step = 1
-        while step < len(lst):
-            i = 0
-            while i < len(lst):
-                if i + step >= len(lst):
-                    # 下次loop时，由于i变为现在的2倍
-                    # 因此这些尾部剩余仍会作为独立的区间！
-                    break
-                elif i + step + step >= len(lst):
-                    lst[i:] = _merge(lst[i:i + step], lst[i + step:])
-                    break
-                else:  # 以上处理边界情况
-                    lst[i:i + step + step] = _merge(lst[i:i + step], lst[i + step:i + step + step])
-                    i += step + step
-            step *= 2
-        return lst
-
-    print '==========================================='
-    print 'merge'
-    print recur(gList[:])
-    print iter(gList[:])
     print '==========================================='
 
 
@@ -251,12 +166,3 @@ def heap():
 
 gList = [6, 5, 7, 4, 8, 3, 9, 2]
 # gList = [8, 7, 6, 5, 4, 4, 3, 3, 2, 2, 1]
-
-if __name__ == '__main__':
-    insertion()
-    selection()
-    bubble()
-    quick()
-    merge()
-    heap()
-    print 'done'
