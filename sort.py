@@ -111,29 +111,6 @@ if __name__ == '__main__':
     print 'done'
 
 
-def quick():
-    def recur(lst):
-        # 始终以lst[0]为分割数
-        def _partition(lst):
-            flag = 0  # 指向小于lst[0]且索引值最大的slot
-            for i in range(1, len(lst)):
-                if lst[i] < lst[0]:
-                    flag += 1
-                    lst[i], lst[flag] = lst[flag], lst[i]
-            lst[0], lst[flag] = lst[flag], lst[0]
-            return flag  # in-place partition, so returns flag only
-
-        if len(lst) < 2:
-            return lst
-        flag = _partition(lst)
-        return recur(lst[:flag]) + [lst[flag]] + recur(lst[flag + 1:])
-
-    print '==========================================='
-    print 'quick'
-    print recur(gList[:])
-    print '==========================================='
-
-
 def heap():
     # 实现中只利用了sink()这一基本操作，且是原地排序
     def iter(lst):

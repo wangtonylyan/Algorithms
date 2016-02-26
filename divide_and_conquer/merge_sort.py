@@ -7,8 +7,6 @@ sys.path.append("..")
 import sort
 
 
-# 合并排序相比于其他排序，无需过多的随机访问
-# 非常适用于链表排序
 class MergeSort(sort.Sort):
     def __init__(self):
         super(MergeSort, self).__init__()
@@ -107,7 +105,7 @@ class CountInversionsInArray():
         return _recur(0, len(lst))
 
     def testcase(self):
-        def func(lst):
+        def test(lst):
             # brute-force algorithm
             count = 0
             for i in range(0, len(lst) - 1):
@@ -125,10 +123,83 @@ class CountInversionsInArray():
             lst = [random.randint(0, 100) for i in range(random.randint(5, 50))]
             random.shuffle(lst)
             cases.append(lst)
-        map(func, cases)
+        map(test, cases)
+        print 'pass:', self.__class__
+
+
+# @problem: sort one linked list
+# 合并排序相比于其他排序，无需过多的随机访问
+# 因此非常适用于链表排序
+class SortLinkedList():
+    class Node():
+        def __init__(self, value, next=None):
+            self.value = value
+            self.next = next
+
+    def _insert(self, lst, value):
+        return self.__class__.Node(value, lst) if lst else self.__class__.Node(value)
+
+    def main(self, lst):
+        def _split(lst):
+            slow = lst  # tortoise
+            fast = lst.next  # hare
+            while fast != None:
+                fast = fast.next
+                if fast:
+                    # update slow pointer here
+                    slow = slow.next
+                    fast = fast.next
+            # so that slow is before the midpoint in the list
+            ret = slow.next
+            # then split the list into two
+            slow.next = None
+            return ret
+
+        def _merge(lst1, lst2):
+            if lst1 == None:
+                return lst2
+            elif lst2 == None:
+                return lst1
+            if lst1.value <= lst2.value:
+                lst1.next = _merge(lst1.next, lst2)
+                return lst1
+            else:
+                lst2.next = _merge(lst1, lst2.next)
+                return lst2
+
+        # recursion and merge
+        if lst == None or lst.next == None:
+            return lst
+        mid = _split(lst)
+        lst = self.main(lst)
+        mid = self.main(mid)
+        return _merge(lst, mid)
+
+    def testcase(self):
+        def test(lst):
+            llst = None
+            for i in lst:
+                llst = self._insert(llst, i)
+            llst = self.main(llst)
+            lst.sort()
+            i = 0
+            while llst and i < len(lst):
+                assert (llst.value == lst[i])
+                llst = llst.next
+                i += 1
+            assert (llst == None and i == len(lst))
+
+        cases = [[1], [1, 2], [2, 1]]
+        for i in range(20):
+            lst = [random.randint(0, 100) for i in range(random.randint(5, 50))]
+            random.shuffle(lst)
+            cases.append(lst)
+        map(test, cases)
+        print 'pass:', self.__class__
 
 
 if __name__ == '__main__':
     MergeSort().testcase()
     CountInversionsInArray().testcase()
+    SortLinkedList().testcase()
     print 'done'

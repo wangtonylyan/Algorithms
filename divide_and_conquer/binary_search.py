@@ -26,6 +26,7 @@ class BinarySearch():
         lst = [1, 2, 3, 4]
         for i in lst:
             assert (self.main(lst, i))
+        print 'pass:', self.__class__
 
 
 # @problem: Given a sorted array of distinct elements,
@@ -55,12 +56,13 @@ class FindMinInRotatedArray():
         return lst[low]
 
     def testcase(self):
-        def func(lst):
+        def test(lst):
             for i in range(len(lst)):
                 temp = lst[i:] + lst[0:i]
                 assert (self.main(temp) == min(temp))
 
-        map(func, [[1], [1, 2], [1, 2, 3], [1, 2, 3, 4]])
+        map(test, [[1], [1, 2], [1, 2, 3], [1, 2, 3, 4]])
+        print 'pass:', self.__class__
 
 
 if __name__ == '__main__':
