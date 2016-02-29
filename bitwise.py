@@ -72,17 +72,19 @@ class NumberProblem():
     def computeMidValue(m, n):
         assert (m <= n)
         # 1) 最简单的计算方式
+        # 缺陷在于m+n的结果有可能超出其数据类型
         return (m + n) / 2
-        # 方式1的不完善改进
-        # 当m+n的值超出其数据类型时，就会导致错误
+        # 2）对于方式1的不完善改进
+        # 继承了方式1的缺陷，且在某些静态语言中，
+        # 由于还区分有无符号，因此还应显式地进行类型转换
         return (m + n) >> 1
-        # 2) 将m和n强制类型转换成无符号整型
-        # 这样虽然节省了除法计算的消耗
+        # 相比于方式1，这样虽然节省了除法计算的消耗
         # 但可能会增加额外的内存分配和数据拷贝
         # 最终的实际执行效率未必会有所提高
         return (unsigned(m) + unsigned(n)) >> 1
         # 3) 最有效的计算方式
         return m + (n - m) / 2
+        # 视数据类型中是否区分有无符号而定
         return m + ((n - m) >> 1)
 
     # @problem: compute the absolute value of an integer
