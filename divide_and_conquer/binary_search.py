@@ -5,7 +5,7 @@ class BinarySearch():
     def __init__(self):
         pass
 
-    # @premise: list has been sorted in strictly increasing order
+    # @premise: list has been sorted in increasing order
     def main(self, lst, val):
         low = 0
         high = len(lst) - 1

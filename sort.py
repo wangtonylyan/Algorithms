@@ -105,65 +105,20 @@ class BubbleSort(Sort):
         return self.main_recur(lst[:-1]) + [lst[-1]]
 
 
+import data_structure.heap as heap
+
+
 class HeapSort(Sort):
     def __init__(self):
         super(HeapSort, self).__init__()
-        self.funcs.append(self.main(self._build_by_sink))
-        self.funcs.append(self.main(self._build_by_float))
+        self.funcs.append(self.main)
 
-    # 堆的两大基本操作以及堆性质的检查函数
-    @staticmethod
-    def _sink(lst, hp, leaf):
-        t = hp << 1 | 1
-        while t < leaf:
-            if t + 1 < leaf and lst[t] < lst[t + 1]:
-                t += 1
-            if lst[hp] >= lst[t]:
-                break
-            lst[hp], lst[t] = lst[t], lst[hp]
-            hp = t
-            t = hp << 1 | 1
+    def main(self, lst):
+        # build heap
+        hp = heap.MaxHeap(lst)
+        # sort heap
+        lst = hp.sort()
         return lst
-
-    @staticmethod
-    def _float(lst, hp, root):
-        t = (hp - 1) >> 1
-        while t >= root:
-            if lst[hp] <= lst[t]:
-                break
-            lst[hp], lst[t] = lst[t], lst[hp]
-            hp = t
-            t = (hp - 1) >> 1
-        return lst
-
-    @staticmethod
-    def _check(lst):
-        for i in range(0, len(lst)):
-            assert (i << 1 | 1 >= len(lst) or lst[i] >= lst[i << 1 | 1])
-            assert ((i + 1) << 1 >= len(lst) or lst[i] >= lst[(i + 1) << 1])
-
-    def _build_by_sink(self, lst):
-        for i in range((len(lst) - 1) >> 1, -1, -1):
-            lst = self._sink(lst, i, len(lst))
-
-    def _build_by_float(self, lst):
-        for i in range(1, len(lst)):
-            lst = self._float(lst, i, 0)
-
-    def main(self, bld):
-        def func(lst):
-            # 1) build heap
-            bld(lst)
-            self._check(lst)
-            # 2) sort and keep heap
-            for i in range(len(lst) - 1, 0, -1):
-                lst[0], lst[i] = lst[i], lst[0]
-                # 由于只能利用sink操作维护堆的性质
-                # 因此推荐使用sink方式建堆
-                lst = self._sink(lst, 0, i)
-            return lst
-
-        return func
 
 
 if __name__ == '__main__':
