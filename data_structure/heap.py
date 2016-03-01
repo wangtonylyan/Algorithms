@@ -84,13 +84,15 @@ class MaxHeap:
     def size(self):
         return len(self.lst)
 
-    def sort(self):
-        lst = self.lst[:]
+    @classmethod
+    def heapsort(cls, lst):
+        # 由于只能利用sink操作维护堆的性质
+        # 因此推荐同样也使用sink方式建堆
+        for i in range((len(lst) - 1) >> 1, -1, -1):
+            lst = cls._sink(lst, i, len(lst))
         for i in range(len(lst) - 1, 0, -1):
             lst[0], lst[i] = lst[i], lst[0]
-            # 由于只能利用sink操作维护堆的性质
-            # 因此推荐在实际实现中也同样使用sink方式建堆
-            lst = self._sink(lst, 0, i)
+            lst = cls._sink(lst, 0, i)
         return lst
 
 
@@ -118,14 +120,12 @@ class SortANearlySortedArray():
             alst = _sink(alst, i, k)
         # sort by heap
         for i in range(0, len(lst)):
-            lst[i] = alst[0]
+            lst[i] = alst[0]  # heap.pop
             if i + k < len(lst):
-                # heap.push
-                alst[0] = lst[i + k]
+                alst[0] = lst[i + k]  # heap.push
                 alst = _sink(alst, 0, k)
             else:
-                # heap.pop
-                alst[0] = alst[len(alst) - 1]
+                alst[0] = alst[len(alst) - 1]  # heap.push
                 alst.pop()
                 alst = _sink(alst, 0, len(alst))
         return lst
@@ -144,8 +144,6 @@ if __name__ == "__main__":
 
         random.shuffle(lst)
         hp = MaxHeap(lst)
-        lst.sort()
-        assert (lst == hp.sort())
         for i in range(num):
             hp.pop()
         assert (hp.size() == 0)
@@ -154,8 +152,6 @@ if __name__ == "__main__":
         for v in lst:
             hp.push(v)
         assert (hp.size() == num)
-        lst.sort()
-        assert (lst == hp.sort())
         for i in range(num):
             hp.pop()
         assert (hp.size() == 0)

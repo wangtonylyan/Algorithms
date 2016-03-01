@@ -2,9 +2,7 @@
 # problem: sorting (into increasing order)
 # solution: insertion sort, shellsort, selection sort, bubble sort,
 #           quicksort, merge sort, heapsort
-# 采用递归和迭代两种形式实现算法
-# 其中递归偏向于表现算法的核心思想，因而忽略空间复杂度、性能等方面
-# 对于quicksort和mergesort这两种算法，递归实现则是为最常见且简单的方式
+# 实际中推荐使用快速排序和合并排序
 
 import random
 
@@ -112,12 +110,18 @@ class HeapSort(Sort):
     def __init__(self):
         super(HeapSort, self).__init__()
         self.funcs.append(self.main)
+        self.funcs.append(self.main_heap)
 
     def main(self, lst):
+        return heap.MaxHeap.heapsort(lst)
+
+    # 堆排序也可以完全通过堆的封装接口来实现
+    def main_heap(self, lst):
         # build heap
         hp = heap.MaxHeap(lst)
-        # sort heap
-        lst = hp.sort()
+        # sort by heap
+        for i in range(len(lst) - 1, -1, -1):
+            lst[i] = hp.pop()
         return lst
 
 
