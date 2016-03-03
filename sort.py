@@ -3,6 +3,8 @@
 # solution: insertion sort, shellsort, selection sort, bubble sort,
 #           quicksort, merge sort, heapsort
 # 实际中推荐使用快速排序和合并排序
+# 快速排序有更多的随机访问，倾向于数组
+# 合并排序有更多的顺序访问，倾向于链表
 
 import random
 
