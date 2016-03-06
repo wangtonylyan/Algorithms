@@ -9,6 +9,7 @@ import random
 # 若以1为树根索引：left=root*2, right=root*2+1, root=child/2
 # 2）最大/最小堆都基于两个核心的基本操作来维护：float()和sink()
 # 因此要在最大/最小堆的基础上实现最小/最大堆只需修改上述两个函数即可
+# 3）虽然最大/小堆都能实现堆排，但最有效率的还是最大堆？
 class MaxHeap:
     def __init__(self, lst=[]):
         assert (isinstance(lst, list))
@@ -47,14 +48,18 @@ class MaxHeap:
     @classmethod
     def _build(cls, lst):
         # 利用heap的两个基本操作可以在数组中原地建堆
-        # 该过程可以借鉴插入排序的思想来理解
-        # _by_sink：将节点i的值插入至其子节点的两棵子堆中
-        # _by_float：将节点i的值插入至其索引之前所有节点所构成的整棵堆中
+        # 由于两个基本操作的实现是快速终止的，即while循环中的break
+        # 这将影响到建堆时的遍历方式：前者效率更高
+        # (a) sink从下至上或float从上至下，一次，相当于插入排序
+        # (b) sink从上至下或float从下至上，多次，相当于冒泡排序
+        # 其实，建堆过程本身就是一种排序
         def _by_sink(lst):
+            # 将节点i的值插入至其子节点的两棵子堆中
             for i in range((len(lst) - 1) >> 1, -1, -1):
                 lst = cls._sink(lst, i, len(lst))
 
         def _by_float(lst):
+            # 将节点i的值插入至其索引之前所有节点所构成的整棵堆中
             for i in range(1, len(lst)):
                 lst = cls._float(lst, i, 0)
 
