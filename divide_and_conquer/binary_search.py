@@ -2,9 +2,6 @@
 
 
 class BinarySearch():
-    def __init__(self):
-        pass
-
     # @premise: list has been sorted in increasing order
     def main(self, lst, val):
         low = 0
@@ -27,6 +24,27 @@ class BinarySearch():
         for i in lst:
             assert (self.main(lst, i))
         print 'pass:', self.__class__
+
+
+# 插补查找是以数据分布的近似均匀为前提，通过比例运算来求出类似二分查找中的中间值
+# 进而分治，所以其本原则与二分查找是相同的
+# On average the interpolation search makes about log(log(n)) comparisons (if the elements are uniformly distributed).
+# In the worst case (for instance where the numerical values of the keys increase exponentially) it can make up to O(n) comparisons.
+class InterpolationSearch(BinarySearch):
+    def main(self, lst, val):
+        low = 0
+        high = len(lst) - 1
+        while low < high and lst[low] <= val <= lst[high]:
+            mid = low + (val - lst[low]) * (high - low) / (lst[high] - lst[low])
+            if lst[mid] < val:
+                low = mid + 1
+            elif lst[mid] > val:
+                high = mid - 1
+            else:
+                return True
+        if low == high and lst[low] == val:
+            return True
+        return True
 
 
 # @problem: Given a sorted array of distinct elements,
@@ -67,5 +85,6 @@ class FindMinInRotatedArray():
 
 if __name__ == '__main__':
     BinarySearch().testcase()
+    InterpolationSearch().testcase()
     FindMinInRotatedArray().testcase()
     print 'done'

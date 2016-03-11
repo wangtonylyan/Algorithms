@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 
-# prime
 def Sieve_of_Eratosthenes(num):
     lst = [1 for i in range(num + 1)]
     for i in range(2, len(lst) / 2 + 1):

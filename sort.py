@@ -127,8 +127,56 @@ class HeapSort(Sort):
         return lst
 
 
+# @problem: convert an unsorted array into Zig-Zag fashion in O(n) time
+class ConvertZigZagArray():
+    # 只需确保偶数索引项(驼峰)大于左右两边的奇数索引项
+    def main_1(self, lst):
+        for i in range(0, len(lst), 2):
+            if i > 0 and lst[i] < lst[i - 1]:
+                lst[i], lst[i - 1] = lst[i - 1], lst[i]
+            if i < len(lst) - 1 and lst[i] < lst[i + 1]:
+                lst[i], lst[i + 1] = lst[i + 1], lst[i]
+
+    # 基于冒泡思想
+    def main_2(self, lst):
+        flag = True  # > if True else <
+        for i in range(len(lst) - 1):
+            if flag:
+                if lst[i] < lst[i + 1]:
+                    lst[i], lst[i + 1] = lst[i + 1], lst[i]
+            else:
+                if lst[i] > lst[i + 1]:
+                    lst[i], lst[i + 1] = lst[i + 1], lst[i]
+            flag = not flag
+
+
+# @problem: Find the closest pair from two sorted arrays in O(n) time
+class FindClosestPair():
+    def main(self, lst1, lst2, sum):
+        i, j = 0, len(lst2) - 1
+        m = abs(lst1[i] + lst2[j] - sum)
+        while i < len(lst1) and j >= 0:
+            t = abs(lst1[i] + lst2[j] - sum)
+            if t < m:
+                m = t
+            if lst1[i] + lst2[j] > sum:
+                j -= 1
+            elif lst1[i] + lst2[j] < sum:
+                i += 1
+            else:
+                break
+
+        return m
+
+    def testcase(self):
+        assert (self.main([1, 4, 5, 7], [10, 20, 30, 40], 32) == 1)
+        assert (self.main([1, 4, 5, 7], [10, 20, 30, 40], 50) == 3)
+        print 'pass:', self.__class__
+
+
 if __name__ == '__main__':
     SelectionSort().testcase()
     BubbleSort().testcase()
     HeapSort().testcase()
+    FindClosestPair().testcase()
     print 'done'
