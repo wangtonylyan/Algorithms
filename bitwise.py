@@ -66,7 +66,7 @@ class SettedBitProblem():
 
 
 class NumberProblem():
-    # @problem: compute the mid of two integers
+    # @problem: compute the (ceiling or floor) middle of two integers
     # 此问题常见于二分的分治算法中
     @staticmethod
     def computeMidValue(m, n):
@@ -82,10 +82,15 @@ class NumberProblem():
         # 但可能会增加额外的内存分配和数据拷贝
         # 最终的实际执行效率未必会有所提高
         return (unsigned(m) + unsigned(n)) >> 1
-        # 3) 最有效的计算方式
-        return m + (n - m) / 2
+        # 3) 较好的计算方式
+        return m + (n - m) / 2  # floor
+        return n - (n - m) / 2  # ceiling
         # 视数据类型中是否区分有无符号而定
         return m + ((n - m) >> 1)
+        return n - ((n - m) >> 1)
+        # 4) 更好的计算方式
+        # http://locklessinc.com/articles/binary_search/
+        return (m & n) + (m ^ n) / 2
 
     # @problem: compute the absolute value of an integer
     # @premise: n is a 32-bit signed integer
