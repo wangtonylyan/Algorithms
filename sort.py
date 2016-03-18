@@ -127,6 +127,30 @@ class HeapSort(Sort):
         return lst
 
 
+# O(n+k), k is the range of input
+# Counting sort is efficient if the range of input data is not
+# significantly greater than the number of objects to be sorted.
+# Consider the situation where the input sequence is 10, 5, 10K, 5K.
+class CountingSort(Sort):
+    def __init__(self):
+        super(CountingSort, self).__init__()
+        self.funcs.append(self.main)
+
+    def main(self, lst):
+        low, high = min(lst), max(lst)  # calculate the range
+        count = [0 for i in range(max(len(lst), high - low + 1) + 1)]
+        for i in range(len(lst)):
+            count[lst[i] - low + 1] += 1
+        for i in range(len(count) - 1):
+            count[i + 1] += count[i]
+        cpy = lst[:]
+        for i in range(len(cpy)):
+            lst[count[cpy[i] - low]] = cpy[i]
+            count[cpy[i] - low] += 1
+
+        return lst
+
+
 # @problem: convert an unsorted array into Zig-Zag fashion in O(n) time
 class ConvertZigZagArray():
     # 只需确保偶数索引项(驼峰)大于左右两边的奇数索引项
@@ -178,5 +202,6 @@ if __name__ == '__main__':
     SelectionSort().testcase()
     BubbleSort().testcase()
     HeapSort().testcase()
+    CountingSort().testcase()
     FindClosestPair().testcase()
     print 'done'
