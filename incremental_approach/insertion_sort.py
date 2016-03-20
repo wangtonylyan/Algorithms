@@ -42,6 +42,28 @@ class InsertionSort(sort.Sort):
         return _insert(lst)
 
 
+# a generalization of insertion sort
+# time complexity is heavily dependent on the gap sequence it uses
+class ShellSort(sort.Sort):
+    def __init__(self):
+        super(ShellSort, self).__init__()
+        self.funcs.append(self.main)
+
+    def main(self, lst):
+        # gap=1 reduces this algorithm to the basic insertion sort
+        gaps = [701, 301, 132, 57, 23, 10, 4, 1]  # Marcin Ciura's gap sequence
+        for gap in gaps:
+            # use insertion sort
+            for i in range(gap, len(lst)):
+                t = lst[i]
+                j = i - gap
+                while j >= 0 and lst[j] > t:
+                    lst[j + gap] = lst[j]
+                    j -= gap
+                lst[j + gap] = t
+        return lst
+
+
 # @problem:
 # Given an unsorted array arr[0..n-1] of size n,
 # find the minimum length subarray arr[s..e]
@@ -107,5 +129,6 @@ class FindMinLengthUnsortedSubarray():
 
 if __name__ == '__main__':
     InsertionSort().testcase()
+    ShellSort().testcase()
     FindMinLengthUnsortedSubarray().testcase()
     print 'done'

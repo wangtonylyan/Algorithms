@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 # problem: sorting (into increasing order)
-# solution: insertion sort, shellsort, selection sort, bubble sort,
-#           quicksort, merge sort, heapsort
-# 实际中推荐使用快速排序和合并排序
-# 快速排序有更多的随机访问，倾向于数组
-# 合并排序有更多的顺序访问，倾向于链表
+# solution:
+# (a) comparison based
+# insertion, shell, selection, bubble, quick, merge, heap
+# 实际中推荐使用快速排序(随机访问，倾向数组)和合并排序(顺序访问，倾向链表)
+# (b) non-comparison based
+# counting, radix, bucket
+# 思想就是建立被排序的数与其排序后的索引值之间的映射
 
 import random
 
@@ -138,17 +140,60 @@ class CountingSort(Sort):
 
     def main(self, lst):
         low, high = min(lst), max(lst)  # calculate the range
-        count = [0 for i in range(max(len(lst), high - low + 1) + 1)]
+        cnt = [0] * (high - low + 2)  # index 0 is reserved
         for i in range(len(lst)):
-            count[lst[i] - low + 1] += 1
-        for i in range(len(count) - 1):
-            count[i + 1] += count[i]
+            cnt[lst[i] - low + 1] += 1
+        for i in range(len(cnt) - 1):
+            cnt[i + 1] += cnt[i]
         cpy = lst[:]
         for i in range(len(cpy)):
-            lst[count[cpy[i] - low]] = cpy[i]
-            count[cpy[i] - low] += 1
+            lst[cnt[cpy[i] - low]] = cpy[i]
+            cnt[cpy[i] - low] += 1
 
         return lst
+
+
+# Radix sort弥补了counting sort不适用于大范围序列的缺陷
+# 但也对数字表达所采用的进制数提出的更高要求
+class RadixSort(Sort):
+    def __init__(self):
+        super(RadixSort, self).__init__()
+        self.funcs.append(self.main)
+
+    def main(self, lst):
+        def count(ind):  # stable
+            ind = pow(10, ind)  # 10-based
+            cnt = [0] * (11)  # index 0 is reserved
+            for i in lst:
+                cnt[i / ind % 10 + 1] += 1
+            for i in range(len(cnt) - 1):
+                cnt[i + 1] += cnt[i]
+            cpy = lst[:]
+            for i in cpy:
+                lst[cnt[i / ind % 10]] = i
+                cnt[i / ind % 10] += 1
+
+        m, i = max(lst), 0
+        while m % 10 != 0 or m / 10 > 0:
+            count(i)
+            m /= 10
+            i += 1
+        return lst
+
+
+# input should be uniformly distributed across the range
+class BucketSort(Sort):
+    def __init__(self):
+        super(BucketSort, self).__init__()
+        self.funcs.append(self.main)
+
+    def main(self, lst):
+        hash = lambda x: x / 10  # for simplicity
+        bucket = [[] for i in range(hash(max(lst)) + 1)]
+        for i in lst:
+            bucket[hash(i)].append(i)
+        map(list.sort, bucket)
+        return reduce(lambda x, y: x + y, bucket, [])
 
 
 # @problem: convert an unsorted array into Zig-Zag fashion in O(n) time
@@ -203,5 +248,7 @@ if __name__ == '__main__':
     BubbleSort().testcase()
     HeapSort().testcase()
     CountingSort().testcase()
+    RadixSort().testcase()
+    BucketSort().testcase()
     FindClosestPair().testcase()
     print 'done'
