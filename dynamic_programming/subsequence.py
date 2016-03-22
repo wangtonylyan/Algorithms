@@ -68,7 +68,7 @@ class LongestCommonSubsequence():
         def recur(i, j):
             if i == 0 or j == 0:
                 return 0
-            if lst1[i - 1] == lst2[j - 1]:
+            if lst1[i - 1] == lst2[j - 1]:  # two sequences start from index i-1 and j-1
                 return recur(i - 1, j - 1) + 1
             else:
                 return max(recur(i - 1, j), recur(i, j - 1))
@@ -78,6 +78,7 @@ class LongestCommonSubsequence():
     def main_2(self, lst1, lst2):
         # tab[i][j]: the longest length of all common subsequences of lst1[:i] and lst2[:j]
         # tab[i][j] ~ tab[i-1][j-1] or tab[i-1][j] or tab[i][j-1]
+        # tab[i][j] = max(tab[i-1][j-1]+1, tab[i-1][j], tab[i][j-1])
         tab = [[0 for row in range(len(lst2) + 1)] for col in range(len(lst1) + 1)]
         for i in range(len(lst1) + 1):  # index of lst1
             for j in range(len(lst2) + 1):  # index of lst2
@@ -104,12 +105,11 @@ class LongestCommonSubsequence():
             assert (self.main_1(lst1, lst2) == self.main_2(lst1, lst2))
 
         llst = []
-        for i in range(10):
-            lst = [i for i in range(random.randint(5, 15))]
-            random.shuffle(lst)
-            lst1 = lst[:]
-            random.shuffle(lst)
-            lst2 = lst[:]
+        for i in range(15):
+            lst1 = [i for i in range(random.randint(5, 15))]
+            random.shuffle(lst1)
+            lst2 = [i for i in range(random.randint(5, 15))]
+            random.shuffle(lst2)
             llst.append((lst1, lst2))
         map(test, llst)
         print 'pass:', self.__class__
