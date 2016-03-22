@@ -19,7 +19,7 @@ class LongestIncreasingSubsequence():
         # tab[i][j]: the minimum end number of all i-length subsequences in a j-length sequence
         # tab[i][j] ~ tab[i-1][j-1] or tab[i][j-1]
         # tab[i][j] = lst[j] or tab[i][j-1] or None
-        tab = [[None for col in range(len(lst))] for row in range(len(lst))]
+        tab = [[None for row in range(len(lst))] for col in range(len(lst))]
         for i in range(len(lst)):  # i: length of increasing subsequence
             for j in range(len(lst)):  # j: length of sequence
                 if i > j:
