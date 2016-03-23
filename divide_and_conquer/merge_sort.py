@@ -16,7 +16,7 @@ class MergeSort(sort.Sort):
     # bottom-up strategy
     # iterative sort with iterative merge
     def main_iter(self, lst):
-        def _merge(low, mid, high):
+        def _merge(low, mid, high):  # [low,high)
             # auxliary space
             alst1 = lst[low:mid]
             alst2 = lst[mid:high]
@@ -37,7 +37,7 @@ class MergeSort(sort.Sort):
         step = 1
         while step < len(lst):
             i = 0
-            while i + step + step < len(lst):
+            while i + step + step <= len(lst):
                 _merge(i, i + step, i + step + step)
                 i += step + step
             # 以下处理边界情况
