@@ -80,11 +80,9 @@ class LongestCommonSubsequence():
         # tab[i][j] ~ tab[i-1][j-1] or tab[i-1][j] or tab[i][j-1]
         # tab[i][j] = max(tab[i-1][j-1]+1, tab[i-1][j], tab[i][j-1])
         tab = [[0 for row in range(len(lst2) + 1)] for col in range(len(lst1) + 1)]
-        for i in range(len(lst1) + 1):  # index of lst1
-            for j in range(len(lst2) + 1):  # index of lst2
-                if i == 0 or j == 0:
-                    tab[i][j] = 0
-                elif tab[i - 1][j - 1] < tab[i - 1][j] or tab[i - 1][j - 1] < tab[i][j - 1]:
+        for i in range(1, len(lst1) + 1):  # index of lst1
+            for j in range(1, len(lst2) + 1):  # index of lst2
+                if tab[i - 1][j - 1] < tab[i - 1][j] or tab[i - 1][j - 1] < tab[i][j - 1]:
                     # either lst1[i] or lst2[j] has become a part of the commen subsequence
                     assert (tab[i - 1][j - 1] + 1 == tab[i - 1][j] or tab[i - 1][j - 1] + 1 == tab[i][j - 1])
                     tab[i][j] = max(tab[i - 1][j], tab[i][j - 1])
