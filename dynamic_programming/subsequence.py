@@ -62,6 +62,17 @@ class LongestIncreasingSubsequence():
         print 'pass:', self.__class__
 
 
+# @problem: maximum sum of all increasing subsequences
+class MaximumSumIncreasingSubsequence():
+    def main(self, lst):
+        tab = [0] * len(lst)
+        for i in range(len(lst)):
+            for j in range(i):
+                if lst[j] < lst[i] and tab[j] + lst[i] > tab[i]:
+                    tab[i] = tab[j] + lst[i]
+        return max(tab)
+
+
 # @problem: longest common subsequence
 class LongestCommonSubsequence():
     # brute force algorithm, also the recursive version of main_2()
@@ -114,11 +125,20 @@ class LongestCommonSubsequence():
         print 'pass:', self.__class__
 
 
-# @problem: Partition problem is to determine
-# whether a given set can be partitioned into two subsets
-# such that the sum of elements in both subsets is same.
+# @problem: partition problem (number partitioning)
+# determine whether a given multiset S of positive integers
+# can be partitioned into two subsets S1 and S2 such that
+# the sum of the numbers in S1 equals the sum of the numbers in S2
 # 可以转换成子序列问题，即是否存在一个子序列其总和等于整个序列总和的一半
 # 其特殊性在于子问题的解不再是子问题规模的解，只有当前规模问题的解才是有意义的
+# 此问题被称为是最简单的NP-hard问题，与之关联的还有以下几种问题
+# @problem: subset sum problem
+# Given a set of positive integers and a value sum,
+# determine if there is a subset with sum equal to given sum.
+# @problem: optimization problem of partition
+# partition a multiset S into two subsets S1 and S2
+# such that the difference between the sum of S1 and S2 is minimized
+# @problem: k-partition problem，即是否存在k个子集，其总和都为sum/k
 class Partition():
     def main_1(self, lst):
         def recur(ind, sum):
