@@ -75,7 +75,6 @@ class MaximumSumIncreasingSubsequence():
 
 # @problem: longest common subsequence
 class LongestCommonSubsequence():
-    # brute force algorithm, also the recursive version of main_2()
     def main_1(self, lst1, lst2):
         def recur(i, j):
             if i == 0 or j == 0:
@@ -125,7 +124,7 @@ class LongestCommonSubsequence():
         print 'pass:', self.__class__
 
 
-# @problem: partition problem (number partitioning)
+# @problem: (balanced) partition problem
 # determine whether a given multiset S of positive integers
 # can be partitioned into two subsets S1 and S2 such that
 # the sum of the numbers in S1 equals the sum of the numbers in S2
