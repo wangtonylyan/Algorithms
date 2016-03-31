@@ -1,9 +1,17 @@
 # Algorithmic Paradigm
-#
-# 1) divide and conquer
+
+#【concurrency】
+# philosopher
+
+#【parallelism】
+
+# 【divide and conquer】
 # binary search
+# merge sort
+# quick sort
 
-# 2) dynamic programming
+# 【dynamic programming】
+# knapsack
 
-# 3) greedy
+# 【greedy】
 
