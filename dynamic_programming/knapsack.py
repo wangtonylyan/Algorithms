@@ -21,13 +21,14 @@ class Knapsack(object):
         print 'pass:', self.__class__
 
 
-class Knapsack01(Knapsack):
+class ZeroOneKnapsack(Knapsack):
     def __init__(self):
-        super(Knapsack01, self).__init__()
+        super(ZeroOneKnapsack, self).__init__()
         self.funcs.append(self.main_1)
         self.funcs.append(self.main_2)
+        self.funcs.append(self.main_3)
 
-    # recursive version of main_2()
+    # depth-first search, also recursive version of main_2()
     def main_1(self, weight, items):
         def _recur(wgt, ind):
             if wgt == 0 or ind < 0:
@@ -53,12 +54,21 @@ class Knapsack01(Knapsack):
                                 tab[i][j - 1])
         return tab[-1][-1]
 
+    # space optimization for main_2()
+    def main_3(self, weight, items):
+        tab = [0 for row in range(weight + 1)]
+        for i in range(len(items)):
+            for j in range(weight, items[i][0] - 1, -1):
+                tab[j] = max(tab[j - items[i][0]] + items[i][1], tab[j])
+        return tab[-1]
 
-class KnapsackComplete(Knapsack):
+
+class CompleteKnapsack(Knapsack):
     def __init__(self):
-        super(KnapsackComplete, self).__init__()
+        super(CompleteKnapsack, self).__init__()
         self.funcs.append(self.main_1)
         self.funcs.append(self.main_2)
+        self.funcs.append(self.main_3)
 
     def main_1(self, weight, items):
         def _recur(wgt, ind):
@@ -84,8 +94,21 @@ class KnapsackComplete(Knapsack):
                                 tab[i][j - 1])
         return tab[-1][-1]
 
+    def main_3(self, weight, items):
+        tab = [0 for row in range(weight + 1)]
+        for i in range(len(items)):
+            for j in range(1, weight + 1):
+                tab[j] = max(tab[j - items[i][0]] + items[i][1] if items[i][0] <= j else 0,
+                             tab[j])
+        return tab[-1]
+
+
+class MultipleKnapsack(Knapsack):
+    def __init__(self):
+        super(MultipleKnapsack, self).__init__()
+
 
 if __name__ == '__main__':
-    Knapsack01().testcase()
-    KnapsackComplete().testcase()
+    ZeroOneKnapsack().testcase()
+    CompleteKnapsack().testcase()
     print 'done'
