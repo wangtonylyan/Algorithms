@@ -174,7 +174,7 @@ class RadixSort(Sort):
                 cnt[i / ind % 10] += 1
 
         m, i = max(lst), 0
-        while m % 10 != 0 or m / 10 > 0:
+        while m > 0:
             count(i)
             m /= 10
             i += 1

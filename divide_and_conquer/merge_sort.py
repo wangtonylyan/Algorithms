@@ -28,11 +28,12 @@ class MergeSort(sort.Sort):
                 else:
                     lst[low + i + j] = alst2[j]
                     j += 1
-            if i == len(alst1):
-                lst[low + i + j:high] = alst2[j:]
-            else:
+            if i < len(alst1):
                 assert (j == len(alst2))
                 lst[low + i + j:high] = alst1[i:]
+            else:
+                assert (i == len(alst1) and j < len(alst2))
+                lst[low + i + j:high] = alst2[j:]
 
         step = 1
         while step < len(lst):
