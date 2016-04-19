@@ -72,6 +72,8 @@ class LSDVariable(StringSort):
         for w in range(width - 1, -1, -1):
             cnt = [0] * self.alphabet
             for i in lst:
+                # 较短字符串通常都是根据实际情况
+                # 利用空闲的cnt[0]或cnt[-1]来统计
                 if w >= len(i):
                     cnt[0 + 1] += 1
                 else:
@@ -98,7 +100,7 @@ class MSD(StringSort):
         super(MSD, self).__init__()
 
     def main(self, lst):
-        def recur(ind, low, high):
+        def recur(low, high, ind):
             if high - low < 2 or ind >= max(map(lambda x: len(x), lst[low:high])):
                 return
             cnt = [0] * self.alphabet
@@ -112,18 +114,16 @@ class MSD(StringSort):
                 cnt[ord(i[ind]) if ind < len(i) else 0] += 1
             lst[low:high] = aux
 
-            flag = low
-            for i in range(low + 1, high):
-                if lst[i][ind] != lst[flag][ind]:
-                    recur(ind + 1, flag, i)
-                    flag = i
-            recur(ind + 1, flag, high)
+            recur(low, cnt[0], ind + 1)
+            for i in range(len(cnt) - 1):
+                recur(low + cnt[i], low + cnt[i + 1], ind + 1)
+            assert (cnt[-1] == high - low)
 
-        recur(0, 0, len(lst))
+        recur(0, len(lst), 0)
         return lst
 
     def testcase(self):
-        super(MSD, self).testcase(0)
+        super(MSD, self).testcase(1)
 
 
 if __name__ == '__main__':
