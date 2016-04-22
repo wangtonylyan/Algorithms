@@ -188,6 +188,8 @@ class BucketSort(Sort):
         self.funcs.append(self.main)
 
     def main(self, lst):
+        # 哈希算法本身还需要维护不同bucket中数据之间的相对顺序
+        # 例如bucket[0]中的数据都必须小于bucket[1]中的，以此类推
         hash = lambda x: x / 10  # for simplicity
         bucket = [[] for i in range(hash(max(lst)) + 1)]
         for i in lst:
