@@ -104,6 +104,8 @@ class MSD(StringSort):
             if high - low < 2 or ind >= max(map(lambda x: len(x), lst[low:high])):
                 return
             cnt = [0] * self.alphabet
+            # 由于只涵盖了[1,255]，因此cnt[1]可以用来统计长度不大于ind的字符串个数
+            # 否则所有ASCII字符的索引值偏移量都将变为2
             for i in lst[low:high]:
                 cnt[ord(i[ind]) + 1 if ind < len(i) else 0 + 1] += 1
             for i in range(len(cnt) - 1):
@@ -114,7 +116,7 @@ class MSD(StringSort):
                 cnt[ord(i[ind]) if ind < len(i) else 0] += 1
             lst[low:high] = aux
 
-            recur(low, cnt[0], ind + 1)
+            assert (max(map(lambda x: len(x), lst[low:low + cnt[0]])) <= ind if cnt[0] > 0 else True)
             for i in range(len(cnt) - 1):
                 recur(low + cnt[i], low + cnt[i + 1], ind + 1)
             assert (cnt[-1] == high - low)
