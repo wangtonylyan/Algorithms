@@ -10,46 +10,68 @@ import sort
 class MergeSort(sort.Sort):
     def __init__(self):
         super(MergeSort, self).__init__()
-        self.funcs.append(self.main_iter)
-        self.funcs.append(self.main_recur)
+        self.funcs.append(self.main_1)
+        self.funcs.append(self.main_2)
+        self.funcs.append(self.main_3)
 
-    # bottom-up strategy
-    # iterative sort with iterative merge
-    def main_iter(self, lst):
-        def _merge(low, mid, high):  # [low,high)
-            # auxliary space
-            alst1 = lst[low:mid]
-            alst2 = lst[mid:high]
-            i, j = 0, 0
-            while i < len(alst1) and j < len(alst2):
-                if alst1[i] <= alst2[j]:
-                    lst[low + i + j] = alst1[i]
-                    i += 1
-                else:
-                    lst[low + i + j] = alst2[j]
-                    j += 1
-            if i < len(alst1):
-                assert (j == len(alst2))
-                lst[low + i + j:high] = alst1[i:]
+    @staticmethod
+    def _merge(lst, low, mid, high):  # [low,high)
+        # auxliary space
+        t1 = lst[low:mid]
+        t2 = lst[mid:high]
+        i, j = 0, 0
+        while i < len(t1) and j < len(t2):
+            if t1[i] <= t2[j]:
+                lst[low + i + j] = t1[i]
+                i += 1
             else:
-                assert (i == len(alst1) and j < len(alst2))
-                lst[low + i + j:high] = alst2[j:]
+                lst[low + i + j] = t2[j]
+                j += 1
+        if i < len(t1):
+            assert (j == len(t2))
+            lst[low + i + j:high] = t1[i:]
+        else:
+            assert (i == len(t1) and j < len(t2))
+            lst[low + i + j:high] = t2[j:]
 
+    # bottom-up, iterative
+    def main_1(self, lst):
         step = 1
         while step < len(lst):
             i = 0
             while i + step + step <= len(lst):
-                _merge(i, i + step, i + step + step)
+                self._merge(lst, i, i + step, i + step + step)
                 i += step + step
             # 以下处理边界情况
             if i + step < len(lst):
-                _merge(i, i + step, len(lst))
+                self._merge(lst, i, i + step, len(lst))
             step *= 2
         return lst
 
-    # top-down strategy
-    # recursive sort with recursive merge
-    def main_recur(self, lst):
+    # top-down, iterative
+    def main_2(self, lst):
+        stk = [0, len(lst)]
+        low, high = 0, len(stk)
+        while low < high:
+            for i in range(low, high, 2):
+                if stk[i + 1] - stk[i] < 2:
+                    continue
+                mid = stk[i] + (stk[i + 1] - stk[i]) / 2
+                if mid - stk[i] > 1:
+                    stk.append(stk[i])
+                    stk.append(mid)
+                if stk[i + 1] - mid > 1:
+                    stk.append(mid)
+                    stk.append(stk[i + 1])
+            low = high
+            high = len(stk)
+        for i in range(len(stk) - 1, -1, -2):
+            mid = stk[i - 1] + (stk[i] - stk[i - 1]) / 2
+            self._merge(lst, stk[i - 1], mid, stk[i])
+        return lst
+
+    # top-down, recursive
+    def main_3(self, lst):
         def _merge(lst1, lst2):
             if len(lst1) == 0:
                 return lst2
@@ -64,7 +86,7 @@ class MergeSort(sort.Sort):
         if len(lst) < 2:
             return lst
         mid = len(lst) >> 1
-        return _merge(self.main_recur(lst[:mid]), self.main_recur(lst[mid:]))
+        return _merge(self.main_3(lst[:mid]), self.main_3(lst[mid:]))
 
 
 # @problem:
