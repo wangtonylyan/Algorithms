@@ -44,7 +44,7 @@ class LSD(StringSort):
         super(LSD, self).__init__()
 
     def main(self, lst):
-        width = max(map(lambda x: len(x), lst))
+        width = max(map(len, lst))
         for w in range(width - 1, -1, -1):
             cnt = [0] * self.alphabet
             for i in lst:
@@ -76,7 +76,7 @@ class MSD(StringSort):
 
     def main(self, lst):
         def recur(low, high, wid):
-            if high - low < 2 or wid >= max(map(lambda x: len(x), lst[low:high])):
+            if high - low < 2 or wid >= max(map(len, lst[low:high])):
                 return
             cnt = [0] * self.alphabet
             for i in lst[low:high]:
@@ -91,7 +91,7 @@ class MSD(StringSort):
                 cnt[ord(i[wid]) if wid < len(i) else 0] += 1
             lst[low:high] = aux
 
-            assert (max(map(lambda x: len(x), lst[low:low + cnt[0]])) <= wid if cnt[0] > 0 else True)
+            assert (max(map(len, lst[low:low + cnt[0]])) <= wid if cnt[0] > 0 else True)
             for i in range(len(cnt) - 1):
                 recur(low + cnt[i], low + cnt[i + 1], wid + 1)
             assert (cnt[-1] == high - low)
