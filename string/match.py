@@ -3,19 +3,37 @@
 # solution: brute force, Rabin-Karp, KMP
 # 返回值是所有匹配子字符串的偏移量
 
-def check_param(func):
-    def f(self, s, p):
-        assert (s and isinstance(s, str))
-        assert (p and isinstance(p, str))
-        assert (len(s) >= len(p))
-        return func(self, s, p)
-
-    return f
+import random
+import re
 
 
-class BruteForce():
-    @check_param
-    def match(self, str, pat):
+class StringMatch(object):
+    def __init__(self):
+        self.funcs = []
+
+    def testcase(self):
+        def test(func):
+            assert (s.find(p) == func(s, p)[0])
+
+        for i in range(100):
+            s = ''
+            for j in range(500):
+                s += chr(random.randint(ord('a'), ord('z')))
+            patlen = random.randint(1, len(s))
+            start = random.randint(0, len(s) - patlen)
+            assert (start + patlen <= len(s))
+            p = s[start:start + patlen]
+            assert (len(s) >= len(p) and s.find(p) != -1)
+            map(test, self.funcs)
+        print 'pass:', self.__class__
+
+
+class BruteForce(StringMatch):
+    def __init__(self):
+        super(BruteForce, self).__init__()
+        self.funcs.append(self.main)
+
+    def main(self, str, pat):
         ret = []
         # search
         for i in range(0, len(str) - len(pat) + 1):
@@ -39,8 +57,10 @@ class BruteForce():
 # (b) 对于每个子字符串的哈希值的计算，应避免遍历整个子字符串
 # 通过前后两个相邻子字符串之间哈希值的递推关系式
 # hash(s[i+1:i+1+m]) = (hash(s[i:i+m]) - s[i]*d^(m-1))*d + s[i+m]
-class RabinKarp():
+class RabinKarp(StringMatch):
     def __init__(self):
+        super(RabinKarp, self).__init__()
+        self.funcs.append(self.main)
         self.alphabet = 128  # 7-bit ASCII
         self.prime = 6999997
 
@@ -61,8 +81,7 @@ class RabinKarp():
             ret = (self.alphabet * (ret - ord(str[i - 1]) * factor) + ord(str[i + strLen - 1])) % self.prime
             yield ret
 
-    @check_param
-    def match(self, str, pat):
+    def main(self, str, pat):
         ret = []
         # step1) preprocess
         pHash = self.hash(pat, len(pat)).next()
@@ -75,20 +94,61 @@ class RabinKarp():
         return ret
 
 
-class Automata():
+class Automata(StringMatch):
     def __init__(self):
-        pass
+        super(Automata, self).__init__()
+        self.funcs.append(self.main)
 
-    @check_param
-    def match(self, str, pat):
-        pass
+    def main(self, str, pat):
+        return [str.find(pat)]
+
+
+class PatternWithWildcard():
+    def main(self, str, pat):
+        for i in range(len(str)):
+            j = 0
+            stk = []
+            while True:
+                if j >= len(pat) or (j == len(pat) - 1 and pat[j] == '*'):
+                    return True
+                elif i >= len(str):  # backtracking
+                    if len(stk) > 0:
+                        i, j = stk[-1]
+                        i += 1
+                        if i >= len(str):
+                            stk.pop()
+                        else:
+                            stk[-1] = (i, j)
+                    else:
+                        break
+                elif pat[j] == '*':
+                    j += 1
+                    stk.append((i, j))
+                elif str[i] == pat[j]:
+                    i += 1
+                    j += 1
+                else:
+                    i = len(str)
+
+        return False
+
+    def testcase(self):
+        def test(case):
+            if re.search(case[1], case[0]):
+                assert (self.main(case[0], case[1]) == True)
+            else:
+                assert (self.main(case[0], case[1]) == False)
+
+        cases = [('cabccbbcbacab', 'ab*ba*c'),
+                 ('abcabcabcde', 'abcd'),
+                 ]
+        map(test, cases)
+        print 'pass:', self.__class__
 
 
 if __name__ == '__main__':
-    string = 'ababcabc'
-    pattern = 'abc'
-    bf = BruteForce()
-    ret = bf.match(string, pattern)
-    print ret
-    rk = RabinKarp()
-    assert (ret == rk.match(string, pattern))
+    BruteForce().testcase()
+    RabinKarp().testcase()
+    Automata().testcase()
+    PatternWithWildcard().testcase()
+    print 'done'

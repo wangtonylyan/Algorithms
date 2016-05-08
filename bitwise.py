@@ -19,10 +19,14 @@ class SettedBitProblem():
     # @premise: n is an 8-bit unsigned integer
     @staticmethod
     def countSettedBitsNumber(n):
+        assert (n <= int('11111111', 2))
         # python中&、+、>>等操作符的优先级不同于C，要加括号，不然出错
-        n = (n & 85) + ((n >> 1) & 85)  # 85=01010101
-        n = (n & 51) + ((n >> 2) & 51)  # 51=00110011
-        n = (n & 15) + ((n >> 4) & 15)  # 15=00001111
+        mask = int('01010101', 2)
+        n = (n & mask) + ((n >> 1) & mask)
+        mask = int('00110011', 2)
+        n = (n & mask) + ((n >> 2) & mask)
+        mask = int('00001111', 2)
+        n = (n & mask) + ((n >> 4) & mask)
         return n
 
     # @problem: get the rightmost bit which is set
