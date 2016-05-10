@@ -50,24 +50,21 @@ class MergeSort(sort.Sort):
 
     # top-down, iterative
     def main_2(self, lst):
-        stk = [0, len(lst)]
-        low, high = 0, len(stk)
-        while low < high:
-            for i in range(low, high, 2):
-                if stk[i + 1] - stk[i] < 2:
-                    continue
-                mid = stk[i] + (stk[i + 1] - stk[i]) / 2
-                if mid - stk[i] > 1:
-                    stk.append(stk[i])
-                    stk.append(mid)
-                if stk[i + 1] - mid > 1:
-                    stk.append(mid)
-                    stk.append(stk[i + 1])
-            low = high
-            high = len(stk)
-        for i in range(len(stk) - 1, -1, -2):
-            mid = stk[i - 1] + (stk[i] - stk[i - 1]) / 2
-            self._merge(lst, stk[i - 1], mid, stk[i])
+        stk = [(0, len(lst))]
+        top = 0
+        while top < len(stk):
+            low, high = stk[top]
+            top += 1
+            if high - low < 2:
+                continue
+            mid = low + (high - low) / 2
+            stk.append((low, mid))
+            stk.append((mid, high))
+
+        assert (len(stk) % 2 == 1)
+        for i in range(len(stk) - 1, 0, -2):
+            assert (stk[i - 1][1] == stk[i][0])
+            self._merge(lst, stk[i - 1][0], stk[i - 1][1], stk[i][1])
         return lst
 
     # top-down, recursive
@@ -99,21 +96,21 @@ class CountInversionsInArray():
         # count inversions during merge
         def _merge(low, mid, high):
             count = 0
-            alst1 = lst[low:mid]
-            alst2 = lst[mid:high]
+            t1 = lst[low:mid]
+            t2 = lst[mid:high]
             i, j = 0, 0
-            while i < len(alst1) and j < len(alst2):
-                if alst1[i] <= alst2[j]:
-                    lst[low + i + j] = alst1[i]
+            while i < len(t1) and j < len(t2):
+                if t1[i] <= t2[j]:
+                    lst[low + i + j] = t1[i]
                     i += 1
                 else:
-                    lst[low + i + j] = alst2[j]
+                    lst[low + i + j] = t2[j]
                     j += 1
-                    count += len(alst1) - i  # the only difference with MergeSort
+                    count += len(t1) - i  # the only difference with MergeSort
             if i == mid - low:
-                lst[low + i + j:high] = alst2[j:]
+                lst[low + i + j:high] = t2[j:]
             else:
-                lst[low + i + j:high] = alst1[i:]
+                lst[low + i + j:high] = t1[i:]
             return count
 
         def _recur(low, high):

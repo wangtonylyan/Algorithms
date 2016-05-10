@@ -40,27 +40,27 @@ class QuickSort(sort.Sort):
         return lst
 
     def main_iter(self, lst):
-        stack = [None for i in range(0, len(lst) + 1)]
+        stk = [None] * (len(lst) + 1)
         top = 0
-        stack[top] = 0
+        stk[top] = 0
         top += 1
-        stack[top] = len(lst)
+        stk[top] = len(lst)
         while top > -1:
-            high = stack[top]
+            high = stk[top]
             top -= 1
-            low = stack[top]
+            low = stk[top]
             top -= 1
             mid = self._partition(lst, low, high)
             if mid - low > 1:
                 top += 1
-                stack[top] = low
+                stk[top] = low
                 top += 1
-                stack[top] = mid
+                stk[top] = mid
             if high - (mid + 1) > 1:
                 top += 1
-                stack[top] = mid + 1
+                stk[top] = mid + 1
                 top += 1
-                stack[top] = high
+                stk[top] = high
         return lst
 
 

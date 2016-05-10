@@ -153,8 +153,8 @@ class CountingSort(Sort):
         return lst
 
 
-# Radix sort弥补了counting sort不适用于大范围序列的缺陷
-# 但也对数字表达所采用的进制数提出的更高要求
+# Radix sort弥补了counting sort不适用于大范围输入域的缺陷
+# 但逐个数位的比较也降低了效率
 class RadixSort(Sort):
     def __init__(self):
         super(RadixSort, self).__init__()
@@ -162,7 +162,7 @@ class RadixSort(Sort):
 
     def main(self, lst):
         def count(ind):  # stable
-            ind = pow(10, ind)  # 10-based
+            ind = 10 ** ind  # 10-based
             cnt = [0] * (11)  # index 0 is reserved
             for i in lst:
                 cnt[i / ind % 10 + 1] += 1
