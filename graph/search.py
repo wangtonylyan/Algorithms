@@ -4,23 +4,49 @@ import copy
 from collections import deque
 
 
+def graph_traverse_check(func):
+    def f(self, src):
+        assert (self.vtx and isinstance(self.vtx, list) and len(self.vtx) > 0)
+        assert (self.grp and isinstance(self.grp, list) and len(self.grp) > 0)
+        assert (len(self.vtx) == len(self.grp))
+        assert (0 <= src < len(self.vtx))
+        self._clear()
+        for v in self.vtx:
+            assert (v.status == 0)
+        ret = func(self, src)
+        for v in self.vtx:
+            assert (v.status == 2 or v.status == 2)
+        return ret
+
+    return f
+
+
 class Graph(object):
     class Vertex():
         def __init__(self):
             self.status = 0
             self.depth = 0
+            self.time = [0, 0]
 
         def clear(self):
             self.status = 0
             self.depth = 0
+            self.time = [0, 0]
 
     def __init__(self, grp):
         self.grp = copy.deepcopy(grp)
         self.vtx = [self.__class__.Vertex() for i in range(len(self.grp))]
+        assert (len(self.grp) == len(self.vtx))
 
     def _clear(self):
         for v in self.vtx:
             v.clear()
+
+    def bfs(self, src):
+        pass
+
+    def dfs(self, src):
+        pass
 
     def testcase(self):
         ugrp = [[1, 4],
@@ -32,7 +58,24 @@ class Graph(object):
                 [2, 3, 5, 7],
                 [3, 6]]
         g = self.__class__(ugrp)
-        assert (g.shortest_path(0, 7) == 4)
+
+        # shortest path
+        for i in range(len(g.vtx)):
+            g.bfs(i)
+            gb = copy.deepcopy(g.vtx)
+            for j in range(len(g.vtx)):
+                if j != i:
+                    g.bfs(j)
+                    assert (gb[j].depth == g.vtx[i].depth)
+
+        for i in range(len(g.vtx)):
+            g.bfs(i)
+            g.dfs(i)
+            gd1 = map(lambda x: copy.deepcopy(x.time), g.vtx)
+            g.dfs_recur(i)
+            gd2 = map(lambda x: copy.deepcopy(x.time), g.vtx)
+            assert (gd1 == gd2)
+
         print 'pass:', self.__class__
 
 
@@ -45,8 +88,8 @@ class GraphList(Graph):
     def __init__(self, grp=[]):
         super(GraphList, self).__init__(grp)
 
+    @graph_traverse_check
     def bfs(self, src):
-        self._clear()
         que = deque()
         self.vtx[src].status = 1
         self.vtx[src].depth = 0
@@ -58,35 +101,55 @@ class GraphList(Graph):
             # 由于顶点之间存在多条通路，导致一个顶点可能在队列中出现多次
             # 因此利用该状态可以避免多次重复地检查同一个顶点
             if self.vtx[i].status == 1:
-                self.vtx[i].status = 2
                 for j in self.grp[i]:
                     # status 1：用于表示是否已得出了该顶点的深度
                     # 只有首次遍历到的深度才是最短路径
                     if self.vtx[j].status == 0:
-                        self.vtx[j].status = 1
                         self.vtx[j].depth = self.vtx[i].depth + 1
                         que.append(j)
+                        self.vtx[j].status = 1
+                self.vtx[i].status = 2
 
+    @graph_traverse_check
     def dfs(self, src):
-        self._clear()
         stk = []
-        self.vtx[src].status = 0
+        time = 1
         stk.append(src)
         while len(stk) > 0:
-            i = stk.pop()
+            i = stk[-1]
             if self.vtx[i].status == 0:
+                self.vtx[i].time[0] = time
+                time += 1
                 self.vtx[i].status = 1
+            elif self.vtx[i].status == 1:
+                self.vtx[i].status = 2
                 for j in self.grp[i]:
                     if self.vtx[j].status == 0:
                         stk.append(j)
+                        self.vtx[i].status = 1
+                        break
+            else:
+                assert (self.vtx[i].status == 2)
+                self.vtx[i].time[1] = time
+                time += 1
+                stk.pop()
 
-    def _dfs_recur(self, src):
-        pass
+    @graph_traverse_check
+    def dfs_recur(self, src):
+        def recur(i, t):
+            assert (self.vtx[i].status == 0)
+            self.vtx[i].time[0] = t
+            t += 1
+            self.vtx[i].status = 1
+            for j in self.grp[i]:
+                if self.vtx[j].status == 0:
+                    t = recur(j, t)
+            self.vtx[i].time[1] = t
+            t += 1
+            self.vtx[i].status = 2
+            return t
 
-    def shortest_path(self, src, dst):
-        assert (0 <= src < len(self.vtx) and 0 <= dst < len(self.vtx))
-        self.bfs(src)
-        return self.vtx[dst].depth
+        recur(src, 1)
 
 
 class LakeCounting():
