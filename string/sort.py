@@ -92,9 +92,9 @@ class MSD(StringSort):
             lst[low:high] = aux
 
             assert (max(map(len, lst[low:low + cnt[0]])) <= wid if cnt[0] > 0 else True)
+            assert (cnt[-1] == high - low)
             for i in range(len(cnt) - 1):
                 recur(low + cnt[i], low + cnt[i + 1], wid + 1)
-            assert (cnt[-1] == high - low)
 
         recur(0, len(lst), 0)
         return lst

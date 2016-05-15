@@ -39,39 +39,67 @@ def testsortint():
     print 'pass:', func, '-- cost:', total / times
 
 
-def testsortstr(func):
-    def test(case):
-        ret = func(case[:])
-        case.sort()
-        if ret != case:
-            print ret
-            print case
-        assert (ret == case)
+def testsortstr():
+    # LSD: 13
+    # MSD: 1.4
+    # list.sort(): 0.04
+    def func(lst):
+        lst.sort()
+        return lst
 
-    cases = []
-    for i in range(200):
-        width = random.randint(1, 25) if type == 0 else 0
+    times = 500
+    length = 100
+    num = 200
+    total = 0
+    for i in range(times):
         case = []
-        for j in range(20):
+        for j in range(num):
             s = ''
-            width = width if type == 0 else random.randint(1, 25)
+            width = random.randint(1, length)
             for k in range(width):
                 s += chr(random.randint(ord('a'), ord('z')))
             case.append(s)
-        cases.append(case)
+        cpy = case[:]
+        start = time.time()
+        ret = func(cpy)
+        end = time.time()
+        total += (end - start) * 1000
+        case.sort()
+        if ret != case:
+            print ret
+        assert (ret == case)
+    print 'pass:', func, '-- cost:', total / times
 
-    map(test, cases)
 
+def testdynamic():
+    def func1(wgt, its):
+        tab = [[0] * (len(its) + 1) for w in range(wgt + 1)]
+        for i in range(1, wgt + 1):
+            for j in range(1, len(its) + 1):
+                tab[i][j] = max(tab[i - its[j - 1][0]][j - 1] + its[j - 1][1] if i >= its[j - 1][0] else 0,
+                                tab[i][j - 1])
+        return tab[-1][-1]
 
-def testdp(func1, func2):
+    def func2(wgt, its):
+        tab = [0] * (wgt + 1)
+        for i in range(len(its)):
+            for j in range(wgt, 1, -1):
+                tab[j] = max(tab[j],
+                             tab[j - its[i][0]] + its[i][1] if j >= its[i][0] else 0)
+        return tab[-1]
+
     wgt = 20
     its = [(1, 1), (2, 5), (3, 8), (4, 9), (5, 10), (6, 17), (7, 17), (8, 20), (9, 24), (10, 30)]
     assert (func1(wgt, its[:]) == func2(wgt, its[:]))
 
 
-def testunionfindset(func):
+def testunionfindset():
+    def func(lst):
+        pass
+
     case = [4, 8, -1, 3, -1, 9, 2, 6, -1, -1, -1, 1, 7, -1, 5, -1, -1]
-    ret = [4, 3, 2, 5, 6, 1, 7, 8]
+    ret = [4, 3, 2, 6, 8, 1, 5, 7]
+    assert (case.count(-1) == len(ret))
     t = func(case)
     if t != ret:
         print t
@@ -79,8 +107,8 @@ def testunionfindset(func):
 
 
 if __name__ == '__main__':
-    testsortint()
+    # testsortint()
     # testsortstr()
-    # testdp()
+    # testdynamic()
     # testunionfindset()
     print 'done'

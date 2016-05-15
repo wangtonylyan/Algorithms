@@ -157,7 +157,7 @@ class OfflineMinimum():
                 set = []
         sets.append(set)
         assert (len(sets) == seq.count(-1) + 1)
-        assert (sum(map(lambda x: len(x), sets)) == num)
+        assert (sum(map(len, sets)) == num)
         # 2) make the disjoint sets
         ds = DisjointSetForest(num)
         ords = []

@@ -15,7 +15,7 @@ def graph_traverse_check(func):
             assert (v.status == 0)
         ret = func(self, src)
         for v in self.vtx:
-            assert (v.status == 2 or v.status == 2)
+            assert (v.status == 0 or v.status == 2)
         return ret
 
     return f
@@ -41,12 +41,6 @@ class Graph(object):
     def _clear(self):
         for v in self.vtx:
             v.clear()
-
-    def bfs(self, src):
-        pass
-
-    def dfs(self, src):
-        pass
 
     def testcase(self):
         ugrp = [[1, 4],
