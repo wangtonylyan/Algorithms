@@ -43,7 +43,7 @@ class Graph(object):
             v.clear()
 
     def testcase(self):
-        ugrp = [[1, 4],
+        case = [[1, 4],
                 [0, 5],
                 [3, 5, 6],
                 [2, 6, 7],
@@ -51,7 +51,7 @@ class Graph(object):
                 [1, 2, 6],
                 [2, 3, 5, 7],
                 [3, 6]]
-        g = self.__class__(ugrp)
+        g = self.__class__(case)
 
         # shortest path
         for i in range(len(g.vtx)):
@@ -90,19 +90,15 @@ class GraphList(Graph):
         que.append(src)
         while len(que) > 0:
             i = que.popleft()
-            assert (self.vtx[i].status > 0)
-            # status 2：用于表示是否已遍历过所有与其互通的顶点
-            # 由于顶点之间存在多条通路，导致一个顶点可能在队列中出现多次
-            # 因此利用该状态可以避免多次重复地检查同一个顶点
+            assert (self.vtx[i].status == 1)
             if self.vtx[i].status == 1:
                 for j in self.grp[i]:
-                    # status 1：用于表示是否已得出了该顶点的深度
                     # 只有首次遍历到的深度才是最短路径
                     if self.vtx[j].status == 0:
                         self.vtx[j].depth = self.vtx[i].depth + 1
                         que.append(j)
                         self.vtx[j].status = 1
-                self.vtx[i].status = 2
+                self.vtx[i].status = 2  # optional
 
     @graph_traverse_check
     def dfs(self, src):
