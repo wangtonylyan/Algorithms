@@ -10,14 +10,15 @@ import sort
 class QuickSort(sort.Sort):
     def __init__(self):
         super(QuickSort, self).__init__()
+        self.part = self._partition_one_way
+        # self.part = self._partition_two_way
         self.funcs.append(self.main_recur)
         self.funcs.append(self.main_iter)
 
     # Quick sort is faster in practice, because its inner loop is efficiently
     # implemented on most architectures, and in most real-world data.
     @staticmethod
-    def _partition(lst, low, high):
-        # pick first element as pivot
+    def _partition_one_way(lst, low, high):
         flag = low
         for i in range(low + 1, high):
             if lst[i] < lst[low]:
@@ -26,11 +27,25 @@ class QuickSort(sort.Sort):
         lst[low], lst[flag] = lst[flag], lst[low]
         return flag  # in-place partition, so returns index only
 
+    @staticmethod
+    def _partition_two_way(lst, low, high):
+        flag = lst[low]
+        i, j = low, high - 1
+        while i != j:
+            while j > i and lst[j] > flag:
+                j -= 1
+            lst[i] = lst[j]
+            while i < j and lst[i] < flag:
+                i += 1
+            lst[j] = lst[i]
+        lst[i] = flag
+        return i
+
     def main_recur(self, lst):
         def _sort(lst, low, high):
             if high - low < 2:
                 return
-            mid = self._partition(lst, low, high)
+            mid = self.part(lst, low, high)
             _sort(lst, low, mid)
             _sort(lst, mid + 1, high)
 
@@ -50,7 +65,7 @@ class QuickSort(sort.Sort):
             top -= 1
             low = stk[top]
             top -= 1
-            mid = self._partition(lst, low, high)
+            mid = self.part(lst, low, high)
             if mid - low > 1:
                 top += 1
                 stk[top] = low

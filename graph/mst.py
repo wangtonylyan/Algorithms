@@ -9,12 +9,12 @@ class MinimumSpanningTree(object):
         for i in range(len(grp)):
             for j, w in grp[i]:
                 flg = True
-                for e in edge:
-                    if not cmp((min(i, j), max(i, j)), e[1]):
+                for e, v in edge:
+                    if cmp((min(i, j), max(i, j)), e) == 0:
                         flg = False
                         break
                 if flg:
-                    edge.append((w, (min(i, j), max(i, j))))
+                    edge.append(((min(i, j), max(i, j)), w))
         assert (len(edge) == sum(map(len, grp)) / 2)
 
         self.grp = grp
@@ -46,6 +46,7 @@ class MinimumSpanningTree(object):
         g = self.__class__(case)
         mst = g.main()
         assert (len(mst) == len(case) - 1)
+        assert (sum(map(lambda x: x[1], mst)) == 37)
         print 'pass:', self.__class__
 
 
@@ -65,24 +66,25 @@ class Kruskal(MinimumSpanningTree):
             p2 = find(ds, n2)
             if p1 != p2:
                 ds[p2] = p1
+            return p1
 
         # 1) sort
-        cnt = [0] * (max(map(lambda x: x[0], self.edge)) + 1)
+        cnt = [0] * (max(map(lambda x: x[1], self.edge)) + 1)
         sort = [None] * len(self.edge)
-        for w, e in self.edge:
+        for e, w in self.edge:
             cnt[w] += 1
         for i in range(len(cnt) - 1):
             cnt[i + 1] += cnt[i]
-        for w, e in self.edge:
-            sort[cnt[w - 1]] = e
+        for e, w in self.edge:
+            sort[cnt[w - 1]] = (e, w)
             cnt[w - 1] += 1
         # 2) select
         mst = []
-        ds = [i for i in range(len(self.grp) + 1)]  # disjoint set
-        for i, j in sort:
-            if find(ds, i) != find(ds, j):
-                union(ds, i, j)
-                mst.append((i, j))
+        sets = [i for i in range(len(self.grp) + 1)]  # disjoint set
+        for (i, j), w in sort:
+            if find(sets, i) != find(sets, j):
+                union(sets, i, j)
+                mst.append(((i, j), w))
         assert (len(mst) == len(self.grp) - 1)
         return mst
 
@@ -97,5 +99,5 @@ class Prim(MinimumSpanningTree):
 
 if __name__ == '__main__':
     Kruskal().testcase()
-    Prim().testcase()
+    # Prim().testcase()
     print 'done'
