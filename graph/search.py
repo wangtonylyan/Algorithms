@@ -91,14 +91,13 @@ class GraphList(Graph):
         while len(que) > 0:
             i = que.popleft()
             assert (self.vtx[i].status == 1)
-            if self.vtx[i].status == 1:
-                for j in self.grp[i]:
-                    # 只有首次遍历到的深度才是最短路径
-                    if self.vtx[j].status == 0:
-                        self.vtx[j].depth = self.vtx[i].depth + 1
-                        que.append(j)
-                        self.vtx[j].status = 1
-                self.vtx[i].status = 2  # optional
+            for j in self.grp[i]:
+                # 只有首次遍历到的深度才是最短路径
+                if self.vtx[j].status == 0:
+                    self.vtx[j].depth = self.vtx[i].depth + 1
+                    que.append(j)
+                    self.vtx[j].status = 1
+            self.vtx[i].status = 2  # optional
 
     @graph_traverse_check
     def dfs(self, src):
