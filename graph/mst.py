@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # minimum(-weight) spanning tree problem
 # 生成树都只有V-1条边，所谓的最小是指权重
+# Kruskal从“边”的角度入手，Prim从“点”的角度入手
 
 
 class MinimumSpanningTree(object):
@@ -30,7 +31,8 @@ class MinimumSpanningTree(object):
                         break
         assert (num == sum(map(len, case)))
         # run test case
-        ret = self.__class__(case).main()
+        ret = self._testcase(case)
+        # check result
         assert (len(ret) == len(case) - 1)
         assert (sum(map(lambda x: x[1], ret)) == 37)
         print 'pass:', self.__class__
@@ -39,19 +41,6 @@ class MinimumSpanningTree(object):
 class Kruskal(MinimumSpanningTree):
     def __init__(self, grp=[]):
         super(Kruskal, self).__init__(grp)
-        # Kruskal算法从“边”的角度入手
-        edge = []
-        for i in range(len(self.grp)):
-            for j, w in self.grp[i]:
-                flg = True
-                for e, v in edge:
-                    if cmp((min(i, j), max(i, j)), e) == 0:
-                        flg = False
-                        break
-                if flg:
-                    edge.append(((min(i, j), max(i, j)), w))
-        assert (len(edge) == sum(map(len, self.grp)) / 2)
-        self.edge = edge
 
     def main(self):
         def find(ds, n):
@@ -67,17 +56,29 @@ class Kruskal(MinimumSpanningTree):
                 ds[p2] = p1
             return p1
 
-        # 1) sort edges
-        cnt = [0] * (max(map(lambda x: x[1], self.edge)) + 1)
-        sort = [None] * len(self.edge)
-        for e, w in self.edge:
+        # 1) build edges
+        edge = []
+        for i in range(len(self.grp)):
+            for j, w in self.grp[i]:
+                flg = True
+                for e, v in edge:
+                    if cmp((min(i, j), max(i, j)), e) == 0:
+                        flg = False
+                        break
+                if flg:
+                    edge.append(((min(i, j), max(i, j)), w))
+        assert (len(edge) == sum(map(len, self.grp)) / 2)
+        # 2) sort edges
+        cnt = [0] * (max(map(lambda x: x[1], edge)) + 1)
+        sort = [None] * len(edge)
+        for e, w in edge:
             cnt[w] += 1
         for i in range(len(cnt) - 1):
             cnt[i + 1] += cnt[i]
-        for e, w in self.edge:
+        for e, w in edge:
             sort[cnt[w - 1]] = (e, w)
             cnt[w - 1] += 1
-        # 2) select edges
+        # 3) build mst by selecting edges
         mst = []
         sets = [i for i in range(len(self.grp) + 1)]  # disjoint set
         for (i, j), w in sort:
@@ -87,67 +88,114 @@ class Kruskal(MinimumSpanningTree):
         assert (len(mst) == len(self.grp) - 1)
         return mst
 
+    def _testcase(self, case):
+        return self.__class__(case).main()
+
 
 class Prim(MinimumSpanningTree):
     def __init__(self, grp=[]):
         super(Prim, self).__init__(grp)
-        # Prim算法从“点”的角度入手
-        self.vtx = [None] * (len(self.grp))
+
+    def main_hp(self, src=0):
+        def _sink(hp, low, high, key=lambda x: x[1]):
+            it = low << 1 | 1
+            while it < high:
+                if it + 1 < high and key(hp[it + 1]) < key(hp[it]):
+                    it += 1
+                if key(hp[it]) > key(hp[low]):
+                    break
+                hp[it], hp[low] = hp[low], hp[it]
+                low = it
+                it = low << 1 | 1
+
+        def _pop(hp, low, high):
+            assert (low <= high)
+            hp[low], hp[high] = hp[high], hp[low]
+            _sink(hp, low, high)
+            return hp[high]
+
+        def _extract_min(src):
+            assert (vtx[src] >= 0)
+            dst, wgt = _pop(self.grp[src], 0, vtx[src])
+            vtx[src] -= 1
+            i = 0
+            while i < vtx[dst] + 1:
+                if self.grp[dst][i][0] == src:
+                    _pop(self.grp[dst], i, vtx[dst])
+                    vtx[dst] -= 1
+                    break
+                i += 1
+            return (dst, wgt)
+
+        # 1) build min-heap based on self.grp
+        vtx = [None] * (len(self.grp))
         for i in range(len(self.grp)):
             for j in range((len(self.grp[i]) - 1) >> 1, -1, -1):
-                self._sink(self.grp[i], j, len(self.grp[i]))
-            self.vtx[i] = len(self.grp[i]) - 1
-
-    def _sink(self, hp, low, high, key=lambda x: x[1]):
-        it = low << 1 | 1
-        while it < high:
-            if it + 1 < high and key(hp[it + 1]) < key(hp[it]):
-                it += 1
-            if key(hp[it]) > key(hp[low]):
-                break
-            hp[it], hp[low] = hp[low], hp[it]
-            low = it
-            it = low << 1 | 1
-
-    def _pop(self, hp, low, high):
-        assert (low <= high)
-        hp[low], hp[high] = hp[high], hp[low]
-        self._sink(hp, low, high)
-        return hp[high]
-
-    def main(self):
-        src = 0
-        a, w = self._pop(self.grp[src], 0, self.vtx[src])
-        self.vtx[src] -= 1
-        for i in range(len(self.vtx[a])):
-            if self.grp[a][i][0] == src:
-                self.grp[a][i], self.grp[a][self.vtx[a]] = self.grp[a][-1], self.grp[a][i]
-                self._sink(self.grp[a], i, )
-                self.vtx[a] -= 1
-                break
-
-        mst = [((src, m[0]), m[1])]
-        sets = [mst[0][0][0], mst[0][0][1]]
-
-        print self.grp[src], self.vtx[src]
-        print self.grp[m[1]], self.vtx[m[1]]
-        return
-        while len(mst) < len(self.vtx) - 1:
-            m = None
-            for i in range(len(sets)):
-                self.grp[sets[i]][0][1]
-            for v in sets:
-                self.grp[v][0]
-            for (i, j), w in mst:
-                for t in self.grp[i]:
-                    if self.vtx[t[0]] == 0:
-                        self.vtx[t[0]] = 1
-                        m = ((i, t[0]), t[1]) if m == None or m[1] > t[1] else m
-
-            mst.append(m)
-
-        print mst
+                _sink(self.grp[i], j, len(self.grp[i]))
+            vtx[i] = len(self.grp[i]) - 1
+        # 2) build mst by popping heap
+        sets = [0] * len(vtx)
+        sets[src] = 1
+        mst = []
+        while len(mst) < len(vtx) - 1:
+            min, src = None, None
+            for v in range(len(sets)):
+                if sets[v] == 1 and vtx[v] >= 0:
+                    while vtx[v] >= 0:
+                        dst = self.grp[v][0][0]
+                        if sets[dst] == 0:
+                            break
+                        _extract_min(v)
+                        vtx[v] -= 1
+                    if vtx[v] >= 0 and (min == None or min[1] > self.grp[v][0][1]):
+                        min = self.grp[v][0]
+                        src = v
+            assert (min != None and src != None)
+            dst, wgt = _extract_min(src)
+            assert (dst == min[0] and wgt == min[1])
+            sets[dst] = 1
+            mst.append(((src, dst), wgt))
+        assert (sum(sets) == len(sets))
         return mst
+
+    def main(self, src=0):
+        vtx = [0] * len(self.grp)
+        vtx[src] = 1
+        closest = [None] * len(self.grp)
+        for i in range(len(self.grp)):
+            if i != src:
+                for j, w in self.grp[i]:
+                    if j == src and (closest[i] == None or closest[i][1] > w):
+                        closest[i] = (j, w)
+
+        mst = []
+        while len(mst) < len(vtx) - 1:
+            m = None
+            for i in range(len(vtx)):
+                if vtx[i] == 0 and closest[i] != None:
+                    if m == None or closest[m][1] > closest[i][1]:
+                        m = i
+            assert (m != None)
+            mst.append(((m, closest[m][0]), closest[m][1]))
+            vtx[m] = 1
+            # incremental approach
+            for i in range(len(vtx)):
+                if vtx[i] == 0:
+                    for j, w in self.grp[i]:
+                        if j == m:
+                            if closest[i] == None or closest[i][1] > w:
+                                closest[i] = (j, w)
+                            break
+        assert (sum(vtx) == len(vtx))
+        return mst
+
+    def _testcase(self, case):
+        num = lambda mst: sum(map(lambda x: x[1], mst))
+        g = self.__class__(case)
+        ret = g.main()
+        for i in range(len(g.grp)):
+            assert (num(g.main_hp(i)) == num(g.main(i)) == num(ret))
+        return ret
 
 
 if __name__ == '__main__':
