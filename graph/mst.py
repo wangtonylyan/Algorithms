@@ -96,7 +96,8 @@ class Prim(MinimumSpanningTree):
     def __init__(self, grp=[]):
         super(Prim, self).__init__(grp)
 
-    def main_hp(self, src=0):
+    # 从树中的节点开始搜索
+    def main_1(self, src=0):
         def _sink(hp, low, high, key=lambda x: x[1]):
             it = low << 1 | 1
             while it < high:
@@ -128,11 +129,10 @@ class Prim(MinimumSpanningTree):
             return (dst, wgt)
 
         # 1) build min-heap based on self.grp
-        vtx = [None] * (len(self.grp))
+        vtx = [len(self.grp[i]) - 1 for i in range(len(self.grp))]
         for i in range(len(self.grp)):
-            for j in range((len(self.grp[i]) - 1) >> 1, -1, -1):
-                _sink(self.grp[i], j, len(self.grp[i]))
-            vtx[i] = len(self.grp[i]) - 1
+            for j in range(vtx[i] >> 1, -1, -1):
+                _sink(self.grp[i], j, vtx[i] + 1)
         # 2) build mst by popping heap
         sets = [0] * len(vtx)
         sets[src] = 1
@@ -158,7 +158,8 @@ class Prim(MinimumSpanningTree):
         assert (sum(sets) == len(sets))
         return mst
 
-    def main(self, src=0):
+    # 从树外的节点开始搜索
+    def main_2(self, src=0):
         vtx = [0] * len(self.grp)
         vtx[src] = 1
         closest = [None] * len(self.grp)
@@ -192,9 +193,9 @@ class Prim(MinimumSpanningTree):
     def _testcase(self, case):
         num = lambda mst: sum(map(lambda x: x[1], mst))
         g = self.__class__(case)
-        ret = g.main()
+        ret = g.main_2()
         for i in range(len(g.grp)):
-            assert (num(g.main_hp(i)) == num(g.main(i)) == num(ret))
+            assert (num(g.main_1(i)) == num(g.main_2(i)) == num(ret))
         return ret
 
 
