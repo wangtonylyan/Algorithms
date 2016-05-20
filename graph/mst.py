@@ -7,6 +7,7 @@
 class MinimumSpanningTree(object):
     def __init__(self, grp):
         self.grp = grp
+        self.funcs = []
 
     def testcase(self):
         case = [
@@ -31,8 +32,12 @@ class MinimumSpanningTree(object):
                         break
         assert (num == sum(map(len, case)))
         # run test case
-        ret = self._testcase(case)
-        # check result
+        num = lambda mst: sum(map(lambda x: x[1], mst))
+        g = self.__class__(case)
+        assert (len(self.funcs) > 0)
+        ret = getattr(g, self.funcs[0])()
+        for i in range(len(g.grp)):
+            assert (reduce(lambda x, y: x and num(getattr(g, y)(i)) == num(ret), self.funcs, True) == True)
         assert (len(ret) == len(case) - 1)
         assert (sum(map(lambda x: x[1], ret)) == 37)
         print 'pass:', self.__class__
@@ -41,8 +46,9 @@ class MinimumSpanningTree(object):
 class Kruskal(MinimumSpanningTree):
     def __init__(self, grp=[]):
         super(Kruskal, self).__init__(grp)
+        self.funcs.append('main')
 
-    def main(self):
+    def main(self, src=None):
         def find(ds, n):
             while ds[n] != n:
                 ds[n] = ds[ds[n]]
@@ -60,12 +66,7 @@ class Kruskal(MinimumSpanningTree):
         edge = []
         for i in range(len(self.grp)):
             for j, w in self.grp[i]:
-                flg = True
-                for e, v in edge:
-                    if cmp((min(i, j), max(i, j)), e) == 0:
-                        flg = False
-                        break
-                if flg:
+                if ((min(i, j), max(i, j)), w) not in edge:
                     edge.append(((min(i, j), max(i, j)), w))
         assert (len(edge) == sum(map(len, self.grp)) / 2)
         # 2) sort edges
@@ -88,80 +89,32 @@ class Kruskal(MinimumSpanningTree):
         assert (len(mst) == len(self.grp) - 1)
         return mst
 
-    def _testcase(self, case):
-        return self.__class__(case).main()
-
 
 class Prim(MinimumSpanningTree):
     def __init__(self, grp=[]):
         super(Prim, self).__init__(grp)
+        self.funcs.append("main_1")
+        self.funcs.append("main_2")
 
     # 从树中的节点开始搜索
     def main_1(self, src=0):
-        def _sink(hp, low, high, key=lambda x: x[1]):
-            it = low << 1 | 1
-            while it < high:
-                if it + 1 < high and key(hp[it + 1]) < key(hp[it]):
-                    it += 1
-                if key(hp[it]) > key(hp[low]):
-                    break
-                hp[it], hp[low] = hp[low], hp[it]
-                low = it
-                it = low << 1 | 1
-
-        def _pop(hp, low, high):
-            assert (low <= high)
-            hp[low], hp[high] = hp[high], hp[low]
-            _sink(hp, low, high)
-            return hp[high]
-
-        def _extract_min(src):
-            assert (vtx[src] >= 0)
-            dst, wgt = _pop(self.grp[src], 0, vtx[src])
-            vtx[src] -= 1
-            i = 0
-            while i < vtx[dst] + 1:
-                if self.grp[dst][i][0] == src:
-                    _pop(self.grp[dst], i, vtx[dst])
-                    vtx[dst] -= 1
-                    break
-                i += 1
-            return (dst, wgt)
-
-        # 1) build min-heap based on self.grp
-        vtx = [len(self.grp[i]) - 1 for i in range(len(self.grp))]
-        for i in range(len(self.grp)):
-            for j in range(vtx[i] >> 1, -1, -1):
-                _sink(self.grp[i], j, vtx[i] + 1)
-        # 2) build mst by popping heap
-        sets = [0] * len(vtx)
-        sets[src] = 1
+        vtx = [0 if i != src else 1 for i in range(len(self.grp))]
         mst = []
-        while len(mst) < len(vtx) - 1:
-            min, src = None, None
-            for v in range(len(sets)):
-                if sets[v] == 1 and vtx[v] >= 0:
-                    while vtx[v] >= 0:
-                        dst = self.grp[v][0][0]
-                        if sets[dst] == 0:
-                            break
-                        _extract_min(v)
-                        vtx[v] -= 1
-                    if vtx[v] >= 0 and (min == None or min[1] > self.grp[v][0][1]):
-                        min = self.grp[v][0]
-                        src = v
-            assert (min != None and src != None)
-            dst, wgt = _extract_min(src)
-            assert (dst == min[0] and wgt == min[1])
-            sets[dst] = 1
-            mst.append(((src, dst), wgt))
-        assert (sum(sets) == len(sets))
+        while len(mst) < len(self.grp) - 1:
+            m = None
+            for i in range(len(vtx)):
+                if vtx[i] == 1:
+                    for j, w in self.grp[i]:
+                        if vtx[j] == 0 and (m == None or m[1] > w):
+                            m = ((i, j), w)
+            assert (m != None and vtx[m[0][0]] == 1 and vtx[m[0][1]] == 0)
+            vtx[m[0][1]] = 1
+            mst.append(m)
         return mst
 
     # 从树外的节点开始搜索
     def main_2(self, src=0):
-        vtx = [0] * len(self.grp)
-        vtx[src] = 1
+        vtx = [0 if i != src else 1 for i in range(len(self.grp))]
         closest = [None] * len(self.grp)
         for i in range(len(self.grp)):
             if i != src:
@@ -174,9 +127,10 @@ class Prim(MinimumSpanningTree):
             m = None
             for i in range(len(vtx)):
                 if vtx[i] == 0 and closest[i] != None:
+                    assert (vtx[closest[i][0]] == 1)
                     if m == None or closest[m][1] > closest[i][1]:
                         m = i
-            assert (m != None)
+            assert (m != None and vtx[m] == 0 and vtx[closest[m][0]] == 1)
             mst.append(((m, closest[m][0]), closest[m][1]))
             vtx[m] = 1
             # incremental approach
@@ -189,14 +143,6 @@ class Prim(MinimumSpanningTree):
                             break
         assert (sum(vtx) == len(vtx))
         return mst
-
-    def _testcase(self, case):
-        num = lambda mst: sum(map(lambda x: x[1], mst))
-        g = self.__class__(case)
-        ret = g.main_2()
-        for i in range(len(g.grp)):
-            assert (num(g.main_1(i)) == num(g.main_2(i)) == num(ret))
-        return ret
 
 
 if __name__ == '__main__':

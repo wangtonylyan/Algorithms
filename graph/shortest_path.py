@@ -10,12 +10,15 @@ class BellmanFord():
         # 1) init
         src = 0
         dis = [-1 if i != src else 0 for i in range(len(self.grp))]
+        # 2) calculate
+        # best: 1->2->...->n
+        # worst: n->n-1->...->1
         for v in range(len(self.grp) - 1):
             for i in range(len(self.grp)):
                 for j, w in self.grp[i]:
                     if dis[i] != -1 and (dis[j] == -1 or dis[j] > dis[i] + w):
                         dis[j] = dis[i] + w
-        # 2) check
+        # 3) check
         for i in range(len(self.grp)):
             for j, w in self.grp[i]:
                 if dis[i] != -1 and dis[j] > dis[i] + w:
