@@ -58,7 +58,7 @@ class MinimumSpanningTree():
         mst = []
         for v in range(len(grp) - 1):
             m = None
-            for i in range(len(vtx)):
+            for i in range(len(grp)):
                 if vtx[i] == 1:
                     for j, w in grp[i]:
                         if vtx[j] == 0 and (m == None or m[1] > w):
@@ -67,31 +67,35 @@ class MinimumSpanningTree():
             vtx[m[0][1]] = 1
             mst.append(m)
         assert (len(mst) == len(grp) - 1)
+        assert (sum(vtx) == len(vtx))
         return mst
 
     # 从树外的节点开始搜索
     def main_Prim_2(self, grp, src=0):
         # 1) initialize
         vtx = [0 if i != src else 1 for i in range(len(grp))]
-        dis = [None] * len(grp)
+        dis = [None if i != src else 0 for i in range(len(grp))]
+        pre = [None] * len(grp)
         for i, w in grp[src]:
-            dis[i] = (src, w)
+            dis[i] = w
+            pre[i] = src
         # 2) build mst by selecting vertices
         mst = []
         for v in range(len(grp) - 1):
             m = None
-            for i in range(len(vtx)):
+            for i in range(len(grp)):
                 if vtx[i] == 0 and dis[i] != None:
-                    assert (vtx[dis[i][0]] == 1)
-                    if m == None or dis[m][1] > dis[i][1]:
+                    assert (vtx[pre[i]] == 1)
+                    if m == None or dis[m] > dis[i]:
                         m = i
-            assert (m != None and vtx[m] == 0 and vtx[dis[m][0]] == 1)
-            mst.append(((m, dis[m][0]), dis[m][1]))
+            assert (m != None and vtx[m] == 0 and vtx[pre[m]] == 1)
+            mst.append(((m, pre[m]), dis[m]))
             vtx[m] = 1
             # update dis array by incremental approach
             for i, w in grp[m]:
-                if vtx[i] == 0 and (dis[i] == None or dis[i][1] > w):
-                    dis[i] = (m, w)
+                if vtx[i] == 0 and (dis[i] == None or dis[i] > w):
+                    dis[i] = w
+                    pre[i] = m
         assert (len(mst) == len(grp) - 1)
         assert (sum(vtx) == len(vtx))
         return mst
