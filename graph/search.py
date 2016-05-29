@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# @problem: graph traversal
+# 针对于无向图
+
 
 import copy
 from collections import deque
@@ -12,10 +15,10 @@ def graph_traverse_check(func):
         assert (0 <= src < len(self.vtx))
         self._clear()
         for v in self.vtx:
-            assert (v.status == 0)
+            assert (v.state == 0)
         ret = func(self, src)
         for v in self.vtx:
-            assert (v.status == 0 or v.status == 2)
+            assert (v.state == 0 or v.state == 2)
         return ret
 
     return f
@@ -24,12 +27,12 @@ def graph_traverse_check(func):
 class Graph(object):
     class Vertex():
         def __init__(self):
-            self.status = 0
+            self.state = 0
             self.depth = 0
             self.time = [0, 0]
 
         def clear(self):
-            self.status = 0
+            self.state = 0
             self.depth = 0
             self.time = [0, 0]
 
@@ -53,18 +56,15 @@ class Graph(object):
                 [3, 6]]
         g = self.__class__(case)
 
-        # shortest path
         for i in range(len(g.vtx)):
-            g.bfs(i)
+            g.bfs_iter(i)
             gb = copy.deepcopy(g.vtx)
             for j in range(len(g.vtx)):
                 if j != i:
-                    g.bfs(j)
+                    g.bfs_iter(j)
                     assert (gb[j].depth == g.vtx[i].depth)
 
-        for i in range(len(g.vtx)):
-            g.bfs(i)
-            g.dfs(i)
+            g.dfs_iter(i)
             gd1 = map(lambda x: copy.deepcopy(x.time), g.vtx)
             g.dfs_recur(i)
             gd2 = map(lambda x: copy.deepcopy(x.time), g.vtx)
@@ -83,42 +83,42 @@ class GraphList(Graph):
         super(GraphList, self).__init__(grp)
 
     @graph_traverse_check
-    def bfs(self, src):
+    def bfs_iter(self, src):
         que = deque()
-        self.vtx[src].status = 1
+        self.vtx[src].state = 1
         self.vtx[src].depth = 0
         que.append(src)
         while len(que) > 0:
             i = que.popleft()
-            assert (self.vtx[i].status == 1)
+            assert (self.vtx[i].state == 1)
             for j in self.grp[i]:
-                # 只有首次遍历到的深度才是最短路径
-                if self.vtx[j].status == 0:
+                # 只有首次遍历到的深度才是最小深度
+                if self.vtx[j].state == 0:
                     self.vtx[j].depth = self.vtx[i].depth + 1
                     que.append(j)
-                    self.vtx[j].status = 1
-            self.vtx[i].status = 2  # optional
+                    self.vtx[j].state = 1
+            self.vtx[i].state = 2  # optional
 
     @graph_traverse_check
-    def dfs(self, src):
+    def dfs_iter(self, src):
         stk = []
         time = 1
         stk.append(src)
         while len(stk) > 0:
             i = stk[-1]
-            if self.vtx[i].status == 0:
+            if self.vtx[i].state == 0:
                 self.vtx[i].time[0] = time
                 time += 1
-                self.vtx[i].status = 1
-            elif self.vtx[i].status == 1:
-                self.vtx[i].status = 2
+                self.vtx[i].state = 1
+            elif self.vtx[i].state == 1:
+                self.vtx[i].state = 2
                 for j in self.grp[i]:
-                    if self.vtx[j].status == 0:
+                    if self.vtx[j].state == 0:
                         stk.append(j)
-                        self.vtx[i].status = 1
+                        self.vtx[i].state = 1
                         break
             else:
-                assert (self.vtx[i].status == 2)
+                assert (self.vtx[i].state == 2)
                 self.vtx[i].time[1] = time
                 time += 1
                 stk.pop()
@@ -126,16 +126,16 @@ class GraphList(Graph):
     @graph_traverse_check
     def dfs_recur(self, src):
         def recur(i, t):
-            assert (self.vtx[i].status == 0)
+            assert (self.vtx[i].state == 0)
             self.vtx[i].time[0] = t
             t += 1
-            self.vtx[i].status = 1
+            self.vtx[i].state = 1
             for j in self.grp[i]:
-                if self.vtx[j].status == 0:
+                if self.vtx[j].state == 0:
                     t = recur(j, t)
             self.vtx[i].time[1] = t
             t += 1
-            self.vtx[i].status = 2
+            self.vtx[i].state = 2
             return t
 
         recur(src, 1)

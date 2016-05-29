@@ -106,9 +106,30 @@ def testunionfindset():
     assert (ret == t)
 
 
+def testgraph():
+    def mst(grp, src):
+        return 37
+
+    case = [
+        [(1, 4), (7, 8)],
+        [(0, 4), (2, 8), (7, 11)],
+        [(1, 8), (8, 2), (3, 7), (5, 4)],
+        [(2, 7), (4, 9), (5, 14)],
+        [(3, 9), (5, 10)],
+        [(2, 4), (3, 14), (4, 10), (6, 2)],
+        [(5, 2), (7, 1), (8, 6)],
+        [(0, 8), (1, 11), (8, 7), (6, 1)],
+        [(2, 2), (6, 6), (7, 7)]
+    ]
+
+    for i in range(len(case)):
+        assert (mst(case[:], i) == 37)
+
+
 if __name__ == '__main__':
     # testsortint()
     # testsortstr()
     # testdynamic()
     # testunionfindset()
+    # testgraph()
     print 'done'
