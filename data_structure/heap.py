@@ -4,46 +4,70 @@
 import random
 
 
+def maxheapcheck(func):
+    def f(self, *args):
+        ret = func(self, *args)
+        assert (self != None or hasattr(self, 'hp'))
+        hp = getattr(self, 'hp')
+        for i in range(0, len(hp)):
+            assert (i << 1 | 1 >= len(hp) or hp[i << 1 | 1] <= hp[i])
+            assert ((i + 1) << 1 >= len(hp) or hp[(i + 1) << 1] <= hp[i])
+        return ret
+
+    return f
+
+
 # 1）完全二叉树存储于数组中，父与子节点之间的数值关系
-# 若以0为树根索引：left=root*2+1, right=root*2+2, root=(child-1)/2
-# 若以1为树根索引：left=root*2, right=root*2+1, root=child/2
-# 2）最大/最小堆都基于两个核心的基本操作来维护：float()和sink()
-# 因此要在最大/最小堆的基础上实现最小/最大堆只需修改上述两个函数即可
-# 3）虽然最大/小堆都能实现堆排，但最有效率的还是最大堆？
+# 0-based indexing：left=root*2+1, right=root*2+2, root=(child-1)/2
+# 1-based indexing：left=root*2, right=root*2+1, root=child/2
+# 2）堆的所有逻辑都是基于两个核心的操作：float()和sink()
+# 最大/最小堆在实现上的区别也仅在于此
 class MaxHeap:
     def __init__(self, lst=[]):
         assert (isinstance(lst, list))
-        self.lst = self._build(lst[:])
+        self.hp = self._build(lst[:])
 
     @staticmethod
-    def _sink(lst, hp, leaf):
-        t = hp << 1 | 1
-        while t < leaf:
-            if t + 1 < leaf and lst[t] < lst[t + 1]:
-                t += 1
-            if lst[hp] >= lst[t]:
-                break
-            lst[hp], lst[t] = lst[t], lst[hp]
-            hp = t
-            t = hp << 1 | 1
-        return lst
-
-    @staticmethod
-    def _float(lst, hp, root):
-        t = (hp - 1) >> 1
+    def _float(hp, iter, root):
+        t = (iter - 1) >> 1
         while t >= root:
-            if lst[hp] <= lst[t]:
+            if hp[t] >= hp[iter]:
                 break
-            lst[hp], lst[t] = lst[t], lst[hp]
-            hp = t
-            t = (hp - 1) >> 1
-        return lst
+            hp[iter], hp[t] = hp[t], hp[iter]
+            iter = t
+            t = (iter - 1) >> 1
+        return hp
 
     @staticmethod
-    def _check(lst):
-        for i in range(0, len(lst)):
-            assert (i << 1 | 1 >= len(lst) or lst[i] >= lst[i << 1 | 1])
-            assert ((i + 1) << 1 >= len(lst) or lst[i] >= lst[(i + 1) << 1])
+    def _sink(hp, iter, leaf):
+        t = iter << 1 | 1
+        while t < leaf:
+            if t + 1 < leaf and hp[t + 1] > hp[t]:
+                t += 1
+            if hp[t] < hp[iter]:
+                break
+            hp[iter], hp[t] = hp[t], hp[iter]
+            iter = t
+            t = iter << 1 | 1
+        return hp
+
+    # 根据heapq标准库中对于_siftup()的描述，可以如下方式优化sink的实现
+    # 将目标节点视为"镂空"并用其子节点来填补，去除循环体中用于判断能否快速终止的比较操作
+    # 循环直至条件失败(即访问到叶子节点)而终止，最后利用float来精确地定位目标节点的位置
+    # 此优化基于的假设：在实践中新替换的数往往距离leaf更近(离root更远)
+    @staticmethod
+    def _sink_2(hp, iter, leaf):
+        r = iter  # 限定后续float操作的根节点对于建堆过程而言是必要的
+        v = hp[iter]
+        t = iter << 1 | 1
+        while t < leaf:
+            if t + 1 < leaf and hp[t + 1] > hp[t]:
+                t += 1
+            hp[iter] = hp[t]  # 只需拷贝，无需交换
+            iter = t
+            t = iter << 1 | 1
+        hp[iter] = v
+        return MaxHeap._float(hp, iter, r)
 
     @classmethod
     def _build(cls, lst):
@@ -57,47 +81,68 @@ class MaxHeap:
             # 将节点i的值插入至其子节点的两棵子堆中
             for i in range((len(lst) - 1) >> 1, -1, -1):
                 lst = cls._sink(lst, i, len(lst))
+            return lst
 
         def _by_float(lst):
             # 将节点i的值插入至其索引之前所有节点所构成的整棵堆中
             for i in range(1, len(lst)):
                 lst = cls._float(lst, i, 0)
+            return lst
 
         # 1)
-        _by_sink(lst)
-        cls._check(lst)
+        hp = _by_sink(lst)
         # 2)
-        _by_float(lst)
-        cls._check(lst)
-        return lst
+        hp = _by_float(lst)
+        return hp
 
+    @maxheapcheck
     def push(self, value):
-        self.lst.append(value)
-        self.lst = self._float(self.lst, len(self.lst) - 1, 0)
-        self._check(self.lst)
+        self.hp.append(value)
+        self.hp = self._float(self.hp, len(self.hp) - 1, 0)
 
+    @maxheapcheck
     def pop(self):
         ret = None
-        if len(self.lst) > 0:
-            ret = self.lst[0]
-            self.lst[0] = self.lst[len(self.lst) - 1]
-            self.lst.pop()
-            self.lst = self._sink(self.lst, 0, len(self.lst))
-        self._check(self.lst)
+        if len(self.hp) > 0:
+            ret = self.hp[0]
+            self.hp[0] = self.hp[len(self.hp) - 1]
+            self.hp.pop()
+            if len(self.hp) > 0:
+                self.hp = self._sink(self.hp, 0, len(self.hp))
         return ret
 
+    @maxheapcheck
     def size(self):
-        return len(self.lst)
+        return len(self.hp)
+
+    def testcase(self):
+        for num in range(0, 10):
+            lst = [i for i in range(num)]
+
+            random.shuffle(lst)
+            hp = self.__class__(lst)
+            for i in range(num):
+                hp.pop()
+            assert (hp.size() == 0)
+
+            random.shuffle(lst)
+            for v in lst:
+                hp.push(v)
+            assert (hp.size() == num)
+            for i in range(num):
+                hp.pop()
+            assert (hp.size() == 0)
+        print 'pass:', self.__class__
 
     @classmethod
     def heapsort(cls, lst):
-        # 由于只能利用sink操作维护堆的性质
-        # 因此推荐同样也使用sink方式建堆
+        # 由于堆排必须利用sink操作维护堆的性质
+        # 因此为简化实现也推荐使用sink方式建堆
         for i in range((len(lst) - 1) >> 1, -1, -1):
-            lst = cls._sink(lst, i, len(lst))
+            lst = cls._sink_2(lst, i, len(lst))
         for i in range(len(lst) - 1, 0, -1):
             lst[0], lst[i] = lst[i], lst[0]
-            lst = cls._sink(lst, 0, i)
+            lst = cls._sink_2(lst, 0, i)
         return lst
 
 
@@ -144,22 +189,6 @@ class SortANearlySortedArray():
 
 
 if __name__ == "__main__":
-    for num in range(0, 10):
-        lst = [i for i in range(num)]
-
-        random.shuffle(lst)
-        hp = MaxHeap(lst)
-        for i in range(num):
-            hp.pop()
-        assert (hp.size() == 0)
-
-        random.shuffle(lst)
-        for v in lst:
-            hp.push(v)
-        assert (hp.size() == num)
-        for i in range(num):
-            hp.pop()
-        assert (hp.size() == 0)
-
+    MaxHeap().testcase()
     SortANearlySortedArray().testcase()
     print 'done'

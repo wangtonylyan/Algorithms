@@ -20,8 +20,8 @@ class Sort(object):
             assert (sort([1]) == [1])
             assert (sort([1, 2]) == [1, 2])
             assert (sort([2, 1]) == [1, 2])
-            for i in range(20):
-                num = random.randint(5, 50)
+            for i in range(50):
+                num = random.randint(10, 50)
                 lst = [i for i in range(num)]
                 for i in range(num):
                     random.shuffle(lst)
