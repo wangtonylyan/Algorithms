@@ -140,6 +140,21 @@ class NumberProblem():
         assert (d > 1 and d & (d - 1) == 0)  # d is a power of 2
         return n & (d - 1)
 
+    # @problem: find a power of two greater than or equal to a number
+    # @premise: n is a 16-bit number
+    @staticmethod
+    def nextHighestPowerOfTwo(n):
+        # 思路就是将二进制n的最高有效位置为0，随后将其右边的比特位全部置为1
+        # 最后再加上1即可，此处的优化思路同完全背包中的第一种解法
+        n -= 1
+        # 通过或运算将每次位移的结果都"累积"了起来，最终的结果就等同于进行了15次位移
+        n |= n >> 1  # n>>0 | n>>1
+        n |= n >> 2  # (n>>0)>>2 | (n>>1)>>2
+        n |= n >> 4  # (n>>0)>>4 | (n>>1)>>4 | (n>>0>>2)>>4 | (n>>1>>2)>>4
+        n |= n >> 8
+        n += 1
+        return n
+
     def testCase(self):
         assert (self.computeAbsoluteValue(1) == (1, 1, 1))
         assert (self.computeAbsoluteValue(-1) == (1, 1, 1))
