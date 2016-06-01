@@ -11,7 +11,7 @@ def testsortint():
     # bubble: 2879
     # insert: 1385
     # select: 1054
-    # heap: 40(sink), 37(float) -- make heap
+    # heap: 35(sink alone), 30(sink based on float)
     # merge: 30(iter), 31(recur)
     # quick: 18.5(iter), 18.2(recur)
     # radix: 10.5
@@ -73,24 +73,44 @@ def testsortstr():
 
 def testdynamic():
     def func1(wgt, its):
-        tab = [[0] * (len(its) + 1) for w in range(wgt + 1)]
+        tab = [[0] * (len(its) + 1) for i in range(1 + wgt)]
         for i in range(1, wgt + 1):
             for j in range(1, len(its) + 1):
-                tab[i][j] = max(tab[i - its[j - 1][0]][j - 1] + its[j - 1][1] if i >= its[j - 1][0] else 0,
+                tab[i][j] = max(tab[i - its[j - 1][0]][j] + its[j - 1][1] if i >= its[j - 1][0] else 0,
                                 tab[i][j - 1])
         return tab[-1][-1]
 
     def func2(wgt, its):
-        tab = [0] * (wgt + 1)
+        tab = [0] * (1 + wgt)
         for i in range(len(its)):
-            for j in range(wgt, 1, -1):
+            for j in range(1, wgt + 1):
                 tab[j] = max(tab[j],
                              tab[j - its[i][0]] + its[i][1] if j >= its[i][0] else 0)
         return tab[-1]
 
-    wgt = 20
-    its = [(1, 1), (2, 5), (3, 8), (4, 9), (5, 10), (6, 17), (7, 17), (8, 20), (9, 24), (10, 30)]
-    assert (func1(wgt, its[:]) == func2(wgt, its[:]))
+    weight = 100
+    items = [(1, 1), (2, 5), (3, 8), (4, 9), (5, 10), (6, 17), (7, 17), (8, 20), (9, 24), (10, 30)]
+
+    def test(func):
+        times = 10
+        total = 0
+        for i in range(times):
+            cpy = items[:]
+            start = time.time()
+            ret = func(wgt, cpy)
+            end = time.time()
+            total += (end - start) * 1000
+        return ret, total / times
+
+    total1, total2 = 0, 0
+    for wgt in range(weight):
+        r1, t1 = test(func1)
+        r2, t2 = test(func2)
+        assert (r1 == r2)
+        total1 += t1
+        total2 += t2
+    print 'pass:', func1, '-- cost:', total1
+    print 'pass:', func2, '-- cost:', total2
 
 
 def testunionfindset():
