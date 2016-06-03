@@ -11,8 +11,9 @@ class Knapsack(object):
     def testcase(self):
         def test(case):
             assert (len(self.funcs) > 1)
-            assert (reduce(lambda x, y: x if x == y(case[0], case[1]) else -1,
-                           self.funcs[1:], self.funcs[0](case[0], case[1])) > 0)
+            for wgt in range(1, case[0] * 10):
+                assert (reduce(lambda x, y: x if x == y(wgt, case[1]) else -1,
+                               self.funcs[1:], self.funcs[0](wgt, case[1])) >= 0)
 
         cases = [(10, [(2, 6, 3), (2, 7, 1), (4, 3, 2), (5, 4, 2), (6, 5, 2)]),
                  (50, [(10, 60, 2), (20, 100, 2), (30, 120, 5)]),
@@ -72,13 +73,30 @@ class CompleteKnapsack(Knapsack):
         self.funcs.append(self.main_4)
 
     # convert to 01-knapsack problem
+    # 优化：从数的二进制表示，对物品数量的构成进行优化
     def main_1(self, weight, items):
         cpy = items[:]
-        for it in items:  # 优化：物品数量的二进制表示
-            k = 2
-            while it[0] * k <= weight:
-                cpy.append((it[0] * k, it[1] * k))
+        for it in items:
+            w, v = it[0], it[1]
+            k = 1  # exponential of 2
+            while w * 2 ** (k + 1) <= weight:
+                cpy.append((w * 2 ** k, v * 2 ** k))
+                k += 1
+            if w * 2 ** k <= weight:
+                k = (weight - w * (2 ** k - 1)) / w
+                assert (k > 0)
+                cpy.append((w * k, v * k))
+        # @assert: cpy中同种物品的重量总和不大于weight
+        return ZeroOneKnapsack().main_3(weight, cpy)
+
+        cpy = items[:]
+        for it in items:
+            w, v = it[0], it[1]
+            k = 2  # power of 2
+            while w * k <= weight:
+                cpy.append((w * k, v * k))
                 k *= 2
+        # @assert: cpy中同种物品的重量总和不小于weight
         return ZeroOneKnapsack().main_3(weight, cpy)
 
     def main_2(self, weight, items):

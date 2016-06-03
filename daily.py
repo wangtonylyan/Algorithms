@@ -22,7 +22,7 @@ def testsortint():
         return lst
 
     times = 500
-    strlen = 5000
+    strlen = 500
     total = 0
     lst = [i for i in range(1, strlen + 1)]
     for i in range(times):
@@ -73,10 +73,20 @@ def testsortstr():
 
 def testdynamic():
     def func1(wgt, its):
+        cpy = its[:]
+        for w, v in cpy:
+            k = 1
+            while w * 2 ** (k + 1) <= wgt:
+                its.append((w * 2 ** k, v * 2 ** k))
+                k += 1
+            if w * 2 ** k <= wgt:
+                k = (wgt - (w * (2 ** k - 1))) / w
+                its.append((w * k, v * k))
+
         tab = [[0] * (len(its) + 1) for i in range(1 + wgt)]
         for i in range(1, wgt + 1):
             for j in range(1, len(its) + 1):
-                tab[i][j] = max(tab[i - its[j - 1][0]][j] + its[j - 1][1] if i >= its[j - 1][0] else 0,
+                tab[i][j] = max(tab[i - its[j - 1][0]][j - 1] + its[j - 1][1] if i >= its[j - 1][0] else 0,
                                 tab[i][j - 1])
         return tab[-1][-1]
 
@@ -84,18 +94,18 @@ def testdynamic():
         tab = [0] * (1 + wgt)
         for i in range(len(its)):
             for j in range(1, wgt + 1):
-                tab[j] = max(tab[j],
-                             tab[j - its[i][0]] + its[i][1] if j >= its[i][0] else 0)
+                tab[j] = max(tab[j - its[i][0]] + its[i][1] if j >= its[i][0] else 0,
+                             tab[j])
         return tab[-1]
 
     weight = 100
     items = [(1, 1), (2, 5), (3, 8), (4, 9), (5, 10), (6, 17), (7, 17), (8, 20), (9, 24), (10, 30)]
 
-    def test(func):
+    def test(func, wgt, its):
         times = 10
         total = 0
         for i in range(times):
-            cpy = items[:]
+            cpy = its[:]
             start = time.time()
             ret = func(wgt, cpy)
             end = time.time()
@@ -104,8 +114,8 @@ def testdynamic():
 
     total1, total2 = 0, 0
     for wgt in range(weight):
-        r1, t1 = test(func1)
-        r2, t2 = test(func2)
+        r1, t1 = test(func1, wgt, items)
+        r2, t2 = test(func2, wgt, items)
         assert (r1 == r2)
         total1 += t1
         total2 += t2
@@ -128,7 +138,7 @@ def testunionfindset():
 
 def testgraph():
     def mst(grp, src):
-        return 37
+        pass
 
     case = [
         [(1, 4), (7, 8)],
