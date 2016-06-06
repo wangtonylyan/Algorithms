@@ -2,7 +2,7 @@
 !/README.md
 
 *.pyc
-temp.*
+temp*.*
 *.temp
 *.log
 /.idea

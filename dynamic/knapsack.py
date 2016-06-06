@@ -79,11 +79,11 @@ class CompleteKnapsack(Knapsack):
         for it in items:
             w, v = it[0], it[1]
             k = 1  # exponential of 2
-            while w * 2 ** (k + 1) <= weight:
-                cpy.append((w * 2 ** k, v * 2 ** k))
+            while w << (k + 1) <= weight:
+                cpy.append((w << k, v << k))
                 k += 1
-            if w * 2 ** k <= weight:
-                k = (weight - w * (2 ** k - 1)) / w
+            if w << k <= weight:
+                k = (weight - (w << k) + w) / w
                 assert (k > 0)
                 cpy.append((w * k, v * k))
         # @assert: cpy中同种物品的重量总和不大于weight
