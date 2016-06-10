@@ -68,6 +68,8 @@ class SettedBitProblem():
         assert (self.detectOppositeSigns(-1, 0) == True)
         assert (self.detectOppositeSigns(1, -1) == True)
 
+        print 'pass:', self.__class__
+
 
 class NumberProblem():
     # @problem: compute the (ceiling or floor) middle of two integers
@@ -126,9 +128,10 @@ class NumberProblem():
             return (n1, n2)
 
         def f3(n1, n2):
-            n1 ^= n2
-            n2 ^= n1
-            n1 ^= n2
+            if n1 != n2:  # the XOR logic will fail
+                n1 ^= n2
+                n2 ^= n1
+                n1 ^= n2
             return (n1, n2)
 
         return (f1(n1, n2), f2(n1, n2), f3(n1, n2))
@@ -170,9 +173,9 @@ class NumberProblem():
         assert (self.modulusByPowerOfTwo(16, 4) == 0)
         assert (self.modulusByPowerOfTwo(18, 8) == 2)
 
+        print 'pass', self.__class__
+
 
 if __name__ == '__main__':
-    sbp = SettedBitProblem()
-    sbp.testCase()
-    np = NumberProblem()
-    np.testCase()
+    SettedBitProblem().testCase()
+    NumberProblem().testCase()

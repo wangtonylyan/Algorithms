@@ -14,12 +14,8 @@ class VectorRotation():
 
         def reverse(low, high):
             assert (0 <= low <= high <= len(lst))
-            i, j = low, high - 1
-            while i < j:
-                lst[i], lst[j] = lst[j], lst[i]
-                i += 1
-                j -= 1
-            return lst
+            for i in range((high - low) >> 1):
+                lst[low + i], lst[high - 1 - i] = lst[high - 1 - i], lst[low + i]
 
         reverse(0, shift)
         reverse(shift, len(lst))

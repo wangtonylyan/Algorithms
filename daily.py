@@ -22,7 +22,7 @@ def testsortint():
         return lst
 
     times = 500
-    strlen = 500
+    strlen = 5000
     total = 0
     lst = [i for i in range(1, strlen + 1)]
     for i in range(times):

@@ -129,7 +129,6 @@ class LongestCommonSubsequence():
 # can be partitioned into two subsets S1 and S2 such that
 # the sum of the numbers in S1 equals the sum of the numbers in S2
 # 可以转换成子序列问题，即是否存在一个子序列其总和等于整个序列总和的一半
-# 其特殊性在于子问题的解不再是子问题规模的解，只有当前规模问题的解才是有意义的
 # 此问题被称为是最简单的NP-hard问题，与之关联的还有以下几种问题
 # @problem: subset sum problem
 # Given a set of positive integers and a value sum,
