@@ -72,7 +72,7 @@ class VectorRotation():
                 else:
                     low = h
             else:
-                shift = high - shift - low
+                shift = l - low
                 left = not left
         return lst
 

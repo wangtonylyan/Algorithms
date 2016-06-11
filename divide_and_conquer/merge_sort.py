@@ -86,6 +86,44 @@ class MergeSort(sort.Sort):
         return _merge(self.main_3(lst[:mid]), self.main_3(lst[mid:]))
 
 
+# @problem: Given two sorted arrays A and B, A has a large enough buffer
+# at the end to hold B. Merge B into A in sorted order.
+class InPlaceMerge():
+    # start merging from the largest
+    def main(self, lst1, lst2):
+        k = len(lst1) - 1
+        i = len(lst1) - len(lst2) - 1
+        j = len(lst2) - 1
+        while i >= 0 and j >= 0:
+            if lst1[i] > lst2[j]:
+                lst1[k] = lst1[i]
+                i -= 1
+            else:
+                lst1[k] = lst2[j]
+                j -= 1
+            k -= 1
+        while j >= 0:
+            lst1[k] = lst2[j]
+            j -= 1
+            k -= 1
+        return lst1
+
+    def testcase(self):
+        ret = [i for i in range(20)]
+
+        lst1 = [i for i in range(10)]
+        lst2 = [i for i in range(10, 20)]
+        lst1 += [None] * len(lst2)
+        assert (self.main(lst1, lst2) == ret)
+
+        lst1 = [i for i in range(10, 20)]
+        lst2 = [i for i in range(10)]
+        lst1 += [None] * len(lst2)
+        assert (self.main(lst1, lst2) == ret)
+
+        print 'pass:', self.__class__
+
+
 # @problem:
 # Inversion Count for an array indicates – how far (or close) the array is from being sorted.
 # If array is already sorted then inversion count is 0. If array is sorted in reverse order that inversion count is the maximum.
@@ -220,6 +258,7 @@ class SortLinkedList():
 
 if __name__ == '__main__':
     MergeSort().testcase()
+    InPlaceMerge().testcase()
     CountInversionsInArray().testcase()
     SortLinkedList().testcase()
     print 'done'
