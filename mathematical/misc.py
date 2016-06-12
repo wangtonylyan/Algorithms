@@ -41,13 +41,13 @@ class SumWithoutAdd():
         mask = 1
 
         while mask <= n1 and mask <= n2:
-            bit1 = mask & n1
-            bit2 = mask & n2
-            if bit1 == bit2 == 0:
+            b1 = mask & n1
+            b2 = mask & n2
+            if b1 == b2 == 0:
                 if carry:
                     sum |= mask
                     carry = False
-            elif bit1 == bit2 > 0:
+            elif b1 == b2 > 0:
                 if carry:
                     sum |= mask
                 else:
@@ -56,16 +56,10 @@ class SumWithoutAdd():
                 sum |= mask
             mask <<= 1
 
-        while mask <= n1:
-            bit1 = mask & n1
-            if (bit1 > 0 and not carry) or (bit1 == 0 and carry):
-                sum |= mask
-                carry = False
-            mask <<= 1
-
-        while mask <= n2:
-            bit2 = mask & n2
-            if (bit2 > 0 and not carry) or (bit2 == 0 and carry):
+        n = n1 if mask <= n1 else n2
+        while mask <= n:
+            b = mask & n
+            if (b > 0 and not carry) or (b == 0 and carry):
                 sum |= mask
                 carry = False
             mask <<= 1
