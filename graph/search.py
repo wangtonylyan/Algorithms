@@ -28,8 +28,8 @@ class Graph(object):
     class Vertex():
         def __init__(self):
             self.state = 0
-            self.depth = 0
-            self.time = [0, 0]
+            self.depth = 0  # 最小深度
+            self.time = [0, 0]  # 首次和末次访问的顺序
 
         def clear(self):
             self.state = 0

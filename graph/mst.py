@@ -125,9 +125,9 @@ class MinimumSpanningTree():
         # run test case
         num = lambda mst: sum(map(lambda x: x[1], mst))
         assert (len(self.funcs) > 0)
-        ret = self.funcs[0](case[:])
+        ret = self.funcs[0](case)
         for i in range(len(case)):
-            assert (reduce(lambda x, y: x and num(y(case[:], i)) == num(ret), self.funcs, True) == True)
+            assert (reduce(lambda x, y: x and num(y(case, i)) == num(ret), self.funcs, True) == True)
         assert (len(ret) == len(case) - 1)
         assert (sum(map(lambda x: x[1], ret)) == 37)
         print 'pass:', self.__class__

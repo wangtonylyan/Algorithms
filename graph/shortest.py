@@ -33,34 +33,10 @@ class ShortestPath():
     # dag (directed acyclic graph)
     # 仅适用于无环的有向图，O(V+E)
     def main_dag(self, grp, src):
-        def sort(grp):  # topological sort
-            vtx = [0] * len(grp)
-            seq = [None] * len(vtx)
-            time = 1
-            for v in range(len(vtx)):
-                if vtx[v] == 0:
-                    stk = [v]
-                    vtx[v] = 1
-                    while len(stk) > 0:
-                        i = stk[-1]
-                        assert (vtx[i] > 0)
-                        if vtx[i] == 1:
-                            vtx[i] = 2
-                            for j, w in grp[i]:
-                                if vtx[j] == 0:
-                                    vtx[j] = 1
-                                    stk.append(j)
-                                    vtx[i] = 1
-                                    break
-                        else:
-                            assert (vtx[i] == 2)
-                            seq[len(vtx) - time] = i
-                            time += 1
-                            stk.pop()
-            return seq
-
         # 1) sort
-        seq = sort(grp)
+        from sort import TopologicalSort
+        unwgt = map(lambda x: map(lambda y: y[0], x), grp)
+        seq = TopologicalSort().main_Kahn(unwgt)
         # 2) initialize
         dis = [None if i != src else 0 for i in range(len(grp))]
         pre = [None] * len(grp)
@@ -122,8 +98,8 @@ class ShortestPath():
             []
         ]
         for i in range(len(dag)):
-            assert (self.main_BellmanFord(dag[:], i) == self.main_dag(dag[:], i)
-                    == self.main_Dijkstra(dag[:], i))
+            assert (self.main_BellmanFord(dag, i) == self.main_dag(dag, i)
+                    == self.main_Dijkstra(dag, i))
 
         print 'pass:', self.__class__
 

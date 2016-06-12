@@ -73,25 +73,15 @@ def testsortstr():
 
 def testdynamic():
     def func1(wgt, its):
-        cpy = its[:]
-        for w, v in cpy:
-            k = 1
-            while w * 2 ** (k + 1) <= wgt:
-                its.append((w * 2 ** k, v * 2 ** k))
-                k += 1
-            if w * 2 ** k <= wgt:
-                k = (wgt - (w * (2 ** k - 1))) / w
-                its.append((w * k, v * k))
-
-        tab = [[0] * (len(its) + 1) for i in range(1 + wgt)]
+        tab = [[0] * (len(its) + 1) for i in range(wgt + 1)]
         for i in range(1, wgt + 1):
             for j in range(1, len(its) + 1):
-                tab[i][j] = max(tab[i - its[j - 1][0]][j - 1] + its[j - 1][1] if i >= its[j - 1][0] else 0,
+                tab[i][j] = max(tab[i - its[j - 1][0]][j] + its[j - 1][1] if i >= its[j - 1][0] else 0,
                                 tab[i][j - 1])
         return tab[-1][-1]
 
     def func2(wgt, its):
-        tab = [0] * (1 + wgt)
+        tab = [0] * (wgt + 1)
         for i in range(len(its)):
             for j in range(1, wgt + 1):
                 tab[j] = max(tab[j - its[i][0]] + its[i][1] if j >= its[i][0] else 0,
