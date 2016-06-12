@@ -115,6 +115,30 @@ class BinarySearchTree(object):
             bst = bst.left
         return bst
 
+    def preorder(self):
+        def recur(bst):
+            if bst == None:
+                return []
+            return [bst] + recur(bst.left) + recur(bst.right)
+
+        return recur(self.root)
+
+    def inorder(self):
+        def recur(bst):
+            if bst == None:
+                return []
+            return recur(bst.left) + [bst] + recur(bst.right)
+
+        return recur(self.root)
+
+    def postorder(self):
+        def recur(bst):
+            if bst == None:
+                return []
+            return recur(bst.left) + recur(bst.right) + [bst]
+
+        return recur(self.root)
+
     def size(self):
         return self._size(self.root)
 
