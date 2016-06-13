@@ -127,10 +127,13 @@ def testunionfindset():
 
 
 def testgraph():
-    def mst(grp, src):
+    def mst(grp):
         pass
 
-    case = [
+    def shortest(grp, src):
+        pass
+
+    ugrp = [
         [(1, 4), (7, 8)],
         [(0, 4), (2, 8), (7, 11)],
         [(1, 8), (8, 2), (3, 7), (5, 4)],
@@ -142,8 +145,20 @@ def testgraph():
         [(2, 2), (6, 6), (7, 7)]
     ]
 
-    for i in range(len(case)):
-        assert (mst(case[:], i) == 37)
+    dag = [
+        [(1, 4), (7, 8)],
+        [(2, 8), (7, 11)],
+        [(8, 2), (3, 7), (5, 4)],
+        [(4, 9), (5, 14)],
+        [(5, 10)],
+        [(6, 2)],
+        [(7, 1), (8, 6)],
+        [],
+        []
+    ]
+
+    assert (mst(ugrp) == 37)
+    assert (shortest(dag, 0) == 119)
 
 
 if __name__ == '__main__':
