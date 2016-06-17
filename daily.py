@@ -76,14 +76,15 @@ def testdynamic():
         tab = [[0] * (len(its) + 1) for i in range(wgt + 1)]
         for i in range(1, wgt + 1):
             for j in range(1, len(its) + 1):
-                tab[i][j] = max(tab[i - its[j - 1][0]][j] + its[j - 1][1] if i >= its[j - 1][0] else 0,
+                tab[i][j] = max(tab[i - its[j - 1][0]][j - 1] + its[j - 1][1] if i >= its[j - 1][0] else 0,
                                 tab[i][j - 1])
+
         return tab[-1][-1]
 
     def func2(wgt, its):
         tab = [0] * (wgt + 1)
         for i in range(len(its)):
-            for j in range(1, wgt + 1):
+            for j in range(wgt, 0, -1):
                 tab[j] = max(tab[j - its[i][0]] + its[i][1] if j >= its[i][0] else 0,
                              tab[j])
         return tab[-1]
@@ -128,10 +129,185 @@ def testunionfindset():
 
 def testgraph():
     def mst(grp):
-        pass
+        def main_Kruskal(grp):
+            edge = []
+            for i in range(len(grp)):
+                for j, w in grp[i]:
+                    m, n = min(i, j), max(i, j)
+                    if ((m, n), w) not in edge:
+                        edge.append(((m, n), w))
+            assert (len(edge) == sum(map(len, grp)) / 2)
+
+            cnt = [0] * (max(map(lambda x: x[1], edge)) + 1)
+            for (i, j), w in edge:
+                cnt[w] += 1
+            for i in range(len(cnt) - 1):
+                cnt[i + 1] += cnt[i]
+            cpy = edge[:]
+            for (i, j), w in cpy:
+                edge[cnt[w - 1]] = ((i, j), w)
+                cnt[w - 1] += 1
+
+            def find(ds, n):
+                while ds[n] != n:
+                    n = ds[n]
+                return n
+
+            def union(ds, n1, n2):
+                p1 = find(ds, n1)
+                p2 = find(ds, n2)
+                if p1 != p2:
+                    ds[p2] = p1
+                return p1
+
+            ds = [i for i in range(len(grp))]
+            ret = []
+            for (i, j), w in edge:
+                if find(ds, i) != find(ds, j):
+                    union(ds, i, j)
+                    ret.append(w)
+            print ret
+            return sum(ret)
+
+        def main_Prim(grp, src):
+            vtx = [0] * len(grp)
+            dis = [None] * len(grp)
+            vtx[src] = 1
+            dis[src] = 0
+            for i, w in grp[src]:
+                dis[i] = w
+
+            ret = []
+            for v in range(len(grp) - 1):
+                m = None
+                for i in range(len(grp)):
+                    if vtx[i] == 0 and dis[i] != None and (m == None or dis[m] > dis[i]):
+                        m = i
+
+                assert (m != None)
+                ret.append(dis[m])
+                vtx[m] = 1
+
+                for i, w in grp[m]:
+                    if vtx[i] == 0 and (dis[i] == None or dis[i] > w):
+                        dis[i] = w
+            print ret
+            return sum(ret)
+
+        ret = main_Kruskal(grp)
+        for i in range(len(grp)):
+            assert (main_Prim(grp, i) == ret)
+        return ret
 
     def shortest(grp, src):
-        pass
+        def f1(grp, src):
+            dis = [None] * len(grp)
+            dis[src] = 0
+            for v in range(len(grp) - 1):
+                for i in range(len(grp)):
+                    if dis[i] != None:
+                        for j, w in grp[i]:
+                            if dis[j] == None or dis[j] > dis[i] + w:
+                                dis[j] = dis[i] + w
+            print dis
+            return sum(dis)
+
+        def f2(grp, src):
+            def sort(grp):
+                vtx = [0] * len(grp)
+                for i in range(len(grp)):
+                    for j, w in grp[i]:
+                        vtx[j] += 1
+                stk = []
+                for i in range(len(grp)):
+                    if vtx[i] == 0:
+                        stk.append(i)
+                ret = []
+                while len(stk) > 0:
+                    i = stk.pop()
+                    for j, w in grp[i]:
+                        vtx[j] -= 1
+                        if vtx[j] == 0:
+                            stk.append(j)
+                    ret.append(i)
+                return ret
+
+            dis = [None] * len(grp)
+            dis[src] = 0
+            for i in sort(grp):
+                if dis[i] != None:
+                    for j, w in grp[i]:
+                        if dis[j] == None or dis[j] > dis[i] + w:
+                            dis[j] = dis[i] + w
+            print dis
+            return sum(dis)
+
+        def f3(grp, src):
+            def sort(grp, src):
+                vtx = [0] * len(grp)
+                vtx[src] = 1
+                stk = [src]
+                time = 1
+                ret = [None] * len(grp)
+                while len(stk) > 0:
+                    i = stk[-1]
+                    if vtx[i] == 1:
+                        vtx[i] = 2
+                        for j, w in grp[i]:
+                            if vtx[j] == 0:
+                                vtx[j] = 1
+                                stk.append(j)
+                                vtx[i] = 1
+                                break
+                    else:
+                        assert (vtx[i] == 2)
+                        stk.pop()
+                        ret[-time] = i
+                        time += 1
+                return ret
+
+            dis = [None] * len(grp)
+            dis[src] = 0
+            ret = sort(grp, src)
+            for i in ret:
+                if dis[i] != None:
+                    for j, w in grp[i]:
+                        if dis[j] == None or dis[j] > dis[i] + w:
+                            dis[j] = dis[i] + w
+
+            print dis
+            return sum(dis)
+
+        def f4(grp, src):
+            vtx = [0] * len(grp)
+            vtx[src] = 1
+            dis = [None] * len(grp)
+            dis[src] = 0
+            for i, w in grp[src]:
+                dis[i] = w
+
+            ret = []
+            for v in range(len(grp) - 1):
+                m = None
+                for i in range(len(grp)):
+                    if vtx[i] == 0 and dis[i] != None:
+                        if m == None or dis[m] > dis[i]:
+                            m = i
+                if m == None:
+                    break
+                vtx[m] = 1
+                ret.append(dis[m])
+
+                for i, w in grp[m]:
+                    if vtx[i] == 0:
+                        if dis[i] == None or dis[i] > dis[m] + w:
+                            dis[i] = dis[m] + w
+            print ret
+            return sum(ret)
+
+        ret = f1(grp, src)
+        assert (ret == f2(grp, src) == f3(grp, src) == f4(grp, src))
+        return ret
 
     ugrp = [
         [(1, 4), (7, 8)],
@@ -158,6 +334,7 @@ def testgraph():
     ]
 
     assert (mst(ugrp) == 37)
+    print '-' * 25
     assert (shortest(dag, 0) == 119)
 
 
