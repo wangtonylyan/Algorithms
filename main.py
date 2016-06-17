@@ -16,5 +16,5 @@
 
 # 【linear extension】
 # a linear order (or total order) that is compatible with the partial order
-# 即满足于已有偏序的一个全序
+# 即根据一个偏序得出一个与之并不矛盾的全序
 # 此类问题有：拓扑排序，MRO

@@ -31,13 +31,13 @@ class ZeroOneKnapsack(Knapsack):
 
     # depth-first search, also recursive version of main_2()
     def main_1(self, weight, items):
-        def _recur(wgt, ind):
+        def recur(wgt, ind):
             if wgt <= 0 or ind < 0:
                 return 0
-            return max(_recur(wgt - items[ind][0], ind - 1) + items[ind][1] if items[ind][0] <= wgt else 0,
-                       _recur(wgt, ind - 1))
+            return max(recur(wgt - items[ind][0], ind - 1) + items[ind][1] if items[ind][0] <= wgt else 0,
+                       recur(wgt, ind - 1))
 
-        return _recur(weight, len(items) - 1)
+        return recur(weight, len(items) - 1)
 
     def main_2(self, weight, items):
         # tab[i][j]: the maximum value within an i-weight knapsack with j items
@@ -100,13 +100,13 @@ class CompleteKnapsack(Knapsack):
         return ZeroOneKnapsack().main_3(weight, cpy)
 
     def main_2(self, weight, items):
-        def _recur(wgt, ind):
+        def recur(wgt, ind):
             if wgt <= 0 or ind < 0:
                 return 0
-            return max(_recur(wgt - items[ind][0], ind) + items[ind][1] if items[ind][0] <= wgt else 0,
-                       _recur(wgt, ind - 1))
+            return max(recur(wgt - items[ind][0], ind) + items[ind][1] if items[ind][0] <= wgt else 0,
+                       recur(wgt, ind - 1))
 
-        return _recur(weight, len(items) - 1)
+        return recur(weight, len(items) - 1)
 
     def main_3(self, weight, items):
         # tab[i][j] ~ tab[i-items[j-1][0]][j] or tab[i][j-1]
