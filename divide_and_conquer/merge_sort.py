@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 
-
-import sys, random
-
-sys.path.append("..")
-import sort
+import random
+from sort import Sort
 
 
-class MergeSort(sort.Sort):
+class MergeSort(Sort):
     def __init__(self):
         super(MergeSort, self).__init__()
         self.funcs.append(self.main_1)

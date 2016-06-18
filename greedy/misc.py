@@ -1,23 +1,39 @@
 # -*- coding: utf-8 -*-
 
+import random
+
+
 # @problem: Given n activities with their start and finish times.
 # Select the maximum number of activities that can be performed by a single person,
 # assuming that a person can only work on a single activity at a time.
 class ActivitySelection():
-    def __init__(self):
-        pass
+    def main_dynamic(self, lst):
+        # 以下维护tab的逻辑对于输入的活动顺序有所依赖
+        # 即对于任意活动lst[k]，lst[k:]中不能存在可以在其前被实施的活动
+        # 基于开始时间或结束时间对lst进行排序都是满足上述条件的
+        lst.sort(key=lambda x: x[0])
+        lst.sort(key=lambda x: x[1])
 
-    def main_1(self, lst):
+        time = max(map(lambda x: x[1], lst))
+        tab = [[0] * (len(lst) + 1) for i in range(time + 1)]
+        for i in range(1, time + 1):
+            for j in range(1, len(lst) + 1):
+                tab[i][j] = max(tab[lst[j - 1][0]][j - 1] + 1 if lst[j - 1][1] <= i else 0,
+                                tab[i][j - 1])
+
+        return tab[-1][-1]
+
+    def main_greedy_1(self, lst):
         lst.sort(key=lambda x: x[1])  # sort by finish time
-        ret = [lst[0]]  # greedy choice
+        ret = [lst[0]]  # greedy choice: the first one to finish
         for i in range(1, len(lst)):
             if lst[i][0] >= ret[-1][1]:
                 ret.append(lst[i])
         return len(ret)
 
-    def main_2(self, lst):
+    def main_greedy_2(self, lst):
         lst.sort(key=lambda x: x[0])  # sort by start time
-        ret = [lst[-1]]  # greedy choice
+        ret = [lst[-1]]  # greedy choice: the last one to start
         for i in range(len(lst) - 2, -1, -1):
             if lst[i][1] <= ret[-1][0]:
                 ret.append(lst[i])
@@ -25,17 +41,28 @@ class ActivitySelection():
 
     def testcase(self):
         def test(lst):
-            assert (self.main_1(lst[:]) == self.main_2(lst[:]))
+            assert (self.main_dynamic(lst[:]) ==
+                    self.main_greedy_1(lst[:]) ==
+                    self.main_greedy_2(lst[:]))
 
-        llst = [[(1, 2), (3, 4), (0, 6), (5, 7), (8, 9), (5, 9)], ]
-        map(test, llst)
+        cases = []
+        for t in range(500):
+            case = []
+            for i in range(random.randint(5, 60)):
+                start = random.randint(0, 30)
+                end = random.randint(0, 30)
+                while end == start:
+                    end = random.randint(0, 30)
+                start, end = min(start, end), max(start, end)
+                if (start, end) not in case:
+                    case.append((start, end))
+            cases.append(case)
+
+        map(test, cases)
         print 'pass:', self.__class__
 
 
-import sys
-
-sys.path.append('../dynamic')
-from knapsack import Knapsack
+from dynamic.knapsack import Knapsack
 
 
 class FractionalKnapsack(Knapsack):

@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 
-
-import sys
-
-sys.path.append("..")
-import sort
+from sort import Sort
 
 
 # 插入排序非常适用于输入域增量式地动态变化
-class InsertionSort(sort.Sort):
+class InsertionSort(Sort):
     def __init__(self):
         super(InsertionSort, self).__init__()
         self.funcs.append(self.main_iter)
@@ -44,7 +40,7 @@ class InsertionSort(sort.Sort):
 
 # a generalization of insertion sort
 # time complexity is heavily dependent on the gap sequence it uses
-class ShellSort(sort.Sort):
+class ShellSort(Sort):
     def __init__(self):
         super(ShellSort, self).__init__()
         self.funcs.append(self.main)

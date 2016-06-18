@@ -2,9 +2,8 @@
 # @problem: graph traversal
 # 针对于无向图
 
-
 import copy
-from collections import deque
+import collections
 
 
 def graph_traverse_check(func):
@@ -84,7 +83,7 @@ class GraphList(Graph):
 
     @graph_traverse_check
     def bfs_iter(self, src):
-        que = deque()
+        que = collections.deque()
         self.vtx[src].state = 1
         self.vtx[src].depth = 0
         que.append(src)
@@ -189,7 +188,7 @@ class LakeCounting():
             for j in range(len(grp[0])):
                 if grp[i][j] == 1:
                     num += 1
-                    que = deque()
+                    que = collections.deque()
                     que.append((i, j))
                     while len(que) > 0:
                         a, b = que.popleft()

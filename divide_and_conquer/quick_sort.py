@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 
-
-import sys
-
-sys.path.append("..")
-import sort
+from sort import Sort
 
 
-class QuickSort(sort.Sort):
+class QuickSort(Sort):
     def __init__(self):
         super(QuickSort, self).__init__()
         self.part = self._partition_one_way
