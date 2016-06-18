@@ -103,38 +103,16 @@ class IsItATree():
 class OfflineMinimum():
     # on-line algorithm: min-heap
     def main_heap(self, seq):
-        def sink(hp, low, high):
-            it = low << 1 | 1
-            while it < high:
-                if it + 1 < high and hp[it + 1] < hp[it]:
-                    it += 1
-                if hp[it] > hp[low]:
-                    break
-                hp[it], hp[low] = hp[low], hp[it]
-                low = it
-                it = low << 1 | 1
-
-        def float(hp, low, high):
-            it = (low - 1) >> 1
-            while it >= high:
-                if hp[it] < hp[low]:
-                    break
-                hp[it], hp[low] = hp[low], hp[it]
-                low = it
-                it = (low - 1) >> 1
-
-        min, hp = [], []
+        from data_structure.heap import MinHeap
+        hp = MinHeap()
+        ret = []
         for i in seq:
             if i != -1:
                 assert (isinstance(i, int))
-                hp.append(i)
-                float(hp, len(hp) - 1, 0)
-            elif len(hp) > 0:
-                min.append(hp[0])
-                hp[0], hp[-1] = hp[-1], hp[0]
-                hp = hp[:-1]
-                sink(hp, 0, len(hp))
-        return min
+                hp.push(i)
+            elif hp.size() > 0:
+                ret.append(hp.pop())
+        return ret
 
     # off-line algorithm
     def main_disjoint(self, seq):

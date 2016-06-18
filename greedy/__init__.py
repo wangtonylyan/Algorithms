@@ -2,4 +2,4 @@
 
 import sys
 
-sys.append('..')
+sys.path.append('..')
