@@ -1,28 +1,30 @@
+# -*- coding: utf-8 -*-
+
 # design pattern: reusability, flexibility
 
 
-# object diagram£º´¦Àí¶ÔÏóÖ®¼äµÄ¹ØÏµ£¬¾ö¶¨ÓÚÔËĞĞÆÚ¡£
-# class diagram£º´¦ÀíÀàµÄ¹ØÏµ£¬¾ö¶¨ÓÚÔÚ±àÒëÆÚ¡£
-# interaction diagram£º
+# object diagramï¼šå¤„ç†å¯¹è±¡ä¹‹é—´çš„å…³ç³»ï¼Œå†³å®šäºè¿è¡ŒæœŸã€‚
+# class diagramï¼šå¤„ç†ç±»çš„å…³ç³»ï¼Œå†³å®šäºåœ¨ç¼–è¯‘æœŸã€‚
+# interaction diagramï¼š
 
 # classification by two criteria: purpose(creational,structural,behavioral) & scope(class,object)
 # 1) creational class pattern & creational object pattern
-# Ö÷Òª×÷ÓÃÊÇÓÃÓÚ´´½¨¶ÔÏó
+# ä¸»è¦ä½œç”¨æ˜¯ç”¨äºåˆ›å»ºå¯¹è±¡
 # The creational class patterns defer some part of object creation to subclasses,
 # while the creational object patterns defer it to another object.
 # 2) structural class pattern & structural object pattern
-# Ö÷Òª×÷ÓÃÊÇÒÔ²»Í¬µÄ×Ó¶ÔÏóÀ´×é½¨¸ü´ó¹æÄ£µÄ¶ÔÏó½á¹¹
+# ä¸»è¦ä½œç”¨æ˜¯ä»¥ä¸åŒçš„å­å¯¹è±¡æ¥ç»„å»ºæ›´å¤§è§„æ¨¡çš„å¯¹è±¡ç»“æ„
 # The structural class patterns use inheritance to compose classes,
 # while the structural object patterns describe ways to assemble objects.
 # 3) behavioral class pattern & behavioral object pattern
-# Ö÷Òª×÷ÓÃÊÇÓÃÓÚ¹ÜÀí¶ÔÏó£¨»òÆäÖ®¼ä£©µÄËã·¨¡¢¹ØÏµ¡¢Ö°Ôğ
+# ä¸»è¦ä½œç”¨æ˜¯ç”¨äºç®¡ç†å¯¹è±¡ï¼ˆæˆ–å…¶ä¹‹é—´ï¼‰çš„ç®—æ³•ã€å…³ç³»ã€èŒè´£
 # The behavioral class patterns use inheritance to describe algorithms and flow of control,
 # whereas the behavioral object patterns describe how a group of objects cooperate to
 # perform a task that no single object can carry out alone.
 
-# ºÜ¶àÉè¼ÆÄ£Ê½¶¼ÊÇÕë¶ÔÓÚ¾²Ì¬ÓïÑÔµÄ£¬¶ø¶¯Ì¬ÓïÑÔÖĞµÄÒ»Ğ©Óï·¨ÌØĞÔ£¨»ò¾²Ì¬ÓïÑÔÖĞµÄ¶¯Ì¬ÌØĞÔ£©¿ÉÒÔºÜºÃµØÌæ´úÉè¼ÆÄ£Ê½
+# å¾ˆå¤šè®¾è®¡æ¨¡å¼éƒ½æ˜¯é’ˆå¯¹äºé™æ€è¯­è¨€çš„ï¼Œè€ŒåŠ¨æ€è¯­è¨€ä¸­çš„ä¸€äº›è¯­æ³•ç‰¹æ€§ï¼ˆæˆ–é™æ€è¯­è¨€ä¸­çš„åŠ¨æ€ç‰¹æ€§ï¼‰å¯ä»¥å¾ˆå¥½åœ°æ›¿ä»£è®¾è®¡æ¨¡å¼
 
-# Éè¼ÆÄ£Ê½¿ÉÒÔÕë¶ÔÓÚ£º1)µ¥¸öÀàµÄÉè¼Æ£¬2)ÀàÖ®¼äµÄ¹ØÁª/×éºÏ£¬3)Í¬Ò»¸ö¼Ì³ĞÊ÷ÉÏµÄÀàµÄÉè¼Æ
+# è®¾è®¡æ¨¡å¼å¯ä»¥é’ˆå¯¹äºï¼š1)å•ä¸ªç±»çš„è®¾è®¡ï¼Œ2)ç±»ä¹‹é—´çš„å…³è”/ç»„åˆï¼Œ3)åŒä¸€ä¸ªç»§æ‰¿æ ‘ä¸Šçš„ç±»çš„è®¾è®¡
 
 
 # the testcase method in each design pattern class illustrates the actions of client as the pattern's user
@@ -33,8 +35,8 @@
 # behavioral pattern: template method,
 
 
-# ºÜ¶àÄ£Ê½µÄÄ¿µÄ¶¼ÔÚÓÚÒª±ÜÃâÊ¹ÓÃ¼Ì³Ğ£¬ÒòÎª¼Ì³ĞµÄ²ã´Î¹ıÉî»áÒıÈë¶îÍâµÄ¸´ÔÓ¶È
-# ÀıÈçproxy¡¢decorator¡¢adapter¡¢delegate¡¢bridge¡¢component
+# å¾ˆå¤šæ¨¡å¼çš„ç›®çš„éƒ½åœ¨äºè¦é¿å…ä½¿ç”¨ç»§æ‰¿ï¼Œå› ä¸ºç»§æ‰¿çš„å±‚æ¬¡è¿‡æ·±ä¼šå¼•å…¥é¢å¤–çš„å¤æ‚åº¦
+# ä¾‹å¦‚proxyã€decoratorã€adapterã€delegateã€bridgeã€component
 
 
 # class inheritance & object composition
@@ -42,6 +44,6 @@
 # the later keeps encapsulation and remains in run time
 # Favor object composition over class inheritance.
 
-# ¼¸¸öÔÚÊµÏÖ»ò×÷ÓÃÉÏ±È½ÏÏàËÆµÄÄ£Ê½£¬±ãÓÚ¹ØÁªµØÀí½âºÍ¼ÇÒä
-# 1£©factory method & abstract factory & builder
-# 2£©proxy & decorator & adapter & bridge & composite
+# å‡ ä¸ªåœ¨å®ç°æˆ–ä½œç”¨ä¸Šæ¯”è¾ƒç›¸ä¼¼çš„æ¨¡å¼ï¼Œä¾¿äºå…³è”åœ°ç†è§£å’Œè®°å¿†
+# 1ï¼‰factory method & abstract factory & builder
+# 2ï¼‰proxy & decorator & adapter & bridge & composite
