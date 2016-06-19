@@ -3,7 +3,7 @@
 # 针对于无向图
 
 import copy
-import collections
+from data_structure.queue import Queue
 
 
 def graph_traverse_check(func):
@@ -38,11 +38,10 @@ class Graph(object):
     def __init__(self, grp):
         self.grp = copy.deepcopy(grp)
         self.vtx = [self.__class__.Vertex() for i in range(len(self.grp))]
-        assert (len(self.grp) == len(self.vtx))
+        assert (len(self.grp) == len(self.vtx) == len(grp))
 
     def _clear(self):
-        for v in self.vtx:
-            v.clear()
+        map(lambda x: getattr(x, 'clear')(), self.vtx)
 
     def testcase(self):
         case = [[1, 4],
@@ -83,18 +82,18 @@ class GraphList(Graph):
 
     @graph_traverse_check
     def bfs_iter(self, src):
-        que = collections.deque()
+        que = Queue()
         self.vtx[src].state = 1
         self.vtx[src].depth = 0
-        que.append(src)
+        que.push(src)
         while len(que) > 0:
-            i = que.popleft()
+            i = que.pop()
             assert (self.vtx[i].state == 1)
             for j in self.grp[i]:
                 # 只有首次遍历到的深度才是最小深度
                 if self.vtx[j].state == 0:
                     self.vtx[j].depth = self.vtx[i].depth + 1
-                    que.append(j)
+                    que.push(j)
                     self.vtx[j].state = 1
             self.vtx[i].state = 2  # optional
 
@@ -188,16 +187,16 @@ class LakeCounting():
             for j in range(len(grp[0])):
                 if grp[i][j] == 1:
                     num += 1
-                    que = collections.deque()
-                    que.append((i, j))
+                    que = Queue()
+                    que.push((i, j))
                     while len(que) > 0:
-                        a, b = que.popleft()
+                        a, b = que.pop()
                         if 0 <= a < len(grp) and 0 <= b < len(grp[0]) and grp[a][b] == 1:
                             grp[a][b] = 0
-                            que.append((a, b + 1))
-                            que.append((a + 1, b + 1))
-                            que.append((a + 1, b))
-                            que.append((a + 1, b - 1))
+                            que.push((a, b + 1))
+                            que.push((a + 1, b + 1))
+                            que.push((a + 1, b))
+                            que.push((a + 1, b - 1))
         return num
 
     def testcase(self):

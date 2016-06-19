@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 # data structure: stack (FILO)
 
-class Stack():
-    class Node():
-        def __init__(self, value):
-            self.value = value
-            self.next = None
+from list import List
 
+
+class Stack(List):
     def __init__(self):
-        self.head = None
-        self.count = 0
+        super(Stack, self).__init__()
 
     def push(self, value):
         stk = self.__class__.Node(value)
@@ -20,24 +17,24 @@ class Stack():
     def pop(self):
         ret = None
         if self.head:
-            ret = self.head.value
+            ret = self.head.key
             self.head = self.head.next
             self.count -= 1
         return ret
 
-    def size(self):
-        return self.count
+    def testcase(self):
+        s = self.__class__()
 
-    def clean(self):
-        self.head = None
-        self.count = 0
+        for i in range(10):
+            s.push(i)
+            assert (len(s) == i + 1)
+        for i in range(12):
+            s.pop()
+            assert (len(s) == (10 - i - 1 if i < 10 else 0))
+        assert (len(s) == 0)
+
+        print 'pass:', self.__class__
 
 
 if __name__ == '__main__':
-    s = Stack()
-    for i in range(10):
-        s.push(i)
-    for i in range(12):
-        print s.pop(),
-        assert (s.size() == (10 - i - 1 if i < 10 else 0))
-    assert (s.size() == 0)
+    Stack().testcase()

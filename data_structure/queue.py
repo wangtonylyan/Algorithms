@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 # data structure: queue (FIFO)
 
-class Queue():
-    class Node():
-        def __init__(self, value):
-            self.next = None
-            self.value = value
+from list import List
 
+
+class Queue(List):
     def __init__(self):
-        self.head = None
-        self.count = 0
+        super(Queue, self).__init__()
 
     def push(self, value):
         que = self.__class__.Node(value)
@@ -25,24 +22,24 @@ class Queue():
     def pop(self):
         ret = None
         if self.head:
-            ret = self.head.value
+            ret = self.head.key
             self.head = self.head.next
             self.count -= 1
         return ret
 
-    def size(self):
-        return self.count
+    def testcase(self):
+        q = self.__class__()
 
-    def clean(self):
-        self.head = None
-        self.count = 0
+        for i in range(10):
+            q.push(i)
+            assert (len(q) == i + 1)
+        for i in range(12):
+            q.pop()
+            assert (len(q) == (10 - i - 1 if i < 10 else 0))
+        assert (len(q) == 0)
+
+        print 'pass:', self.__class__
 
 
 if __name__ == '__main__':
-    q = Queue()
-    for i in range(10):
-        q.push(i)
-    for i in range(12):
-        print q.pop(),
-        assert (q.size() == (10 - i - 1 if i < 10 else 0))
-    assert (q.size() == 0)
+    Queue().testcase()

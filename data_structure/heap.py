@@ -82,7 +82,7 @@ class Heap(object):
             self._sink(0, len(self.hp))
         return ret
 
-    def size(self):
+    def __len__(self):
         return len(self.hp)
 
     def _check(self):
@@ -103,7 +103,7 @@ class Heap(object):
             for i in range(num):
                 hp.pop()
                 hp._check()
-            assert (hp.size() == 0)
+            assert (len(hp) == 0)
 
             random.shuffle(lst)
             hp = self.__class__([])
@@ -111,11 +111,11 @@ class Heap(object):
             for v in lst:
                 hp.push(v)
                 hp._check()
-            assert (hp.size() == num)
+            assert (len(hp) == num)
             for i in range(num):
                 hp.pop()
                 hp._check()
-            assert (hp.size() == 0)
+            assert (len(hp) == 0)
 
         print 'pass:', self.__class__
 

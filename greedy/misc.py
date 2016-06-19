@@ -49,10 +49,10 @@ class ActivitySelection():
         for t in range(500):
             case = []
             for i in range(random.randint(5, 60)):
-                start = random.randint(0, 30)
-                end = random.randint(0, 30)
+                start = random.randint(1, 30)
+                end = random.randint(1, 30)
                 while end == start:
-                    end = random.randint(0, 30)
+                    end = random.randint(1, 30)
                 start, end = min(start, end), max(start, end)
                 if (start, end) not in case:
                     case.append((start, end))

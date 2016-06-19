@@ -18,7 +18,7 @@ class Huffman():
         hp = map(lambda (c, f): self.__class__.Node(f, c), chst)
         hp = MinHeap(hp, key)
         # build tree
-        while hp.size() > 1:
+        while len(hp) > 1:
             left = hp.pop()
             right = hp.pop()
             node = self.__class__.Node(key(left) + key(right), None)
