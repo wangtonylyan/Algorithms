@@ -2,6 +2,8 @@
 # @problem: single-source shortest paths problem
 # 针对于连通的有向图
 
+from sort import TopologicalSort
+
 
 class ShortestPath():
     # weighted directed graph
@@ -34,7 +36,6 @@ class ShortestPath():
     # 仅适用于无环的有向图，O(V+E)
     def main_dag(self, grp, src):
         # 1) sort
-        from sort import TopologicalSort
         unwgt = map(lambda x: map(lambda y: y[0], x), grp)
         seq = TopologicalSort().main_Kahn(unwgt)
         # 2) initialize
