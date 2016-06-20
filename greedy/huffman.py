@@ -5,9 +5,9 @@ from data_structure.heap import MinHeap
 
 class Huffman():
     class Node():
-        def __init__(self, key, value):
-            self.left = None
-            self.right = None
+        def __init__(self, key, value, left=None, right=None):
+            self.left = left
+            self.right = right
             self.key = key
             self.value = value
 
@@ -21,9 +21,7 @@ class Huffman():
         while len(hp) > 1:
             left = hp.pop()
             right = hp.pop()
-            node = self.__class__.Node(key(left) + key(right), None)
-            node.left = left
-            node.right = right
+            node = self.__class__.Node(key(left) + key(right), None, left, right)
             hp.push(node)
         return hp.pop()
 
