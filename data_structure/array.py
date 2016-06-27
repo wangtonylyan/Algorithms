@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 # data structure: array
 
-import random
 
-
-# @problem: 删除数组中的给定区间
-class IntervalDeletion():
-    def main(self, lst, low, high):
+class Array():
+    # @problem: 删除数组中的给定区间
+    @staticmethod
+    def deleteInterval(lst, low, high):
         shift = high - low
         assert (high - low >= 0)
         i = high
@@ -15,19 +14,9 @@ class IntervalDeletion():
             i += 1
         return lst[:i - shift]
 
-    def testcase(self):
-        num = 100
-        case = [i for i in range(num)]
-        for s in range(num + 1):
-            for i in range(len(case) - s):
-                assert (self.main(case[:], i, i + s) == case[:i] + case[i + s:])
-
-        print 'pass:', self.__class__
-
-
-# @problem: 删除数组中连续的重复元素
-class ReplicateDeletion():
-    def main(self, lst):
+    # @problem: 删除数组中连续的重复元素
+    @staticmethod
+    def deleteReplicate(lst):
         i, j = 0, 1
         while j < len(lst):
             if lst[i] == lst[j]:
@@ -37,16 +26,6 @@ class ReplicateDeletion():
                 lst[i] = lst[j]
                 j += 1
         return lst[:i + 1]
-
-    def testcase(self):
-        for t in range(100):
-            case = []
-            for i in range(20):
-                for j in range(random.randint(1, 20)):
-                    case.append(i)
-            assert (self.main(case[:]) == [k for k in range(i + 1)])
-
-        print 'pass:', self.__class__
 
 
 # @problem: rotation
@@ -135,6 +114,5 @@ class Rotation():
 
 
 if __name__ == '__main__':
-    IntervalDeletion().testcase()
-    ReplicateDeletion().testcase()
     Rotation().testcase()
+    print 'done'

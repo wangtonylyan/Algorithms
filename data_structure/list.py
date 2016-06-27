@@ -50,7 +50,7 @@ class List(object):
     # 2) 将当前遍历到的节点与其之前遍历到的节点进行比较，判断是否有相同节点
     # 可以原地比较，也可以利用一个额外的数据结构存储已遍历到的节点，但两者的比较次数相同
     # 3) Floyd's cycle-finding algorithm, aka. tortoise and hare algorithm
-    def ifCyclic(self):
+    def checkCyclic(self):
         if self.head:
             hare = self.head.next
             tortoise = self.head
