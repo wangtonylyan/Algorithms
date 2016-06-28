@@ -84,7 +84,7 @@ class CompleteKnapsack(Knapsack):
                 k += 1
             if w << k <= weight:
                 k = (weight - (w << k) + w) / w
-                assert (k > 0)
+                assert (isinstance(k, int) and k > 0)
                 cpy.append((w * k, v * k))
         # @assert: cpy中同种物品的重量总和不大于weight
         return ZeroOneKnapsack().main_3(weight, cpy)
