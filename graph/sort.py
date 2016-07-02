@@ -17,18 +17,18 @@ class TopologicalSort():
         # 因此该算法不依赖于此容器的具体类型，包括set、queue、stack等
         # 采用不同的容器类型会导致最终得到的拓扑顺序不唯一
         # 换言之，对于任意时刻该容器中的所有节点，彼此之间不存在唯一的拓扑顺序
-        st = set()
+        indg = set()
         for i in range(len(grp)):
             if vtx[i] == 0:
-                st.add(i)
+                indg.add(i)
         # 2)
         sort = []
-        while len(st) > 0:
-            i = st.pop()  # 将入度已为0的节点i从图中删除
+        while len(indg) > 0:
+            i = indg.pop()  # 将入度已为0的节点i从图中删除
             for j in grp[i]:  # 方式是删除所有以节点i为起始点的有向边
                 vtx[j] -= 1
                 if vtx[j] == 0:
-                    st.add(j)
+                    indg.add(j)
             sort.append(i)
         # 3)
         return sort if len(sort) == len(grp) else None

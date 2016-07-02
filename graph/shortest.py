@@ -38,6 +38,7 @@ class ShortestPath():
         # 1) sort
         unwgt = map(lambda x: map(lambda y: y[0], x), grp)
         seq = TopologicalSort().main_Kahn(unwgt)
+        assert (seq != None and len(seq) == len(grp))
         # 2) initialize
         dis = [None if i != src else 0 for i in range(len(grp))]
         pre = [None] * len(grp)

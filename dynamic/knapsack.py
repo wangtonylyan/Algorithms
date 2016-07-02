@@ -12,7 +12,7 @@ class Knapsack(object):
         def test(case):
             assert (len(self.funcs) > 1)
             for wgt in range(1, case[0] * 10):
-                assert (reduce(lambda x, y: x if x == y(wgt, case[1]) else -1,
+                assert (reduce(lambda x, y: x if x == y(wgt, case[1]) else None,
                                self.funcs[1:], self.funcs[0](wgt, case[1])) >= 0)
 
         cases = [(10, [(2, 6, 3), (2, 7, 1), (4, 3, 2), (5, 4, 2), (6, 5, 2)]),
