@@ -6,7 +6,6 @@
 
 class TopologicalSort():
     def main_Kahn(self, grp):
-        # 1)
         vtx = [0] * len(grp)  # in-degree
         for i in range(len(grp)):
             for j in grp[i]:
@@ -21,7 +20,6 @@ class TopologicalSort():
         for i in range(len(grp)):
             if vtx[i] == 0:
                 indg.add(i)
-        # 2)
         sort = []
         while len(indg) > 0:
             i = indg.pop()  # 将入度已为0的节点i从图中删除
@@ -30,43 +28,38 @@ class TopologicalSort():
                 if vtx[j] == 0:
                     indg.add(j)
             sort.append(i)
-        # 3)
         return sort if len(sort) == len(grp) else None
 
     def main_dfs(self, grp):
-        # 1)
-        indg = [0] * len(grp)  # in-degree
+        vtx = [0] * len(grp)
         for i in range(len(grp)):
             for j in grp[i]:
-                indg[j] += 1
-        # 2)
-        vtx = [0] * len(grp)
-        sort = [None] * len(grp)
-        time = 1
-        for src in range(len(grp)):
-            if indg[src] == 0:
-                assert (vtx[src] == 0)
-                stk = [src]
-                vtx[src] = 1
-                while len(stk) > 0:
-                    i = stk[-1]
-                    assert (vtx[i] > 0)
-                    if vtx[i] == 1:
-                        vtx[i] = 2
-                        for j in grp[i]:
-                            if vtx[j] == 0:
-                                vtx[j] = 1
-                                stk.append(j)
-                                vtx[i] = 1
-                                break
-                            elif j in stk:  # 整个stk就是一条路径
-                                return None  # loop exists
-                    else:
-                        assert (vtx[i] == 2)
-                        stk.pop()
-                        # 3)
-                        sort[-time] = i  # sort.insert(0, i)
-                        time += 1
+                vtx[j] += 1  # in-degree
+        stk = []
+        for i in range(len(grp)):
+            if vtx[i] == 0:
+                vtx[i] = 1  # initial state
+                stk.append(i)
+            else:
+                vtx[i] = 0
+        sort = []
+        while len(stk) > 0:
+            i = stk[-1]
+            assert (vtx[i] > 0)
+            if vtx[i] == 1:
+                vtx[i] = 2
+                for j in grp[i]:
+                    if vtx[j] == 0:
+                        vtx[j] = 1
+                        stk.append(j)
+                        vtx[i] = 1
+                        break
+                    elif j in stk:  # 整个stk就是一条路径
+                        return None  # loop exists
+            else:
+                assert (vtx[i] == 2)
+                stk.pop()
+                sort = [i] + sort
         return sort
 
     def testcase(self):
