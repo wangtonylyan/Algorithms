@@ -12,10 +12,15 @@ class DisjointSetList():
 # in practice, you can use either of them for simplicity
 class DisjointSetForest():
     def __init__(self, num):
-        # alphabet = [1,num]
+        # alphabet = [0,num]
         self.sets = [i for i in range(num + 1)]
         self.ranks = [0] * (num + 1)
-        assert (len(self.sets) == len(self.ranks))
+        self.size = len(self.sets)
+        assert (len(self.sets) == len(self.ranks) == self.size == num + 1)
+
+    def __len__(self):
+        assert (self.size > 0)
+        return self.size
 
     # find the root of a tree
     def find(self, n):
@@ -33,6 +38,8 @@ class DisjointSetForest():
         p2 = self.find(n2)
         if p1 == p2:
             return p1
+        self.size -= 1
+        assert (self.size > 0)
         # (a) make the root of the tree with fewer nodes
         # point to the one with more nodes
         # 由于最理想的树高度是1，且节点个数更多的树的高度也往往更高，
@@ -110,7 +117,7 @@ class OfflineMinimum():
             if i != -1:
                 assert (isinstance(i, int))
                 hp.push(i)
-            elif hp.size() > 0:
+            elif len(hp) > 0:
                 ret.append(hp.pop())
         return ret
 
@@ -131,37 +138,36 @@ class OfflineMinimum():
         assert (sum(map(len, sets)) == num)
         # 2) make the disjoint sets
         ds = DisjointSetForest(num)
-        ords = []
+        root = []  # root of tree in forest
         for set in sets:
             for i in range(1, len(set)):
                 ds.union(set[i], set[0])
-            ords.append(set[0] if len(set) > 0 else 0)
-        assert (len(ords) == seq.count(-1) + 1)
+            root.append(set[0] if len(set) > 0 else None)
+        assert (len(root) == seq.count(-1) + 1)
         # 3) compute the result
-        # ords[j]对应于ret[j]，j表示第j次的EXTRACT-MIN操作
-        # ords[j]==0，表示该次EXTRACT-MIN操作的区间还未确定
-        # ords[j]==None，表示该次EXTRACT-MIN操作的结果已知
+        # root[j]对应于ret[j]，j表示第j次的EXTRACT-MIN操作
+        # root[j]==None，表示该次EXTRACT-MIN操作的区间还未确定
+        # root[j]==-1，表示该次EXTRACT-MIN操作的结果已知
         ret = [None] * seq.count(-1)
         for i in range(1, num + 1):
             p = ds.find(i)
-            for j in range(len(ords)):
-                if ords[j] != None and ords[j] != 0:
-                    if ds.find(ords[j]) == p:
+            for j in range(len(root)):
+                if root[j] != None and root[j] != -1:
+                    if ds.find(root[j]) == p:
                         break
-            assert (ds.find(ords[j]) == p)
-            if j < len(ords) - 1:
+            assert (ds.find(root[j]) == p)
+            if j < len(root) - 1:
                 assert (ret[j] == None)
                 ret[j] = i
                 # update the disjoint sets
-                for k in range(j + 1, len(ords)):
-                    if ords[k] != None:
-                        if ords[k] == 0:
-                            ords[k] = ords[j]
-                        else:
-                            ords[k] = ds.union(p, ords[k])  # p == ds.find(ords[j])
+                for k in range(j + 1, len(root)):
+                    if root[k] == None:
+                        root[k] = root[j]
                         break
-                assert (k < len(ords))
-                ords[j] = None
+                    elif root[k] != -1:
+                        root[k] = ds.union(p, root[k])  # p == ds.find(root[j])
+                        break
+                root[j] = -1
         return ret
 
     def testcase(self):

@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # @problem: graph traversal
 # 针对于无向图
+# BFS：bipartite graph
+# DFS：topological sort
+
 
 import copy
 from data_structure.queue import Queue
@@ -27,7 +30,7 @@ class Graph(object):
     class Vertex():
         def __init__(self):
             self.state = 0
-            self.depth = 0  # 最小深度
+            self.depth = 0  # 最小深度，层次
             self.time = [0, 0]  # 首次和末次访问的顺序
 
         def clear(self):

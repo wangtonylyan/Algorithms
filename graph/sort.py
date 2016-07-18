@@ -60,6 +60,7 @@ class TopologicalSort():
                 assert (vtx[i] == 2)
                 stk.pop()
                 sort = [i] + sort
+        assert (len(sort) == len(grp))
         return sort
 
     def testcase(self):

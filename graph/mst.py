@@ -11,6 +11,8 @@ class MinimumSpanningTree():
                       self.main_Prim_1,
                       self.main_Prim_2]
 
+    # @algorithm: Reverse-Delete Algorithm
+    # 与之思想互逆的贪婪算法：从权值最大的边开始删除
     def main_Kruskal(self, grp, src=None):
         def find(ds, n):
             while ds[n] != n:
