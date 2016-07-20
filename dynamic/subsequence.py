@@ -150,30 +150,54 @@ class Partition():
         return recur(len(lst) - 1, sum(lst) >> 1) if sum(lst) & 1 == 0 else False
 
     def main_2(self, lst):
-        if sum(lst) & 1 != 0:
+        # optional: if sum(lst) & 1 != 0: return False
+        if sum(lst) < 2:  # makes sense
             return False
-        # tab[i][j] ~ tab[i-lst[j]][j-1] or tab[i][j-1]
-        tab = [[False for col in range(len(lst))] for row in range((sum(lst) >> 1) + 1)]
-        for i in range(1, (sum(lst) >> 1) + 1):
-            for j in range(len(lst)):
-                if lst[j] == i:
-                    tab[i][j] = True
-                elif j > 0:
-                    if lst[j] < i:
-                        tab[i][j] = tab[i - lst[j]][j - 1] or tab[i][j - 1]
-                    else:
-                        tab[i][j] = tab[i][j - 1]
-                # optimization (optional)
-                if tab[i][j] == True:
+        # tab[i][j] ~ tab[i-lst[j-1]][j-1] or tab[i][j-1]
+        tab = [[False if row > 0 else True for col in range(len(lst) + 1)] for row in range((sum(lst) >> 1) + 1)]
+        for i in range(1, len(tab)):
+            for j in range(1, len(lst) + 1):
+                tab[i][j] = (tab[i - lst[j - 1]][j - 1] if i >= lst[j - 1] else False) \
+                            or tab[i][j - 1]
+                # optimization
+                if tab[i][j]:
                     tab[i][j + 1:] = [True] * (len(tab[i]) - j - 1)
                     break
+
+        set = []
+        i, j = len(tab) - 1, len(lst)
+        while i > 0:
+            flg = False
+            while j >= 0:
+                if tab[i][j]:
+                    flg = True
+                    j -= 1
+                    assert (i == 0 or j >= 0)
+                else:
+                    if flg:
+                        assert (j + 1 < len(lst) and tab[i][j + 1])
+                        j += 1
+                        set.append(lst[j - 1])
+                        i -= lst[j - 1]
+                        assert (tab[i][j])
+                    else:
+                        assert (tab[i][:j] == [False] * j)
+                        j = -1
+                    break
+            if j == -1:
+                assert (not tab[i][j + 1])
+                j = len(lst)
+                i -= 1
+
+        if tab[-1][-1]:
+            assert (sum(lst) & 1 == 0 and sum(set) == sum(lst) >> 1)
         return tab[-1][-1]
 
     def testcase(self):
         def test(lst):
-            assert (self.main_1(lst) == self.main_2(lst) == True)
+            assert (self.main_1(lst) == self.main_2(lst))
 
-        llst = []
+        llst = [[1, 1], [1, 1, 100]]
         for i in range(15):
             lst = [i for i in range(1, random.randint(10, 50))]
             while sum(lst) & 1 != 0:
