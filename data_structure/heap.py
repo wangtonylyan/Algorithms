@@ -82,6 +82,17 @@ class Heap(object):
             self._sink(0, len(self.hp))
         return ret
 
+    def replace(self, old, new):
+        for i in range(len(self.hp)):
+            if self.hp == old:
+                self.hp = new
+                if i > 0:
+                    self._float(i, 0)
+                else:
+                    self._sink(i, len(self.hp))
+                return True
+        return False
+
     def __len__(self):
         return len(self.hp)
 

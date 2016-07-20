@@ -2,6 +2,8 @@
 # 并查集，一种用于表示动态不相交集合(disjoint set)的数据结构
 # 此类问题依赖于高效的集合查询与合并操作
 
+from data_structure.heap import MinHeap
+
 
 class DisjointSetList():
     pass
@@ -10,13 +12,13 @@ class DisjointSetList():
 # use a tree to represent each disjoint set
 # two heuristics can be used together: (a) union by rank and (b) path compression
 # in practice, you can use either of them for simplicity
+# 0-based index, i.e. the range of input is [0, num)
 class DisjointSetForest():
     def __init__(self, num):
-        # alphabet = [0,num]
-        self.sets = [i for i in range(num + 1)]
-        self.ranks = [0] * (num + 1)
-        self.size = len(self.sets)
-        assert (len(self.sets) == len(self.ranks) == self.size == num + 1)
+        self.sets = [i for i in range(num)]
+        self.ranks = [0] * num
+        self.size = num
+        assert (len(self.sets) == len(self.ranks) == self.size == num)
 
     def __len__(self):
         assert (self.size > 0)
@@ -24,7 +26,7 @@ class DisjointSetForest():
 
     # find the root of a tree
     def find(self, n):
-        assert (1 <= n <= len(self.sets))
+        assert (0 <= n < len(self.sets))
         while self.sets[n] != n:
             self.sets[n] = self.sets[self.sets[n]]  # (b)
             n = self.sets[n]
@@ -32,8 +34,8 @@ class DisjointSetForest():
 
     # merge two trees
     def union(self, n1, n2):
-        assert (1 <= n1 <= len(self.sets))
-        assert (1 <= n2 <= len(self.sets))
+        assert (0 <= n1 < len(self.sets))
+        assert (0 <= n2 < len(self.sets))
         p1 = self.find(n1)
         p2 = self.find(n2)
         if p1 == p2:
@@ -110,7 +112,6 @@ class IsItATree():
 class OfflineMinimum():
     # on-line algorithm: min-heap
     def main_heap(self, seq):
-        from data_structure.heap import MinHeap
         hp = MinHeap()
         ret = []
         for i in seq:
@@ -137,7 +138,7 @@ class OfflineMinimum():
         assert (len(sets) == seq.count(-1) + 1)
         assert (sum(map(len, sets)) == num)
         # 2) make the disjoint sets
-        ds = DisjointSetForest(num)
+        ds = DisjointSetForest(num + 1)  # use 1-based index here
         root = []  # root of tree in forest
         for set in sets:
             for i in range(1, len(set)):
