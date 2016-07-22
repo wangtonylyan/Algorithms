@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-# @problem: minimum(-weight) spanning tree
+# @problem: minimum(-weight) spanning tree (MST) and arborescence (MSA)
 # 生成树都只有V-1条边，所谓的最小是指权重
-# 针对于连通的无向图
+# 针对于连通图，最小生成树属于无向图，最小树形图属于有向图
 
 from data_structure.tree.disjoint import DisjointSetForest
 
@@ -177,6 +177,12 @@ class MinimumSpanningTree():
 
         map(test, cases)
         print 'pass:', self.__class__
+
+
+class MinimumSpanningArborescence():
+    def main_Edmonds(self, grp, src):
+        msa = []
+        pass
 
 
 if __name__ == '__main__':

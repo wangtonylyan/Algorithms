@@ -54,7 +54,7 @@ class TopologicalSort():
                         stk.append(j)
                         vtx[i] = 1
                         break
-                    elif j in stk:  # 整个stk就是一条路径
+                    elif j in stk:  # the current stk is exactly a path
                         return None  # loop exists
             else:
                 assert (vtx[i] == 2)
