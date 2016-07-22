@@ -7,6 +7,7 @@
 
 import copy
 from data_structure.queue import Queue
+from data_structure.stack import Stack
 
 
 def graph_traverse_check(func):
@@ -38,10 +39,8 @@ class Graph(object):
             self.depth = 0
             self.time = [0, 0]
 
-    def __init__(self, grp):
-        self.grp = copy.deepcopy(grp)
-        self.vtx = [self.__class__.Vertex() for i in range(len(self.grp))]
-        assert (len(self.grp) == len(self.vtx) == len(grp))
+    def __init__(self):
+        pass
 
     def _clear(self):
         map(lambda x: getattr(x, 'clear')(), self.vtx)
@@ -74,16 +73,82 @@ class Graph(object):
         print 'pass:', self.__class__
 
 
-class GraphMatrix(Graph):
-    def __init__(self, grp=[]):
-        super(GraphMatrix, self).__init__(grp)
+def check_param(func):
+    def f(self, grp, *args):
+        assert (isinstance(grp, list) and reduce(lambda x, y: x and isinstance(y, list), grp, True))
+        return func(self, grp, args)
+
+    return f
 
 
 class GraphList(Graph):
-    def __init__(self, grp=[]):
-        super(GraphList, self).__init__(grp)
+    def __init__(self):
+        super(GraphList, self).__init__()
 
-    @graph_traverse_check
+    @check_param
+    def bfs_iter_singleSource(self, grp, src):
+        assert (0 <= src < len(grp))
+        vtx = [0] * len(grp)
+        que = Queue()
+        vtx[src] = 1
+        que.push(src)
+        while len(que) > 0:
+            i = que.pop()
+            assert (vtx[i] == 1)
+            for j in grp[i]:
+                if vtx[j] == 0:
+                    vtx[j] = 1
+                    que.push(j)
+
+        assert (vtx.count(1) == sum(vtx))
+        return sum(vtx)
+
+    @check_param
+    def dfs_iter_singleSource(self, grp, src):
+        assert (0 <= src < len(grp))
+        vtx = [0] * len(grp)
+        stk = Stack()
+        vtx[src] = 1
+        stk.push(src)
+        while len(stk) > 0:
+            i = stk.pop()
+            assert (vtx[i] == 1)
+            for j in grp[i]:
+                if vtx[j] == 0:
+                    stk.push(i)
+                    vtx[j] = 1
+                    stk.push(j)
+                    break
+
+        assert (vtx.count(1) == sum(vtx))
+        return sum(vtx)
+
+    @check_param
+    def dfs_recur_singleSource(self, grp, src):
+        assert (0 <= src < len(grp))
+
+        def recur(src):
+            assert (vtx[src] == 0)
+            vtx[src] = 1
+            for i in grp[src]:
+                if vtx[i] == 0:
+                    recur(i)
+
+        vtx = [0] * len(grp)
+        recur(src)
+
+        assert (vtx.count(1) == sum(vtx))
+        return sum(vtx)
+
+    def testcase(self):
+        pass
+
+
+class UndirectedGraphList(GraphList):
+    def __init__(self):
+        super(UndirectedGraphList, self).__init__()
+
+    @check_param
     def bfs_iter(self, src):
         que = Queue()
         self.vtx[src].state = 1
@@ -100,7 +165,7 @@ class GraphList(Graph):
                     self.vtx[j].state = 1
             self.vtx[i].state = 2  # optional
 
-    @graph_traverse_check
+    @check_param
     def dfs_iter(self, src):
         stk = []
         time = 1
@@ -124,7 +189,7 @@ class GraphList(Graph):
                 time += 1
                 stk.pop()
 
-    @graph_traverse_check
+    @check_param
     def dfs_recur(self, src):
         def recur(i, t):
             assert (self.vtx[i].state == 0)
@@ -140,6 +205,21 @@ class GraphList(Graph):
             return t
 
         recur(src, 1)
+
+    def testcase(self):
+        pass
+
+
+class DirectedGraphList(GraphList):
+    def __init__(self):
+        super(DirectedGraphList, self).__init__()
+
+    def testcase(self):
+        pass
+
+
+class GraphMatrix(Graph):
+    pass
 
 
 class LakeCounting():
@@ -221,6 +301,8 @@ class LakeCounting():
 
 
 if __name__ == '__main__':
-    GraphList().testcase()
+    # GraphList().testcase()
+    UndirectedGraphList().testcase()
+    DirectedGraphList().testcase()
     LakeCounting().testcase()
     print 'done'
