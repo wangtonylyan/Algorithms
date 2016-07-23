@@ -3,6 +3,8 @@
 # 生成树都只有V-1条边，所谓的最小是指权重
 # 针对于连通图，最小生成树属于无向图，最小树形图属于有向图
 
+
+from graph import UndirectedGraph, DirectedGraph
 from data_structure.tree.disjoint import DisjointSetForest
 
 
@@ -16,8 +18,9 @@ from data_structure.tree.disjoint import DisjointSetForest
 # 2) cycle property
 # Let C be any cycle in G, and let edge e = (v, w) be the most expensive edge belonging to C.
 # Then e does not belong to any minimum spanning tree of G.
-class MinimumSpanningTree():
+class MinimumSpanningTree(UndirectedGraph):
     def __init__(self):
+        super(MinimumSpanningTree, self).__init__()
         self.funcs = [self.main_Boruvka,
                       self.main_Kruskal,
                       self.main_Prim_1,
@@ -133,41 +136,7 @@ class MinimumSpanningTree():
         return mst
 
     def testcase(self):
-        cases = [
-            [
-                [(1, 4), (7, 8)],
-                [(0, 4), (2, 8), (7, 11)],
-                [(1, 8), (8, 2), (3, 7), (5, 4)],
-                [(2, 7), (4, 9), (5, 14)],
-                [(3, 9), (5, 10)],
-                [(2, 4), (3, 14), (4, 10), (6, 2)],
-                [(5, 2), (7, 1), (8, 6)],
-                [(0, 8), (1, 11), (8, 7), (6, 1)],
-                [(2, 2), (6, 6), (7, 7)]
-            ],
-            [
-                [(1, 7), (3, 4)],
-                [(0, 7), (2, 11), (3, 9), (4, 10)],
-                [(1, 11), (4, 5)],
-                [(0, 4), (1, 9), (4, 15), (5, 6)],
-                [(1, 10), (2, 5), (3, 15), (5, 12), (6, 8)],
-                [(3, 6), (4, 12), (6, 13)],
-                [(4, 8), (5, 13)]
-            ]
-        ]
-
         def test(case):
-            # check test case
-            num = 0
-            for i in range(len(case)):
-                for j, w1 in case[i]:
-                    for k, w2 in case[j]:
-                        if k == i:
-                            assert (w1 == w2 > 0)
-                            num += 1
-                            break
-            assert (num == sum(map(len, case)))
-            # run test case
             num = lambda mst: sum(map(lambda x: x[1], mst))
             assert (len(self.funcs) > 0)
             ret = self.funcs[0](case)
@@ -175,11 +144,13 @@ class MinimumSpanningTree():
                 assert (reduce(lambda x, y: x and num(y(case, i)) == num(ret), self.funcs, True) == True)
             assert (len(ret) == len(case) - 1)
 
-        map(test, cases)
-        print 'pass:', self.__class__
+        self._testcase(test, self.gencase_weighted())
 
 
-class MinimumSpanningArborescence():
+class MinimumSpanningArborescence(DirectedGraph):
+    def __init__(self):
+        super(MinimumSpanningArborescence, self).__init__()
+
     def main_Edmonds(self, grp, src):
         msa = []
         pass

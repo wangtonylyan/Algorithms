@@ -3,8 +3,10 @@
 # topological ordering: for every directed edge uv, vertex u must come before vertex v
 # This ordering only exists for a dag.
 
+from graph import DirectedAcyclicGraph
 
-class TopologicalSort():
+
+class TopologicalSort(DirectedAcyclicGraph):
     def main_Kahn(self, grp):
         vtx = [0] * len(grp)  # in-degree
         for i in range(len(grp)):
@@ -65,13 +67,17 @@ class TopologicalSort():
 
     def testcase(self):
         def test(case):
-            assert (self.main_Kahn(case) == self.main_dfs(case))
+            def check(ret):
+                for i in range(len(ret)):
+                    for j in ret[:i]:
+                        assert (j not in case[ret[i]])
 
-        cases = [
-            [[1, 7], [2, 7], [8, 3, 5], [4, 5], [5], [6], [7, 8], [], [7]],
-        ]
-        map(test, cases)
-        print 'pass:', self.__class__
+            ret1 = self.main_Kahn(case)
+            ret2 = self.main_dfs(case)
+            assert (len(ret1) == len(ret2) == len(case))
+            map(check, [ret1, ret2])
+
+        self._testcase(test, self.gencase_unweighted())
 
 
 if __name__ == '__main__':

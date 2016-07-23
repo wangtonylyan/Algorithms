@@ -2,10 +2,12 @@
 # @problem: single-source shortest paths problem
 # 针对于连通的有向图
 
+
+from graph import DirectedAcyclicGraph
 from sort import TopologicalSort
 
 
-class ShortestPath():
+class ShortestPath(DirectedAcyclicGraph):
     # weighted directed graph
     # 适合于任何带权值的有向图，O(VE)
     def main_BellmanFord(self, grp, src):
@@ -90,22 +92,12 @@ class ShortestPath():
         return dis, pre
 
     def testcase(self):
-        dag = [
-            [(1, 4), (7, 8)],
-            [(2, 8), (7, 11)],
-            [(8, 2), (3, 7), (5, 4)],
-            [(4, 9), (5, 14)],
-            [(5, 10)],
-            [(6, 2)],
-            [(7, 1), (8, 6)],
-            [],
-            []
-        ]
-        for i in range(len(dag)):
-            assert (self.main_BellmanFord(dag, i) == self.main_dag(dag, i)
-                    == self.main_Dijkstra(dag, i))
+        def test(case):
+            for i in range(len(case)):
+                assert (self.main_BellmanFord(case, i) == self.main_dag(case, i)
+                        == self.main_Dijkstra(case, i))
 
-        print 'pass:', self.__class__
+        self._testcase(test, self.gencase_weighted())
 
 
 if __name__ == '__main__':
