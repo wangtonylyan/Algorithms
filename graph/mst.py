@@ -144,7 +144,7 @@ class MinimumSpanningTree(UndirectedGraph):
                 assert (reduce(lambda x, y: x and num(y(case, i)) == num(ret), self.funcs, True) == True)
             assert (len(ret) == len(case) - 1)
 
-        self._testcase(test, self.gencase_weighted())
+        self._testcase(test, self.gencase(True))
 
 
 class MinimumSpanningArborescence(DirectedGraph):

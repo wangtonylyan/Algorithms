@@ -97,7 +97,7 @@ class ShortestPath(DirectedAcyclicGraph):
                 assert (self.main_BellmanFord(case, i) == self.main_dag(case, i)
                         == self.main_Dijkstra(case, i))
 
-        self._testcase(test, self.gencase_weighted())
+        self._testcase(test, self.gencase(True))
 
 
 if __name__ == '__main__':

@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 # @problem: graph traversal
-# BFS：bipartite graph
-# DFS：topological sort
 
 
 import copy
-from graph import Graph, UndirectedGraph, DirectedGraph
+from graph import *
 from data_structure.queue import Queue
 from data_structure.stack import Stack
 
 
-def dec_search_source(func):
+def dec_search_source_wrapper(func):
     def f(self, grp, src, *args):
         assert (isinstance(grp, list) and reduce(lambda x, y: x and isinstance(y, list), grp, True))
         assert (0 <= src < len(grp))
@@ -38,7 +36,7 @@ class GraphList(Graph):
             self.dfs_recur,
         ]
 
-    @dec_search_source
+    @dec_search_source_wrapper
     def bfs_iter(self, grp, src):
         vtx = [0] * len(grp)
         que = Queue()
@@ -53,7 +51,7 @@ class GraphList(Graph):
                     que.push(j)
         return vtx
 
-    @dec_search_source
+    @dec_search_source_wrapper
     def bfs_iter_2(self, grp, src):
         vtx = [0] * len(grp)
         que = [src]
@@ -71,7 +69,7 @@ class GraphList(Graph):
                 que = que[1:]
         return vtx
 
-    @dec_search_source
+    @dec_search_source_wrapper
     def dfs_iter(self, grp, src):
         vtx = [0] * len(grp)
         stk = Stack()
@@ -88,7 +86,7 @@ class GraphList(Graph):
                     break
         return vtx
 
-    @dec_search_source
+    @dec_search_source_wrapper
     def dfs_iter_2(self, grp, src):
         vtx = [0] * len(grp)
         stk = [src]
@@ -108,7 +106,7 @@ class GraphList(Graph):
                 stk.pop()
         return vtx
 
-    @dec_search_source
+    @dec_search_source_wrapper
     def dfs_recur(self, grp, src):
         def recur(src):
             assert (vtx[src] == 0)
@@ -144,7 +142,7 @@ class GraphList(Graph):
             assert (reduce(lambda x, y: x if x == self._traverse(copy.deepcopy(case), y) else None,
                            self.funcs[1:], self._traverse(copy.deepcopy(case), self.funcs[0])) != None)
 
-        self._testcase(test, self.gencase_unweighted())
+        self._testcase(test, self.gencase(False))
 
 
 class UndirectedGraphList(UndirectedGraph, GraphList):
@@ -157,16 +155,33 @@ class DirectedGraphList(DirectedGraph, GraphList):
         super(DirectedGraphList, self).__init__()
 
 
-class GraphMatrix(Graph):
-    pass
+# @problem: 获取所有节点距离某个源点的深度/层次
+# @problem: bipartite graph，实现：对不同层次的节点进行染色
+class VertexDepth(UndirectedGraph):
+    def main_bfs(self, grp, src):
+        vtx = [0] * len(grp)
+        dpt = [None] * len(grp)
+        que = Queue()
+        vtx[src] = 1
+        dpt[src] = 0
+        que.push(src)
+        while len(que) > 0:
+            i = que.pop()
+            assert (vtx[i] == 1)
+            for j in grp[i]:
+                # 只有首次遍历到的深度才是最小深度
+                if vtx[j] == 0:
+                    vtx[j] = 1
+                    dpt[j] = dpt[i] + 1
+                    que.push(j)
+        return dpt
 
+    def testcase(self):
+        def test(case):
+            for i in range(len(case)):
+                self.main_bfs(case, i)
 
-class UndirectedGraphMatrix(UndirectedGraph, GraphMatrix):
-    pass
-
-
-class DirectedGraphMatrix(DirectedGraph, GraphMatrix):
-    pass
+        self._testcase(test, self.gencase(False))
 
 
 class LakeCounting():
@@ -250,76 +265,6 @@ class LakeCounting():
 if __name__ == '__main__':
     UndirectedGraphList().testcase()
     DirectedGraphList().testcase()
+    VertexDepth().testcase()
     LakeCounting().testcase()
     print 'done'
-
-'''
-    class Vertex():
-        def __init__(self):
-            self.state = 0
-            self.depth = 0  # 最小深度，层次
-            self.time = [0, 0]  # 首次和末次访问的顺序
-
-        def clear(self):
-            self.state = 0
-            self.depth = 0
-            self.time = [0, 0]
-
-    @check_param
-    def bfs_iter(self, src):
-        que = Queue()
-        self.vtx[src].state = 1
-        self.vtx[src].depth = 0
-        que.push(src)
-        while len(que) > 0:
-            i = que.pop()
-            assert (self.vtx[i].state == 1)
-            for j in self.grp[i]:
-                # 只有首次遍历到的深度才是最小深度
-                if self.vtx[j].state == 0:
-                    self.vtx[j].depth = self.vtx[i].depth + 1
-                    que.push(j)
-                    self.vtx[j].state = 1
-            self.vtx[i].state = 2  # optional
-
-    @check_param
-    def dfs_iter(self, src):
-        stk = []
-        time = 1
-        stk.append(src)
-        while len(stk) > 0:
-            i = stk[-1]
-            if self.vtx[i].state == 0:
-                self.vtx[i].time[0] = time
-                time += 1
-                self.vtx[i].state = 1
-            elif self.vtx[i].state == 1:
-                self.vtx[i].state = 2
-                for j in self.grp[i]:
-                    if self.vtx[j].state == 0:
-                        stk.append(j)
-                        self.vtx[i].state = 1
-                        break
-            else:
-                assert (self.vtx[i].state == 2)
-                self.vtx[i].time[1] = time
-                time += 1
-                stk.pop()
-
-    @check_param
-    def dfs_recur(self, src):
-        def recur(i, t):
-            assert (self.vtx[i].state == 0)
-            self.vtx[i].time[0] = t
-            t += 1
-            self.vtx[i].state = 1
-            for j in self.grp[i]:
-                if self.vtx[j].state == 0:
-                    t = recur(j, t)
-            self.vtx[i].time[1] = t
-            t += 1
-            self.vtx[i].state = 2
-            return t
-
-        recur(src, 1)
-'''

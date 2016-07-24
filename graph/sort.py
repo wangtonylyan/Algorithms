@@ -44,7 +44,8 @@ class TopologicalSort(DirectedAcyclicGraph):
                 stk.append(i)
             else:
                 vtx[i] = 0
-        sort = []
+        sort = [None] * len(grp)
+        ind = 0
         while len(stk) > 0:
             i = stk[-1]
             assert (vtx[i] > 0)
@@ -61,8 +62,9 @@ class TopologicalSort(DirectedAcyclicGraph):
             else:
                 assert (vtx[i] == 2)
                 stk.pop()
-                sort = [i] + sort
-        assert (len(sort) == len(grp))
+                ind += 1
+                sort[-ind] = i
+        assert (ind == len(grp))
         return sort
 
     def testcase(self):
@@ -77,7 +79,7 @@ class TopologicalSort(DirectedAcyclicGraph):
             assert (len(ret1) == len(ret2) == len(case))
             map(check, [ret1, ret2])
 
-        self._testcase(test, self.gencase_unweighted())
+        self._testcase(test, self.gencase(False))
 
 
 if __name__ == '__main__':

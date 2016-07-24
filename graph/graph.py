@@ -1,77 +1,13 @@
 # -*- coding: utf-8 -*-
 
-def dec_check_unweighted(undrct=False):
-    def f1(func):
-        def f2(*args):
-            cases = func(*args)
-            assert (isinstance(cases, list))
-            for case in cases:
-                assert (isinstance(case, list))
-                if undrct:
-                    num = 0
-                    for i in range(len(case)):
-                        for j in case[i]:
-                            for k in case[j]:
-                                if k == i:
-                                    num += 1
-                                    break
-                    assert (num == sum(map(len, case)))
-                else:
-                    pass
-            return cases
-
-        return f2
-
-    return f1
+class Enum(tuple):
+    __getattr__ = tuple.index
 
 
-def dec_check_weighted(undrct=False):
-    def f1(func):
-        def f2(*args):
-            cases = func(*args)
-            assert (isinstance(cases, list))
-            for case in cases:
-                assert (isinstance(case, list))
-                if undrct:
-                    num = 0
-                    for i in range(len(case)):
-                        for j, w in case[i]:
-                            for k, v in case[j]:
-                                if k == i:
-                                    assert (w == v >= 0)
-                                    num += 1
-                                    break
-                    assert (num == sum(map(len, case)))
-                else:
-                    for i in range(len(case)):
-                        for j, w in case[i]:
-                            assert (w >= 0)
-            return cases
+# adjacency list and adjacency matrix representation
+GraphRepresentationType = Enum(['LIST', 'MATRIX'])
 
-        return f2
-
-    return f1
-
-
-class Graph(object):
-    def __init__(self):
-        pass
-
-    def testcase(self):
-        assert (False)
-
-    def _testcase(self, test, cases):
-        map(test, cases)
-        print 'pass:', self.__class__, '-', len(cases)
-
-    def gencase_unweighted(self):
-        assert (False)
-
-    def gencase_weighted(self):
-        assert (False)
-
-
-undirected_acyclic_ugrp = [
+lib_undirected_acyclic_ugrp = [
     [  # line
         [1], [0, 2], [1, 3], [2, 4], [3, 5], [4, 6], [5, 7], [6]
     ],
@@ -84,7 +20,7 @@ undirected_acyclic_ugrp = [
     ],
 ]
 
-undirected_ugrp = undirected_acyclic_ugrp + [
+lib_undirected_ugrp = lib_undirected_acyclic_ugrp + [
     [  # loop
         [1, 7], [0, 2], [1, 3], [2, 4], [3, 5], [4, 6], [5, 7], [6, 0]
     ],
@@ -106,10 +42,9 @@ undirected_ugrp = undirected_acyclic_ugrp + [
     ],
 ]
 
-undirected_acyclic_wgrp = [
+lib_undirected_acyclic_wgrp = [
 ]
-
-undirected_wgrp = undirected_acyclic_wgrp + [
+lib_undirected_wgrp = lib_undirected_acyclic_wgrp + [
     [
         [(1, 4), (7, 8)],
         [(0, 4), (2, 8), (7, 11)],
@@ -163,35 +98,7 @@ undirected_wgrp = undirected_acyclic_wgrp + [
         [(0, 7), (1, 81), (2, 74), (3, 24)]
     ],
 ]
-
-
-class UndirectedGraph(Graph):
-    def __init__(self):
-        super(UndirectedGraph, self).__init__()
-
-    @dec_check_unweighted(True)
-    def gencase_unweighted(self):
-        return undirected_ugrp
-
-    @dec_check_weighted(True)
-    def gencase_weighted(self):
-        return undirected_wgrp
-
-
-class UndirectedAcyclicGraph(UndirectedGraph):
-    def __init__(self):
-        super(UndirectedAcyclicGraph, self).__init__()
-
-    @dec_check_unweighted(True)
-    def gencase_unweighted(self):
-        return undirected_acyclic_ugrp
-
-    @dec_check_weighted(True)
-    def gencase_weighted(self):
-        return undirected_acyclic_wgrp
-
-
-directed_acyclic_ugrp = [
+lib_directed_acyclic_ugrp = [
     [
         [], [0], [1], [2], [3], [4]
     ],
@@ -211,11 +118,9 @@ directed_acyclic_ugrp = [
         [5], [7], [7, 0], [0, 6], [], [], [], [4, 5, 6]
     ]
 ]
-
-directed_ugrp = directed_acyclic_ugrp + [
+lib_directed_ugrp = lib_directed_acyclic_ugrp + [
 ]
-
-directed_acyclic_wgrp = [
+lib_directed_acyclic_wgrp = [
     [
         [], [(0, 1)], [(1, 1)], [(2, 1)], [(3, 1)], [(4, 1)]
     ],
@@ -237,39 +142,178 @@ directed_acyclic_wgrp = [
         []
     ],
 ]
-directed_wgrp = directed_acyclic_wgrp + [
+lib_directed_wgrp = lib_directed_acyclic_wgrp + [
 ]
+
+
+def dec_check_cases(drct):
+    assert (isinstance(drct, bool))
+
+    def f1(func):
+        def f2(self, wgt, rpst, *args):
+            assert (isinstance(self, Graph))
+            assert (isinstance(wgt, bool))
+            assert (isinstance(rpst, int))
+
+            cases = func(self, wgt, rpst, *args)
+            assert (isinstance(cases, list))
+
+            for case in cases:
+                assert (isinstance(case, list))
+                if rpst == GraphRepresentationType.LIST:
+                    if drct:  # directed
+                        if wgt:  # weighted
+                            for i in range(len(case)):
+                                for j, w in case[i]:
+                                    assert (0 <= j < len(case) and w > 0)
+                        else:  # unweighted
+                            for i in range(len(case)):
+                                for j in case[i]:
+                                    assert (0 <= j < len(case))
+                    else:  # undirected
+                        if wgt:  # weighted
+                            num = 0
+                            for i in range(len(case)):
+                                for j, w in case[i]:
+                                    for k, v in case[j]:
+                                        if k == i:
+                                            assert (w == v > 0)
+                                            num += 1
+                                            break
+                            assert (num == sum(map(len, case)))
+                        else:  # unweighted
+                            num = 0
+                            for i in range(len(case)):
+                                for j in case[i]:
+                                    for k in case[j]:
+                                        if k == i:
+                                            num += 1
+                                            break
+                            assert (num == sum(map(len, case)))
+                elif rpst == GraphRepresentationType.MATRIX:
+                    if drct:  # directed
+                        if wgt:  # weighted
+                            for i in range(len(case)):
+                                for j in range(len(case)):
+                                    assert (case[i][j] >= 0)  # connection or weight
+                        else:  # unweighted
+                            for i in range(len(case)):
+                                for j in range(len(case)):
+                                    assert (0 <= case[i][j] <= 1)  # connection
+                    else:  # undirected
+                        if wgt:  # weighted
+                            for i in range(len(case)):
+                                for j in range(len(case)):
+                                    assert (case[i][j] == case[j][i] >= 0)
+                        else:  # unweighted
+                            for i in range(len(case)):
+                                for j in range(len(case)):
+                                    assert (0 <= case[i][j] == case[j][i] <= 1)
+                else:
+                    assert (False)
+
+            return cases
+
+        return f2
+
+    return f1
+
+
+class Graph(object):
+    def __init__(self):
+        self.ugrps = None  # unweighted graph
+        self.wgrps = None  # weighted graph
+
+    def testcase(self):
+        assert (False)
+
+    def _testcase(self, test, cases):
+        map(test, cases)
+        print 'pass:', self.__class__, '-', len(cases)
+
+    def gencase(self, wgt, rpst=GraphRepresentationType.LIST):
+        return self._gencase(wgt, rpst)
+
+    def _gencase(self, wgt, rpst):
+        if rpst == GraphRepresentationType.LIST:
+            if wgt:
+                return self.wgrps
+            else:
+                return self.ugrps
+        elif rpst == GraphRepresentationType.MATRIX:
+            if wgt:
+                return self._transform(self.wgrps, True)
+            else:
+                return self._transform(self.ugrps, False)
+        assert (False)
+
+    # from GraphRepresentationType.LIST to GraphRepresentationType.MATRIX
+    @staticmethod
+    def _transform(grps, wgt):
+        ret = []
+        if wgt:
+            for g in grps:
+                m = [[0] * len(g) for i in range(len(g))]
+                for i in range(len(g)):
+                    for j, w in g[i]:
+                        m[i][j] = w
+                ret.append(m)
+        else:
+            for g in grps:
+                m = [[0] * len(g) for i in range(len(g))]
+                for i in range(len(g)):
+                    for j in g[i]:
+                        m[i][j] = 1
+                ret.append(m)
+        assert (len(ret) == len(grps))
+        return ret
+
+
+class UndirectedGraph(Graph):
+    def __init__(self):
+        super(UndirectedGraph, self).__init__()
+        self.ugrps = lib_undirected_ugrp
+        self.wgrps = lib_undirected_wgrp
+
+    @dec_check_cases(False)
+    def _gencase(self, *args):
+        return super(UndirectedGraph, self)._gencase(*args)
+
+
+class UndirectedAcyclicGraph(UndirectedGraph):
+    def __init__(self):
+        super(UndirectedAcyclicGraph, self).__init__()
+        self.ugrps = lib_undirected_acyclic_ugrp
+        self.wgrps = lib_undirected_acyclic_wgrp
 
 
 class DirectedGraph(Graph):
     def __init__(self):
         super(DirectedGraph, self).__init__()
+        self.ugrps = lib_directed_ugrp
+        self.wgrps = lib_directed_wgrp
 
-    @dec_check_unweighted(False)
-    def gencase_unweighted(self):
-        return directed_ugrp
-
-    @dec_check_weighted(False)
-    def gencase_weighted(self):
-        return directed_wgrp
+    @dec_check_cases(True)
+    def _gencase(self, *args):
+        return super(DirectedGraph, self)._gencase(*args)
 
 
 class DirectedAcyclicGraph(DirectedGraph):
     def __init__(self):
         super(DirectedAcyclicGraph, self).__init__()
-
-    @dec_check_unweighted(False)
-    def gencase_unweighted(self):
-        return directed_acyclic_ugrp
-
-    @dec_check_weighted(False)
-    def gencase_weighted(self):
-        return directed_acyclic_wgrp
+        self.ugrps = lib_directed_acyclic_ugrp
+        self.wgrps = lib_directed_acyclic_wgrp
 
 
 if __name__ == '__main__':
-    print len(UndirectedGraph().gencase_unweighted())
-    print len(UndirectedGraph().gencase_weighted())
-    print len(DirectedGraph().gencase_unweighted())
-    print len(DirectedGraph().gencase_weighted())
+    grp = UndirectedGraph()
+    assert (len(grp.gencase(False, GraphRepresentationType.LIST)) ==
+            len(grp.gencase(False, GraphRepresentationType.MATRIX)))
+    assert (len(grp.gencase(True, GraphRepresentationType.LIST)) ==
+            len(grp.gencase(True, GraphRepresentationType.MATRIX)))
+    grp = DirectedGraph()
+    assert (len(grp.gencase(False, GraphRepresentationType.LIST)) ==
+            len(grp.gencase(False, GraphRepresentationType.MATRIX)))
+    assert (len(grp.gencase(True, GraphRepresentationType.LIST)) ==
+            len(grp.gencase(True, GraphRepresentationType.MATRIX)))
     print 'done'
