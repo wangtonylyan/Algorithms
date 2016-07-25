@@ -7,6 +7,9 @@ from graph import DirectedAcyclicGraph
 
 
 class TopologicalSort(DirectedAcyclicGraph):
+    def __init__(self):
+        super(TopologicalSort, self).__init__(False)
+
     def main_Kahn(self, grp):
         vtx = [0] * len(grp)  # in-degree
         for i in range(len(grp)):
@@ -79,7 +82,7 @@ class TopologicalSort(DirectedAcyclicGraph):
             assert (len(ret1) == len(ret2) == len(case))
             map(check, [ret1, ret2])
 
-        self._testcase(test, self.gencase(False))
+        self._testcase(test, self._gencase())
 
 
 if __name__ == '__main__':

@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
+import copy
+
 
 class Enum(tuple):
     __getattr__ = tuple.index
 
 
-# adjacency list and adjacency matrix representation
-GraphRepresentationType = Enum(['LIST', 'MATRIX'])
+# LIST: adjacency list
+# MATRIX: adjacency matrix
+# DICT: http://code.activestate.com/recipes/119466/
+GraphRepresentationType = Enum(['LIST', 'MATRIX', 'DICT'])
 
 lib_undirected_acyclic_ugrp = [
     [  # line
@@ -146,174 +150,270 @@ lib_directed_wgrp = lib_directed_acyclic_wgrp + [
 ]
 
 
-def dec_check_cases(drct):
-    assert (isinstance(drct, bool))
+def dec_check_cases(func):
+    def f(self, *args):
+        assert (isinstance(self, AbstractGraph))
+        assert (0 <= self.rpst < len(GraphRepresentationType))
+        assert (isinstance(self.wgt, bool))
+        assert (isinstance(self.drct, bool))
+        assert (isinstance(self.grps, list))
 
-    def f1(func):
-        def f2(self, wgt, rpst, *args):
-            assert (isinstance(self, Graph))
-            assert (isinstance(wgt, bool))
-            assert (isinstance(rpst, int))
+        cases = func(self, *args)
+        assert (isinstance(cases, list))
 
-            cases = func(self, wgt, rpst, *args)
-            assert (isinstance(cases, list))
-
-            for case in cases:
+        for case in cases:
+            if self.rpst == GraphRepresentationType.LIST:
                 assert (isinstance(case, list))
-                if rpst == GraphRepresentationType.LIST:
-                    if drct:  # directed
-                        if wgt:  # weighted
-                            for i in range(len(case)):
-                                for j, w in case[i]:
-                                    assert (0 <= j < len(case) and w > 0)
-                        else:  # unweighted
-                            for i in range(len(case)):
-                                for j in case[i]:
-                                    assert (0 <= j < len(case))
-                    else:  # undirected
-                        if wgt:  # weighted
-                            num = 0
-                            for i in range(len(case)):
-                                for j, w in case[i]:
-                                    for k, v in case[j]:
-                                        if k == i:
-                                            assert (w == v > 0)
-                                            num += 1
-                                            break
-                            assert (num == sum(map(len, case)))
-                        else:  # unweighted
-                            num = 0
-                            for i in range(len(case)):
-                                for j in case[i]:
-                                    for k in case[j]:
-                                        if k == i:
-                                            num += 1
-                                            break
-                            assert (num == sum(map(len, case)))
-                elif rpst == GraphRepresentationType.MATRIX:
-                    if drct:  # directed
-                        if wgt:  # weighted
-                            for i in range(len(case)):
-                                for j in range(len(case)):
-                                    assert (case[i][j] >= 0)  # connection or weight
-                        else:  # unweighted
-                            for i in range(len(case)):
-                                for j in range(len(case)):
-                                    assert (0 <= case[i][j] <= 1)  # connection
-                    else:  # undirected
-                        if wgt:  # weighted
-                            for i in range(len(case)):
-                                for j in range(len(case)):
-                                    assert (case[i][j] == case[j][i] >= 0)
-                        else:  # unweighted
-                            for i in range(len(case)):
-                                for j in range(len(case)):
-                                    assert (0 <= case[i][j] == case[j][i] <= 1)
-                else:
-                    assert (False)
+                if self.drct:  # directed
+                    if self.wgt:  # weighted
+                        for i in range(len(case)):
+                            for j, w in case[i]:
+                                assert (0 <= j < len(case) and w > 0)
+                    else:  # unweighted
+                        for i in range(len(case)):
+                            for j in case[i]:
+                                assert (0 <= j < len(case))
+                else:  # undirected
+                    if self.wgt:  # weighted
+                        num = 0
+                        for i in range(len(case)):
+                            for j, w in case[i]:
+                                for k, v in case[j]:
+                                    if k == i:
+                                        assert (w == v > 0)
+                                        num += 1
+                                        break
+                        assert (num == sum(map(len, case)))
+                    else:  # unweighted
+                        num = 0
+                        for i in range(len(case)):
+                            for j in case[i]:
+                                for k in case[j]:
+                                    if k == i:
+                                        num += 1
+                                        break
+                        assert (num == sum(map(len, case)))
+            elif self.rpst == GraphRepresentationType.MATRIX:
+                assert (isinstance(case, list))
+                if self.drct:  # directed
+                    if self.wgt:  # weighted
+                        for i in range(len(case)):
+                            for j in range(len(case)):
+                                assert (case[i][j] >= 0)  # connection or weight
+                    else:  # unweighted
+                        for i in range(len(case)):
+                            for j in range(len(case)):
+                                assert (0 <= case[i][j] <= 1)  # connection
+                else:  # undirected
+                    if self.wgt:  # weighted
+                        for i in range(len(case)):
+                            for j in range(len(case)):
+                                assert (case[i][j] == case[j][i] >= 0)
+                    else:  # unweighted
+                        for i in range(len(case)):
+                            for j in range(len(case)):
+                                assert (0 <= case[i][j] == case[j][i] <= 1)
+            elif self.rpst == GraphRepresentationType.DICT:
+                assert (isinstance(case, dict))
+                if self.drct:  # directed
+                    if self.wgt:  # weighted
+                        for i in case.keys():
+                            for j, w in case[i].items():
+                                assert (w > 0)
+                    else:  # unweighted
+                        for i in case.keys():
+                            for j, w in case[i].items():
+                                assert (w == 1)
+                else:  # undirected
+                    if self.wgt:  # weighted
+                        for i in case.keys():
+                            for j in case[i].keys():
+                                assert (case[i][j] == case[j][i] > 0)
+                    else:  # unweighted
+                        for i in case.keys():
+                            for j in case[i].keys():
+                                assert (case[i][j] == case[j][i] == 1)
+            else:
+                assert (False)
 
-            return cases
+        return cases
 
-        return f2
-
-    return f1
+    return f
 
 
-class Graph(object):
-    def __init__(self):
-        self.ugrps = None  # unweighted graph
-        self.wgrps = None  # weighted graph
-
+# interface
+class AbstractGraph(object):
     def testcase(self):
         assert (False)
+
+    def _testcase(self, test, cases):
+        assert (False)
+
+    def _gencase(self):
+        assert (False)
+
+
+class Graph(AbstractGraph):
+    def __init__(self, rpst, wgt, drct):
+        assert (0 <= rpst < len(GraphRepresentationType))
+        assert (isinstance(wgt, bool))
+        assert (isinstance(drct, bool))
+        super(Graph, self).__init__()
+        self.rpst = rpst  # representation/structure
+        self.wgt = wgt  # weight
+        self.drct = drct  # direction
+        self.grps = None
 
     def _testcase(self, test, cases):
         map(test, cases)
         print 'pass:', self.__class__, '-', len(cases)
 
-    def gencase(self, wgt, rpst=GraphRepresentationType.LIST):
-        return self._gencase(wgt, rpst)
+    @dec_check_cases
+    def _gencase(self):
+        assert (isinstance(self.grps, list) and all(map(lambda x: isinstance(x, list), self.grps)))
+        return map(lambda x: self._transform(GraphRepresentationType.LIST, self.rpst, x, self.wgt), self.grps)
 
-    def _gencase(self, wgt, rpst):
-        if rpst == GraphRepresentationType.LIST:
-            if wgt:
-                return self.wgrps
-            else:
-                return self.ugrps
-        elif rpst == GraphRepresentationType.MATRIX:
-            if wgt:
-                return self._transform(self.wgrps, True)
-            else:
-                return self._transform(self.ugrps, False)
-        assert (False)
-
-    # from GraphRepresentationType.LIST to GraphRepresentationType.MATRIX
     @staticmethod
-    def _transform(grps, wgt):
-        ret = []
-        if wgt:
-            for g in grps:
-                m = [[0] * len(g) for i in range(len(g))]
-                for i in range(len(g)):
-                    for j, w in g[i]:
-                        m[i][j] = w
-                ret.append(m)
+    def _transform(fm, to, grp, wgt):
+        assert (0 <= fm < len(GraphRepresentationType))
+        assert (0 <= to < len(GraphRepresentationType))
+        assert (grp != None and isinstance(wgt, bool))
+        ret = None
+        if fm == to:
+            ret = copy.deepcopy(grp)  # return a new instance of grp
+        elif fm == GraphRepresentationType.LIST:
+            assert (isinstance(grp, list) and all(map(lambda x: isinstance(x, list), grp)))
+            if to == GraphRepresentationType.MATRIX:
+                ret = [[0] * len(grp) for i in range(len(grp))]
+                if wgt:
+                    for i in range(len(grp)):
+                        for j, w in grp[i]:
+                            ret[i][j] = w
+                else:
+                    for i in range(len(grp)):
+                        for j in grp[i]:
+                            ret[i][j] = 1
+            elif to == GraphRepresentationType.DICT:
+                ret = {}
+                if wgt:
+                    for i in range(len(grp)):
+                        for j, w in grp[i]:
+                            if not ret.has_key(i):
+                                ret[i] = {}
+                            ret[i][j] = w
+                else:
+                    for i in range(len(grp)):
+                        for j in grp[i]:
+                            if not ret.has_key(i):
+                                ret[i] = {}
+                            ret[i][j] = 1
+        elif fm == GraphRepresentationType.MATRIX:
+            assert (isinstance(grp, list) and all(map(lambda x: isinstance(x, list), grp)))
+            if to == GraphRepresentationType.LIST:
+                pass
+            elif to == GraphRepresentationType.DICT:
+                pass
+        elif fm == GraphRepresentationType.DICT:
+            assert (isinstance(grp, dict) and all(map(lambda x: isinstance(x, dict), grp)))
+            if to == GraphRepresentationType.LIST:
+                pass
+            elif to == GraphRepresentationType.MATRIX:
+                pass
+
+        assert (ret != None)
+        if isinstance(ret, list):
+            assert (all(map(lambda x: isinstance(x, list), ret)))
+        elif isinstance(ret, dict):
+            assert (all(map(lambda x: isinstance(x, dict), ret.values())))
         else:
-            for g in grps:
-                m = [[0] * len(g) for i in range(len(g))]
-                for i in range(len(g)):
-                    for j in g[i]:
-                        m[i][j] = 1
-                ret.append(m)
-        assert (len(ret) == len(grps))
+            assert (False)
+        return ret
+
+    @staticmethod
+    def _transpose(rpst, grp, wgt):
+        assert (grp != None)
+        assert (0 <= rpst < len(GraphRepresentationType))
+        assert (isinstance(wgt, bool))
+        if rpst == GraphRepresentationType.LIST:
+            ret = [[] for i in range(len(grp))]
+            if wgt:
+                for i in range(grp):
+                    for j, w in grp[i]:
+                        ret[j].append((i, w))
+            else:
+                for i in range(grp):
+                    for j in grp[i]:
+                        ret[j].append(i)
+        elif rpst == GraphRepresentationType.MATRIX:
+            ret = [[0] * len(grp) for i in range(len(grp))]
+            for i in range(len(grp)):
+                for j in range(len(grp)):
+                    if grp[i][j] > 0:
+                        ret[j][i] = grp[i][j]
+        elif rpst == GraphRepresentationType.DICT:
+            ret = {}
+            for i in grp.keys():
+                for j in grp[i].keys():
+                    if not ret.has_key(j):
+                        ret[j] = {}
+                    ret[j][i] = grp[i][j]
+        assert (len(ret) == len(grp))
         return ret
 
 
 class UndirectedGraph(Graph):
-    def __init__(self):
-        super(UndirectedGraph, self).__init__()
-        self.ugrps = lib_undirected_ugrp
-        self.wgrps = lib_undirected_wgrp
-
-    @dec_check_cases(False)
-    def _gencase(self, *args):
-        return super(UndirectedGraph, self)._gencase(*args)
+    def __init__(self, wgt, rpst=GraphRepresentationType.LIST):
+        assert (isinstance(wgt, bool))
+        assert (0 <= rpst < len(GraphRepresentationType))
+        super(UndirectedGraph, self).__init__(rpst, wgt, False)
+        if self.wgt:
+            self.grps = lib_undirected_wgrp
+        else:
+            self.grps = lib_undirected_ugrp
 
 
 class UndirectedAcyclicGraph(UndirectedGraph):
-    def __init__(self):
-        super(UndirectedAcyclicGraph, self).__init__()
-        self.ugrps = lib_undirected_acyclic_ugrp
-        self.wgrps = lib_undirected_acyclic_wgrp
+    def __init__(self, wgt, rpst=GraphRepresentationType.LIST):
+        assert (isinstance(wgt, bool))
+        assert (0 <= rpst < len(GraphRepresentationType))
+        super(UndirectedAcyclicGraph, self).__init__(wgt, rpst)
+        if self.wgt:
+            self.grps = lib_undirected_acyclic_wgrp
+        else:
+            self.grps = lib_undirected_acyclic_ugrp
 
 
 class DirectedGraph(Graph):
-    def __init__(self):
-        super(DirectedGraph, self).__init__()
-        self.ugrps = lib_directed_ugrp
-        self.wgrps = lib_directed_wgrp
-
-    @dec_check_cases(True)
-    def _gencase(self, *args):
-        return super(DirectedGraph, self)._gencase(*args)
+    def __init__(self, wgt, rpst=GraphRepresentationType.LIST):
+        assert (isinstance(wgt, bool))
+        assert (0 <= rpst < len(GraphRepresentationType))
+        super(DirectedGraph, self).__init__(rpst, wgt, True)
+        if self.wgt:
+            self.grps = lib_directed_wgrp
+        else:
+            self.grps = lib_directed_ugrp
 
 
 class DirectedAcyclicGraph(DirectedGraph):
-    def __init__(self):
-        super(DirectedAcyclicGraph, self).__init__()
-        self.ugrps = lib_directed_acyclic_ugrp
-        self.wgrps = lib_directed_acyclic_wgrp
+    def __init__(self, wgt, rpst=GraphRepresentationType.LIST):
+        assert (isinstance(wgt, bool))
+        assert (0 <= rpst < len(GraphRepresentationType))
+        super(DirectedAcyclicGraph, self).__init__(wgt, rpst)
+        if self.wgt:
+            self.grps = lib_directed_acyclic_wgrp
+        else:
+            self.grps = lib_directed_acyclic_ugrp
 
 
 if __name__ == '__main__':
-    grp = UndirectedGraph()
-    assert (len(grp.gencase(False, GraphRepresentationType.LIST)) ==
-            len(grp.gencase(False, GraphRepresentationType.MATRIX)))
-    assert (len(grp.gencase(True, GraphRepresentationType.LIST)) ==
-            len(grp.gencase(True, GraphRepresentationType.MATRIX)))
-    grp = DirectedGraph()
-    assert (len(grp.gencase(False, GraphRepresentationType.LIST)) ==
-            len(grp.gencase(False, GraphRepresentationType.MATRIX)))
-    assert (len(grp.gencase(True, GraphRepresentationType.LIST)) ==
-            len(grp.gencase(True, GraphRepresentationType.MATRIX)))
+    def main(cls):
+        assert (len(cls(False, GraphRepresentationType.LIST)._gencase()) ==
+                len(cls(False, GraphRepresentationType.MATRIX)._gencase()) ==
+                len(cls(False, GraphRepresentationType.DICT)._gencase()))
+        assert (len(cls(True, GraphRepresentationType.LIST)._gencase()) ==
+                len(cls(True, GraphRepresentationType.MATRIX)._gencase()) ==
+                len(cls(True, GraphRepresentationType.DICT)._gencase()))
+
+
+    map(main, [UndirectedGraph, UndirectedAcyclicGraph, DirectedGraph, DirectedAcyclicGraph])
     print 'done'

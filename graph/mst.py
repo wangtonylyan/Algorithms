@@ -20,7 +20,7 @@ from data_structure.tree.disjoint import DisjointSetForest
 # Then e does not belong to any minimum spanning tree of G.
 class MinimumSpanningTree(UndirectedGraph):
     def __init__(self):
-        super(MinimumSpanningTree, self).__init__()
+        super(MinimumSpanningTree, self).__init__(True)
         self.funcs = [self.main_Boruvka,
                       self.main_Kruskal,
                       self.main_Prim_1,
@@ -144,12 +144,12 @@ class MinimumSpanningTree(UndirectedGraph):
                 assert (reduce(lambda x, y: x and num(y(case, i)) == num(ret), self.funcs, True) == True)
             assert (len(ret) == len(case) - 1)
 
-        self._testcase(test, self.gencase(True))
+        self._testcase(test, self._gencase())
 
 
 class MinimumSpanningArborescence(DirectedGraph):
     def __init__(self):
-        super(MinimumSpanningArborescence, self).__init__()
+        super(MinimumSpanningArborescence, self).__init__(True)
 
     def main_Edmonds(self, grp, src):
         msa = []

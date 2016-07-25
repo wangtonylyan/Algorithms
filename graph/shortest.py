@@ -8,6 +8,9 @@ from sort import TopologicalSort
 
 
 class ShortestPath(DirectedAcyclicGraph):
+    def __init__(self):
+        super(ShortestPath, self).__init__(True)
+
     # weighted directed graph
     # 适合于任何带权值的有向图，O(VE)
     def main_BellmanFord(self, grp, src):
@@ -97,7 +100,7 @@ class ShortestPath(DirectedAcyclicGraph):
                 assert (self.main_BellmanFord(case, i) == self.main_dag(case, i)
                         == self.main_Dijkstra(case, i))
 
-        self._testcase(test, self.gencase(True))
+        self._testcase(test, self._gencase())
 
 
 if __name__ == '__main__':

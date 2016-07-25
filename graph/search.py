@@ -3,7 +3,7 @@
 
 
 import copy
-from graph import *
+from graph import AbstractGraph, UndirectedGraph, DirectedGraph
 from data_structure.queue import Queue
 from data_structure.stack import Stack
 
@@ -25,9 +25,9 @@ def dec_search_source_wrapper(func):
     return f
 
 
-class GraphList(Graph):
+class GraphSearch_List(AbstractGraph):
     def __init__(self):
-        super(GraphList, self).__init__()
+        AbstractGraph.__init__(self)
         self.funcs = [
             self.bfs_iter,
             self.bfs_iter_2,
@@ -142,22 +142,27 @@ class GraphList(Graph):
             assert (reduce(lambda x, y: x if x == self._traverse(copy.deepcopy(case), y) else None,
                            self.funcs[1:], self._traverse(copy.deepcopy(case), self.funcs[0])) != None)
 
-        self._testcase(test, self.gencase(False))
+        self._testcase(test, self._gencase())
 
 
-class UndirectedGraphList(UndirectedGraph, GraphList):
+class UndirectedGraphSearch_List(GraphSearch_List, UndirectedGraph):
     def __init__(self):
-        super(UndirectedGraphList, self).__init__()
+        GraphSearch_List.__init__(self)
+        UndirectedGraph.__init__(self, False)
 
 
-class DirectedGraphList(DirectedGraph, GraphList):
+class DirectedGraphSearch_List(GraphSearch_List, DirectedGraph):
     def __init__(self):
-        super(DirectedGraphList, self).__init__()
+        GraphSearch_List.__init__(self)
+        DirectedGraph.__init__(self, False)
 
 
 # @problem: 获取所有节点距离某个源点的深度/层次
 # @problem: bipartite graph，实现：对不同层次的节点进行染色
 class VertexDepth(UndirectedGraph):
+    def __init__(self):
+        super(VertexDepth, self).__init__(False)
+
     def main_bfs(self, grp, src):
         vtx = [0] * len(grp)
         dpt = [None] * len(grp)
@@ -181,7 +186,7 @@ class VertexDepth(UndirectedGraph):
             for i in range(len(case)):
                 self.main_bfs(case, i)
 
-        self._testcase(test, self.gencase(False))
+        self._testcase(test, self._gencase())
 
 
 class LakeCounting():
@@ -263,8 +268,8 @@ class LakeCounting():
 
 
 if __name__ == '__main__':
-    UndirectedGraphList().testcase()
-    DirectedGraphList().testcase()
+    UndirectedGraphSearch_List().testcase()
+    DirectedGraphSearch_List().testcase()
     VertexDepth().testcase()
     LakeCounting().testcase()
     print 'done'

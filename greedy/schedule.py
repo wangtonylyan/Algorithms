@@ -3,7 +3,8 @@
 import random
 
 
-# @problem: <Algorithm Design> 4.1
+# @problem: interval scheduling
+# @reference: <Algorithm Design> 4.1
 # 给定若干个区间，求互不重叠区间所能组成的最大集合
 # 1) 证明：由于贪婪算法的迭代过程中，每步可供选择的区间不会少于最优算法
 # 于是每步所得的解也都不会差于(结束时间晚于或开始时间早于)最优解
@@ -13,6 +14,8 @@ import random
 # (b) 选择持续时间最短的区间
 # (c) 选择与其他区间冲突最少的区间
 class IntervalSchedule():
+    # @problem: weighted interval scheduling
+    # 无权重的版本就相当于所有区间的权重值都为1
     def main_dynamic(self, lst):
         # 以下维护tab的逻辑对于输入的活动顺序有所依赖
         # 即对于任意活动lst[k]，lst[k:]中不能存在可以在其前被实施的活动
@@ -30,6 +33,7 @@ class IntervalSchedule():
         return tab[-1][-1]
 
     def main_greedy_1(self, lst):
+        # 贪婪算法中排序为的是事先得出每次贪婪决策的结果
         lst.sort(key=lambda x: x[1])  # sort by finish time
         ret = [lst[0]]  # greedy choice: the first one to finish
         for i in range(1, len(lst)):
