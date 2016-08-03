@@ -46,10 +46,10 @@ class StableMatching():
             check(self.main_GaleShapley(map1[:], map2[:]))
 
         cases = []
-        for i in range(100):
+        for _ in range(100):
             lst = [i for i in range(random.randint(2, 50))]
             map1, map2 = [], []
-            for j in range(len(lst)):
+            for _ in range(len(lst)):
                 random.shuffle(lst)
                 map1.append(lst[:])
                 random.shuffle(lst)

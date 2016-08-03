@@ -91,7 +91,7 @@ class MinimumSpanningTree(UndirectedGraph):
     def main_Prim_1(self, grp, src=0):
         vtx = [0 if i != src else 1 for i in range(len(grp))]
         mst = []
-        for v in range(len(grp) - 1):
+        for _ in range(len(grp) - 1):
             m = None
             for i in range(len(grp)):
                 if vtx[i] == 1:
@@ -116,7 +116,7 @@ class MinimumSpanningTree(UndirectedGraph):
             pre[i] = src
         # 2) build mst by selecting vertices
         mst = []
-        for v in range(len(grp) - 1):
+        for _ in range(len(grp) - 1):
             m = None
             for i in range(len(grp)):
                 if vtx[i] == 0 and dis[i] != None:
@@ -140,8 +140,7 @@ class MinimumSpanningTree(UndirectedGraph):
             num = lambda mst: sum(map(lambda x: x[1], mst))
             assert (len(self.funcs) > 0)
             ret = self.funcs[0](case)
-            for i in range(len(case)):
-                assert (reduce(lambda x, y: x and num(y(case, i)) == num(ret), self.funcs, True) == True)
+            assert (all(num(f(case, src)) == num(ret) for f in self.funcs[1:] for src in range(len(case))))
             assert (len(ret) == len(case) - 1)
 
         self._testcase(test, self._gencase())

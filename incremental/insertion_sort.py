@@ -97,18 +97,18 @@ class FindMinLengthUnsortedSubarray():
                 high = i
                 break
         assert (low <= high)
-        minVal, maxVal = lst[low], lst[high]
+        m, n = lst[low], lst[high]
         for i in range(low, high + 1):
-            if lst[i] < minVal:
-                minVal = lst[i]
-            if lst[i] > maxVal:
-                maxVal = lst[i]
+            if lst[i] < m:
+                m = lst[i]
+            if lst[i] > n:
+                n = lst[i]
         for i in range(low):
-            if lst[i] > minVal:
+            if lst[i] > m:
                 low = i
                 break
         for i in range(len(lst) - 1, high, -1):
-            if lst[i] < maxVal:
+            if lst[i] < n:
                 high = i
                 break
         return (low, high)

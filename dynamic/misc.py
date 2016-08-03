@@ -9,7 +9,7 @@ class Ferry():
         pass
 
     def main_1(self, map):
-        tab = [[0 for col in range(len(map) + 1)] for row in range(len(map) + 1)]
+        tab = [[0] * (len(map) + 1) for _ in range(len(map) + 1)]
         for i in range(1, len(map) + 1):
             for j in range(1, len(map) + 1):
                 tab[i][j] = max(tab[i - 1][map[i - 1] - 1] + 1 if j >= map[i - 1] else 0,

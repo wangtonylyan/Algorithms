@@ -10,7 +10,7 @@ from data_structure.stack import Stack
 
 def dec_search_source_wrapper(func):
     def f(self, grp, src, *args):
-        assert (isinstance(grp, list) and reduce(lambda x, y: x and isinstance(y, list), grp, True))
+        assert (isinstance(grp, list) and (all(isinstance(x, list) for x in grp)))
         assert (0 <= src < len(grp))
         vtx = func(self, grp, src, *args)
         assert (isinstance(vtx, list) and len(vtx) == len(grp))
@@ -137,10 +137,10 @@ class GraphSearch_List(AbstractGraph):
         def test(case):
             assert (len(self.funcs) > 0)
             for i in range(len(case)):
-                assert (reduce(lambda x, y: x if x == y(copy.deepcopy(case), i) else None,
-                               self.funcs[1:], self.funcs[0](copy.deepcopy(case), i)) != None)
-            assert (reduce(lambda x, y: x if x == self._traverse(copy.deepcopy(case), y) else None,
-                           self.funcs[1:], self._traverse(copy.deepcopy(case), self.funcs[0])) != None)
+                ret = self.funcs[0](copy.deepcopy(case), i)
+                assert (all(f(copy.deepcopy(case), i) == ret for f in self.funcs[1:]))
+            ret = self._traverse(copy.deepcopy(case), self.funcs[0])
+            assert (all(self._traverse(copy.deepcopy(case), f) == ret for f in self.funcs[1:]))
 
         self._testcase(test, self._gencase())
 

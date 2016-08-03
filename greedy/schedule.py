@@ -24,7 +24,7 @@ class IntervalSchedule():
         lst.sort(key=lambda x: x[1])
 
         time = max(map(lambda x: x[1], lst))
-        tab = [[0] * (len(lst) + 1) for i in range(time + 1)]
+        tab = [[0] * (len(lst) + 1) for _ in range(time + 1)]
         for i in range(1, time + 1):
             for j in range(1, len(lst) + 1):
                 tab[i][j] = max(tab[lst[j - 1][0]][j - 1] + 1 if lst[j - 1][1] <= i else 0,
@@ -56,9 +56,9 @@ class IntervalSchedule():
                     self.main_greedy_2(lst[:]))
 
         cases = []
-        for t in range(500):
+        for _ in range(500):
             case = []
-            for i in range(random.randint(5, 60)):
+            for _ in range(random.randint(5, 60)):
                 st = random.randint(0, 30)
                 ft = random.randint(0, 30)
                 while ft == st:
@@ -113,9 +113,9 @@ class IntervalPartition():
                     assert (not self.isOverlapped(i, j, j + 1))
 
         cases = []
-        for t in range(500):
+        for _ in range(500):
             case = []
-            for i in range(random.randint(5, 60)):
+            for _ in range(random.randint(5, 60)):
                 st = random.randint(0, 30)
                 ft = random.randint(0, 30)
                 while ft == st:
@@ -151,9 +151,9 @@ class MinimizeLateness():
             ret = self.main(case[:])
 
         cases = []
-        for t in range(500):
+        for _ in range(500):
             case = []
-            for i in range(random.randint(5, 60)):
+            for _ in range(random.randint(5, 60)):
                 lt = random.randint(1, 10)  # interval length
                 dt = random.randint(lt * 5, lt * 10)  # deadline
                 if (lt, dt) not in case:

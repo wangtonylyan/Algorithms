@@ -86,7 +86,7 @@ class Select():
 
     def testcase(self):
         def test(func):
-            for i in range(20):
+            for _ in range(20):
                 lst = [i for i in range(random.randint(5, 50))]
                 for i in range(len(lst)):
                     random.shuffle(lst)

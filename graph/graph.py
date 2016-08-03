@@ -270,7 +270,7 @@ class Graph(AbstractGraph):
 
     @dec_check_cases
     def _gencase(self):
-        assert (isinstance(self.grps, list) and all(map(lambda x: isinstance(x, list), self.grps)))
+        assert (isinstance(self.grps, list) and (all(isinstance(x, list) for x in self.grps)))
         return map(lambda x: self._transform(GraphRepresentationType.LIST, self.rpst, x, self.wgt), self.grps)
 
     @staticmethod
@@ -282,9 +282,9 @@ class Graph(AbstractGraph):
         if fm == to:
             ret = copy.deepcopy(grp)  # return a new instance of grp
         elif fm == GraphRepresentationType.LIST:
-            assert (isinstance(grp, list) and all(map(lambda x: isinstance(x, list), grp)))
+            assert (isinstance(grp, list) and (all(isinstance(x, list) for x in grp)))
             if to == GraphRepresentationType.MATRIX:
-                ret = [[0] * len(grp) for i in range(len(grp))]
+                ret = [[0] * len(grp) for _ in range(len(grp))]
                 if wgt:
                     for i in range(len(grp)):
                         for j, w in grp[i]:
@@ -308,13 +308,13 @@ class Graph(AbstractGraph):
                                 ret[i] = {}
                             ret[i][j] = 1
         elif fm == GraphRepresentationType.MATRIX:
-            assert (isinstance(grp, list) and all(map(lambda x: isinstance(x, list), grp)))
+            assert (isinstance(grp, list) and (all(isinstance(x, list) for x in grp)))
             if to == GraphRepresentationType.LIST:
                 pass
             elif to == GraphRepresentationType.DICT:
                 pass
         elif fm == GraphRepresentationType.DICT:
-            assert (isinstance(grp, dict) and all(map(lambda x: isinstance(x, dict), grp)))
+            assert (isinstance(grp, dict) and (all(isinstance(x, dict) for x in grp)))
             if to == GraphRepresentationType.LIST:
                 pass
             elif to == GraphRepresentationType.MATRIX:
@@ -322,9 +322,9 @@ class Graph(AbstractGraph):
 
         assert (ret != None)
         if isinstance(ret, list):
-            assert (all(map(lambda x: isinstance(x, list), ret)))
+            assert (all(isinstance(x, list) for x in ret))
         elif isinstance(ret, dict):
-            assert (all(map(lambda x: isinstance(x, dict), ret.values())))
+            assert (all(isinstance(x, dict) for x in ret.values()))
         else:
             assert (False)
         return ret
@@ -335,7 +335,7 @@ class Graph(AbstractGraph):
         assert (0 <= rpst < len(GraphRepresentationType))
         assert (isinstance(wgt, bool))
         if rpst == GraphRepresentationType.LIST:
-            ret = [[] for i in range(len(grp))]
+            ret = [[] for _ in range(len(grp))]
             if wgt:
                 for i in range(grp):
                     for j, w in grp[i]:
@@ -345,7 +345,7 @@ class Graph(AbstractGraph):
                     for j in grp[i]:
                         ret[j].append(i)
         elif rpst == GraphRepresentationType.MATRIX:
-            ret = [[0] * len(grp) for i in range(len(grp))]
+            ret = [[0] * len(grp) for _ in range(len(grp))]
             for i in range(len(grp)):
                 for j in range(len(grp)):
                     if grp[i][j] > 0:

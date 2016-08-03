@@ -19,7 +19,7 @@ class LongestIncreasingSubsequence():
         # tab[i][j]: the minimum end number of all i-length subsequences in a j-length sequence
         # tab[i][j] ~ tab[i-1][j-1] or tab[i][j-1]
         # tab[i][j] = lst[j] or tab[i][j-1] or None
-        tab = [[None for col in range(len(lst))] for row in range(len(lst))]
+        tab = [[None] * (len(lst)) for _ in range(len(lst))]
         for i in range(len(lst)):  # i: length of increasing subsequence
             for j in range(len(lst)):  # j: length of sequence
                 if i > j:
@@ -53,9 +53,9 @@ class LongestIncreasingSubsequence():
             assert (self.main_1(lst) == self.main_2(lst))
 
         llst = []
-        for i in range(15):
+        for _ in range(15):
             lst = [i for i in range(random.randint(10, 100))]
-            for j in range(len(lst)):
+            for _ in range(len(lst)):
                 random.shuffle(lst)
                 llst.append(lst)
         map(test, llst)
@@ -90,7 +90,7 @@ class LongestCommonSubsequence():
         # tab[i][j]: the longest length of all common subsequences of lst1[:i] and lst2[:j]
         # tab[i][j] ~ tab[i-1][j-1] or tab[i-1][j] or tab[i][j-1]
         # tab[i][j] = max(tab[i-1][j-1]+1, tab[i-1][j], tab[i][j-1])
-        tab = [[0 for col in range(len(lst2) + 1)] for row in range(len(lst1) + 1)]
+        tab = [[0] * (len(lst2) + 1) for _ in range(len(lst1) + 1)]
         for i in range(1, len(lst1) + 1):  # index of lst1
             for j in range(1, len(lst2) + 1):  # index of lst2
                 if tab[i - 1][j - 1] < tab[i - 1][j] or tab[i - 1][j - 1] < tab[i][j - 1]:
@@ -114,7 +114,7 @@ class LongestCommonSubsequence():
             assert (self.main_1(lst1, lst2) == self.main_2(lst1, lst2))
 
         llst = []
-        for i in range(15):
+        for _ in range(15):
             lst1 = [i for i in range(random.randint(5, 13))]
             random.shuffle(lst1)
             lst2 = [i for i in range(random.randint(5, 13))]
@@ -154,7 +154,7 @@ class Partition():
         if sum(lst) < 2:  # makes sense
             return False
         # tab[i][j] ~ tab[i-lst[j-1]][j-1] or tab[i][j-1]
-        tab = [[False if row > 0 else True for col in range(len(lst) + 1)] for row in range((sum(lst) >> 1) + 1)]
+        tab = [[False if i > 0 else True for _ in range(len(lst) + 1)] for i in range((sum(lst) >> 1) + 1)]
         for i in range(1, len(tab)):
             for j in range(1, len(lst) + 1):
                 tab[i][j] = (tab[i - lst[j - 1]][j - 1] if i >= lst[j - 1] else False) \
@@ -198,11 +198,11 @@ class Partition():
             assert (self.main_1(lst) == self.main_2(lst))
 
         llst = [[1, 1], [1, 1, 100]]
-        for i in range(15):
+        for _ in range(15):
             lst = [i for i in range(1, random.randint(10, 50))]
             while sum(lst) & 1 != 0:
                 lst = [i for i in range(1, random.randint(10, 50))]
-            for j in range(len(lst)):
+            for _ in range(len(lst)):
                 random.shuffle(lst)
                 llst.append(lst)
         map(test, llst)

@@ -20,7 +20,7 @@ class ShortestPath(DirectedAcyclicGraph):
         # 2) calculate
         # best: 1->2->...->n
         # worst: n->n-1->...->1
-        for v in range(len(grp) - 1):
+        for _ in range(len(grp) - 1):
             for i in range(len(grp)):
                 if dis[i] != None:
                     for j, w in grp[i]:
@@ -75,7 +75,7 @@ class ShortestPath(DirectedAcyclicGraph):
             dis[i] = w
             pre[i] = src
         # 2) calculate by selecting vertices
-        for v in range(len(grp) - 1):
+        for _ in range(len(grp) - 1):
             m = None
             for i in range(len(grp)):
                 if vtx[i] == 0 and dis[i] != None:

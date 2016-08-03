@@ -174,7 +174,7 @@ class CountInversionsInArray():
             assert (lst == cpy)
 
         cases = [[1], [1, 2], [2, 1]]
-        for i in range(20):
+        for _ in range(20):
             lst = [random.randint(0, 100) for i in range(random.randint(5, 50))]
             random.shuffle(lst)
             cases.append(lst)
@@ -245,8 +245,8 @@ class SortLinkedList():
             assert (llst == None and i == len(lst))
 
         cases = [[1], [1, 2], [2, 1]]
-        for i in range(20):
-            lst = [random.randint(0, 100) for i in range(random.randint(5, 50))]
+        for _ in range(20):
+            lst = [random.randint(0, 100) for _ in range(random.randint(5, 50))]
             random.shuffle(lst)
             cases.append(lst)
         map(test, cases)

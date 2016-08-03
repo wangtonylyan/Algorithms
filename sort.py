@@ -21,10 +21,10 @@ class Sort(object):
             assert (sort([1]) == [1])
             assert (sort([1, 2]) == [1, 2])
             assert (sort([2, 1]) == [1, 2])
-            for i in range(50):
+            for _ in range(50):
                 num = random.randint(10, 50)
                 lst = [i for i in range(num)]
-                for i in range(num):
+                for _ in range(num):
                     random.shuffle(lst)
                     ret = sort(lst[:])  # pass by reference, so need to copy
                     lst.sort()
@@ -189,7 +189,7 @@ class BucketSort(Sort):
         # 哈希算法本身还需要维护不同bucket中数据之间的相对顺序
         # 例如bucket[0]中的数据都必须小于bucket[1]中的，以此类推
         hash = lambda x: x / 10  # for simplicity
-        bucket = [[] for i in range(hash(max(lst)) + 1)]
+        bucket = [[] for _ in range(hash(max(lst)) + 1)]
         for i in lst:
             bucket[hash(i)].append(i)
         map(list.sort, bucket)
