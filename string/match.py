@@ -3,18 +3,21 @@
 # solution: brute force, Rabin-Karp, KMP
 # 返回值是所有匹配子字符串的偏移量
 
-import random
-import re
+import random, re
+from string import String
 
 
-class StringMatch(object):
+class StringMatch(String):
     def __init__(self):
+        super(StringMatch, self).__init__()
         self.funcs = []
 
     def testcase(self):
-        def test(func):
-            assert (s.find(p) == func(s, p)[0])
+        def test(case):
+            s, p = case
+            assert (all(s.find(p) == f(s, p)[0] for f in self.funcs))
 
+        cases = []
         for i in range(100):
             s = ''
             for j in range(500):
@@ -24,8 +27,8 @@ class StringMatch(object):
             assert (start + patlen <= len(s))
             p = s[start:start + patlen]
             assert (len(s) >= len(p) and s.find(p) != -1)
-            map(test, self.funcs)
-        print 'pass:', self.__class__
+            cases.append((s, p))
+        self._testcase(test, cases)
 
 
 class BruteForce(StringMatch):
