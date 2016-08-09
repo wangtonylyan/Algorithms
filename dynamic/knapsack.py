@@ -79,10 +79,12 @@ class CompleteKnapsack(Knapsack):
         for it in items:
             w, v = it[0], it[1]
             k = 1  # exponential of 2
-            while w << (k + 1) <= weight:
+            # 以下两条while判断条件的等价性：假设将w<<k加入items后
+            # while (w << (k + 1)) - w <= weight:  # 已有的同类物品的总重量是否仍小于weight
+            while w << (k + 1) < weight:  # 背包内的剩余重量是否将大于w<<k
                 cpy.append((w << k, v << k))
                 k += 1
-            if w << k <= weight:
+            if (w << k) - w <= weight - w:
                 k = (weight - (w << k) + w) / w
                 assert (isinstance(k, int) and k > 0)
                 cpy.append((w * k, v * k))

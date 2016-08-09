@@ -28,10 +28,10 @@ class QuickSort(Sort):
         flag = lst[low]
         i, j = low, high - 1
         while i != j:
-            while j > i and lst[j] > flag:
+            while j > i and lst[j] >= flag:
                 j -= 1
             lst[i] = lst[j]
-            while i < j and lst[i] < flag:
+            while i < j and lst[i] <= flag:
                 i += 1
             lst[j] = lst[i]
         lst[i] = flag
