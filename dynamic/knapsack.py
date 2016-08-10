@@ -4,6 +4,9 @@
 # @param weight: weight of knapsack
 # @param items: pairs of item info (weight,value,number)
 
+import copy
+
+
 class Knapsack(object):
     def __init__(self):
         self.funcs = []
@@ -12,8 +15,8 @@ class Knapsack(object):
         def test(case):
             assert (len(self.funcs) > 0)
             for wgt in range(1, case[0] * 10):
-                ret = self.funcs[0](wgt, case[1])
-                assert (all(f(wgt, case[1]) == ret >= 0 for f in self.funcs[1:]))
+                ret = self.funcs[0](wgt, copy.deepcopy(case[1]))
+                assert (all(f(wgt, copy.deepcopy(case[1])) == ret >= 0 for f in self.funcs[1:]))
 
         cases = [(10, [(2, 6, 3), (2, 7, 1), (4, 3, 2), (5, 4, 2), (6, 5, 2)]),
                  (50, [(10, 60, 2), (20, 100, 2), (30, 120, 5)]),
@@ -75,31 +78,36 @@ class CompleteKnapsack(Knapsack):
     # convert to 01-knapsack problem
     # 优化：从数的二进制表示，对物品数量的构成进行优化
     def main_1(self, weight, items):
-        cpy = items[:]
-        for it in items:
+        for it in items[:]:
+            dup = []
             w, v = it[0], it[1]
             k = 1  # exponential of 2
-            # 以下两条while判断条件的等价性：假设将w<<k加入items后
-            # while (w << (k + 1)) - w <= weight:  # 已有的同类物品的总重量是否仍小于weight
-            while w << (k + 1) < weight:  # 背包内的剩余重量是否将大于w<<k
-                cpy.append((w << k, v << k))
+            # while (w << (k + 1)) - w <= weight:
+            while w << (k + 1) <= weight:
+                dup.append((w << k, v << k))
                 k += 1
+            # 该if条件可以同时弥补/覆盖上述两个while条件所造成的"空隙"
             if (w << k) - w <= weight - w:
                 k = (weight - (w << k) + w) / w
                 assert (isinstance(k, int) and k > 0)
-                cpy.append((w * k, v * k))
-        # @assert: cpy中同种物品的重量总和不大于weight
-        return ZeroOneKnapsack().main_3(weight, cpy)
+                dup.append((w * k, v * k))
+            # @assert: items中同种物品的重量总和不大于weight
+            assert (w > weight or weight - sum([x[0] for x in dup + [(w, v)]]) <= w)
+            items += dup
+        return ZeroOneKnapsack().main_3(weight, items)
 
-        cpy = items[:]
-        for it in items:
+        for it in items[:]:
+            dup = []
             w, v = it[0], it[1]
             k = 2  # power of 2
             while w * k <= weight:
-                cpy.append((w * k, v * k))
+                dup.append((w * k, v * k))
                 k *= 2
-        # @assert: cpy中同种物品的重量总和不小于weight
-        return ZeroOneKnapsack().main_3(weight, cpy)
+            dup.append((w * k, v * k))
+            # @assert: items中同种物品的重量总和不小于weight
+            assert (sum([x[0] for x in dup + [(w, v)]]) >= weight)
+            items += dup
+        return ZeroOneKnapsack().main_3(weight, items)
 
     def main_2(self, weight, items):
         def recur(wgt, ind):
