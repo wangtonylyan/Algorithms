@@ -10,12 +10,16 @@ from string import String
 class StringMatch(String):
     def __init__(self):
         super(StringMatch, self).__init__()
-        self.funcs = []
+        self.funcs = [
+            self.main_brute_force,
+            # self.main_automata,
+        ]
 
     def testcase(self):
         def test(case):
             s, p = case
-            assert (all(s.find(p) == f(s, p)[0] for f in self.funcs))
+            ret = s.find(p)
+            assert (all(f(s, p)[0] == ret for f in self.funcs))
 
         cases = []
         for i in range(100):
@@ -30,23 +34,43 @@ class StringMatch(String):
             cases.append((s, p))
         self._testcase(test, cases)
 
-
-class BruteForce(StringMatch):
-    def __init__(self):
-        super(BruteForce, self).__init__()
-        self.funcs.append(self.main)
-
-    def main(self, str, pat):
+    def main_brute_force(self, str, pat):
         ret = []
         # search
-        for i in range(0, len(str) - len(pat) + 1):
-            assert (i + len(pat) <= len(str))
+        for i in range(len(str) - len(pat) + 1):
             j = 0
             while j < len(pat) and str[i + j] == pat[j]:
                 j += 1
             if j == len(pat):
                 ret.append(i)
         return ret
+
+    def preprocess(self, str):
+        tab = [0] * len(str)
+        left, right = 0, 0  # [left,right) is a prefix of str
+        # @invariant: 'right' index is the farthest to the right
+        # 目的是为了在从左至右的遍历顺序下，尽可能多地预知右边仍未被访问到的字符
+        # 简而言之'right'越远/右，tab的可复用几率就越高
+        for i in range(1, len(str)):
+            assert (left < i and left <= right)
+            if i < right:
+                assert (str[i:right] == str[i - left:right - left])
+                assert (str[right] != str[right - left])
+                if right - i > tab[i - left]:
+                    assert (str[i + tab[i - left]] == str[i - left + tab[i - left]] != tab[i - left])
+                    tab[i] = tab[i - left]
+                    continue
+                else:
+                    j = tab[i - left]
+            else:
+                j = 0
+
+            while j < len(str) - i and str[j] == str[i + j]:
+                j += 1
+            tab[i] = j
+            left, right = i, i + j
+
+        return tab
 
 
 # 该算法的设计思想，就是利用哈希在暴力算法的基础上先进行一轮筛选
@@ -97,15 +121,6 @@ class RabinKarp(StringMatch):
         return ret
 
 
-class Automata(StringMatch):
-    def __init__(self):
-        super(Automata, self).__init__()
-        self.funcs.append(self.main)
-
-    def main(self, str, pat):
-        return [str.find(pat)]
-
-
 class PatternWithWildcard():
     def main(self, str, pat):
         for i in range(len(str)):
@@ -137,10 +152,7 @@ class PatternWithWildcard():
 
     def testcase(self):
         def test(case):
-            if re.search(case[1], case[0]):
-                assert (self.main(case[0], case[1]) == True)
-            else:
-                assert (self.main(case[0], case[1]) == False)
+            assert (self.main(case[0], case[1]) == True if re.search(case[1], case[0]) else False)
 
         cases = [('cabccbbcbacab', 'ab*ba*c'),
                  ('abcabcabcde', 'abcd'),
@@ -150,8 +162,10 @@ class PatternWithWildcard():
 
 
 if __name__ == '__main__':
-    BruteForce().testcase()
-    RabinKarp().testcase()
-    Automata().testcase()
+    StringMatch().testcase()
     PatternWithWildcard().testcase()
+
+    s = StringMatch()
+    assert (s.preprocess('aabaabcaxaabaabcy')[9] == 7)
+    assert (s.preprocess('aabcaabxaaz')[4:9] == [3, 1, 0, 0, 2])
     print 'done'
