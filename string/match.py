@@ -45,7 +45,7 @@ class StringMatch(String):
                 ret.append(i)
         return ret
 
-    def main_preprocess_brute_force(self, str):
+    def _preprocess_brute_force(self, str):
         tab = [0] * len(str)
         for i in range(1, len(str)):
             j = 0
@@ -54,17 +54,17 @@ class StringMatch(String):
             tab[i] = j
         return tab
 
-    def main_preprocess(self, str):
+    def _preprocess_fundamental(self, str):
         tab = [0] * len(str)
         left, right = 0, 0  # [left,right) is a prefix of str
         # @invariant: 'right' is the farthest to the right
         # 目的是为了在从左至右的遍历顺序下，尽可能多地预知右边仍未被访问到的字符
         # 简而言之'right'越右，tab可复用的几率就越高
         for i in range(1, len(str)):
-            assert (left < i and left <= right)
+            assert (left < i and left <= right <= len(str))
             if i < right:
                 assert (str[i:right] == str[i - left:right - left])
-                assert (str[right] != str[right - left])
+                assert (right == len(str) or str[right] != str[right - left])
                 if right - i > tab[i - left]:
                     assert (str[i:i + tab[i - left]] == str[i - left:i - left + tab[i - left]] == str[:tab[i - left]])
                     assert (str[i + tab[i - left]] == str[i - left + tab[i - left]] != str[tab[i - left]])
@@ -175,7 +175,7 @@ if __name__ == '__main__':
     PatternWithWildcard().testcase()
 
     s = StringMatch()
-    cases = ['aabaabcaxaabaabcy', 'aabcaabxaaz', 'abaabcabaac']
-    assert (all(map(lambda x: s.main_preprocess_brute_force(x) == s.main_preprocess(x), cases)))
+    cases = ['aabaabcaxaabaabcy', 'aabcaabxaaz', 'abaabcabaac', 'abcdefg', 'aabcaabxaaz', 'abcabc']
+    assert (all(map(lambda x: s._preprocess_brute_force(x) == s._preprocess_fundamental(x), cases)))
 
     print 'done'

@@ -12,21 +12,12 @@ from string import String
 class StringSort(String):
     def __init__(self):
         super(StringSort, self).__init__()
+        self.funcs = [
+            self.main_LSD,
+            self.main_MSD,
+        ]
 
-    def testcase(self):
-        def test(case):
-            ret = self.main(case[:])
-            case.sort()
-            assert (ret == case)
-
-        self._testcase(test, self._gencase())
-
-
-class LSD(StringSort):
-    def __init__(self):
-        super(LSD, self).__init__()
-
-    def main(self, lst):
+    def main_LSD(self, lst):
         aux = [None] * len(lst)
         for w in range(max(map(len, lst)) - 1, -1, -1):
             cnt = [0] * (self.alphabet + 2)
@@ -47,12 +38,7 @@ class LSD(StringSort):
             lst, aux = aux, lst
         return lst
 
-
-class MSD(StringSort):
-    def __init__(self):
-        super(MSD, self).__init__()
-
-    def main(self, lst):
+    def main_MSD(self, lst):
         def recur(low, high, wid):
             if high - low < 2 or wid >= max(map(len, lst[low:high])):
                 return
@@ -75,8 +61,15 @@ class MSD(StringSort):
         recur(0, len(lst), 0)
         return lst
 
+    def testcase(self):
+        def test(case):
+            cpy = case[:]
+            cpy.sort()
+            assert (all(f(case[:]) == cpy for f in self.funcs))
+
+        self._testcase(test, self._gencase())
+
 
 if __name__ == '__main__':
-    LSD().testcase()
-    MSD().testcase()
+    StringSort().testcase()
     print 'done'
