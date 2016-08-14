@@ -63,6 +63,7 @@ class StringMatch(String):
         def test(case):
             assert (len(self.funcs) > 0)
             ret = self.funcs[0](case[0], case[1])
+            assert (len(ret) > 0)  # only for current cases
             assert (all(f(case[0], case[1]) == ret for f in self.funcs[1:]))
 
         cases = [
@@ -71,11 +72,11 @@ class StringMatch(String):
             ('abcabcabcabc', 'abc'),
             ('aaaaaaaaaa', 'a'),
         ]
-        for i in range(100):
+        for i in range(200):
             s = ''
-            for j in range(500):
+            for j in range(200):
                 s += chr(random.randint(ord('a'), ord('z')))
-            patlen = random.randint(1, len(s))
+            patlen = random.randint(1, 10)
             start = random.randint(0, len(s) - patlen)
             assert (start + patlen <= len(s))
             p = s[start:start + patlen]
@@ -83,68 +84,6 @@ class StringMatch(String):
             cases.append((s, p))
 
         self._testcase(test, cases)
-
-
-class BoyerMoore(StringMatch):
-    def __init__(self):
-        super(BoyerMoore, self).__init__()
-        self.funcs.append(self.main_badCharacter)
-        self.funcs.append(self.main_badCharacterExtended)
-
-    def main_bruteForce(self, str, pat):
-        # search
-        ret = []
-        for i in range(len(pat) - 1, len(str)):
-            j = 0
-            while j < len(pat) and str[i - j] == pat[len(pat) - 1 - j]:
-                j += 1
-            if j == len(pat):
-                ret.append(i - j + 1)
-        return ret
-
-    def main_badCharacter(self, str, pat):
-        # preprocess
-        tab = [-1] * self.alphabet
-        for i in range(len(pat)):
-            # rightmost occurrence of pat[i]
-            tab[ord(pat[i]) - ord('a')] = i
-        # search
-        ret = []
-        i = 0
-        while i < len(str) - len(pat) + 1:
-            j = len(pat) - 1
-            while j >= 0 and str[i + j] == pat[j]:
-                j -= 1
-            if j == -1:
-                ret.append(i)
-                i += 1
-            else:
-                i += max(j - tab[ord(str[i + j]) - ord('a')], 1)
-        return ret
-
-    def main_badCharacterExtended(self, str, pat):
-        # preprocess
-        tab = [[] for _ in range(self.alphabet)]
-        for i in range(len(pat)):
-            # all occurrences of pat[i]
-            tab[ord(pat[i]) - ord('a')].append(i)
-        # search
-        ret = []
-        i = 0
-        while i < len(str) - len(pat) + 1:
-            j = len(pat) - 1
-            while j >= 0 and str[i + j] == pat[j]:
-                j -= 1
-            if j == -1:
-                ret.append(i)
-                i += 1
-            else:
-                bad = tab[ord(str[i + j]) - ord('a')]
-                k = -1  # closest to the left of j
-                while k + 1 < len(bad) and bad[k + 1] < j:
-                    k += 1
-                i += max(j - (bad[k] if k > -1 else -1), 1)
-        return ret
 
 
 # 该算法的设计思想，就是利用哈希在暴力算法的基础上先进行一轮筛选
@@ -194,6 +133,91 @@ class RabinKarp(StringMatch):
         return ret
 
 
+class KnuthMorrisPratt(StringMatch):
+    def __init__(self):
+        super(KnuthMorrisPratt, self).__init__()
+
+
+class BoyerMoore(StringMatch):
+    def __init__(self):
+        super(BoyerMoore, self).__init__()
+        self.funcs.append(self.main_badCharacter)
+        self.funcs.append(self.main_goodSuffix)
+
+    def main_bruteForce(self, str, pat):
+        # search
+        ret = []
+        for i in range(len(pat) - 1, len(str)):
+            j = 0
+            while j < len(pat) and str[i - j] == pat[len(pat) - 1 - j]:
+                j += 1
+            if j == len(pat):
+                ret.append(i - j + 1)
+        return ret
+
+    def main_badCharacter(self, str, pat):
+        # preprocess
+        tab = [[] for _ in range(self.alphabet)]
+        for i in range(len(pat) - 1, -1, -1):
+            # all occurrences of pat[i], rightmost first
+            tab[ord(pat[i]) - ord('a')].append(i)
+        # search
+        ret = []
+        i = 0
+        while i < len(str) - len(pat) + 1:
+            j = len(pat) - 1
+            while j >= 0 and str[i + j] == pat[j]:
+                j -= 1
+            if j == -1:
+                ret.append(i)
+                i += 1
+            else:
+                assert (str[i + j] != pat[j])
+                bad = tab[ord(str[i + j]) - ord('a')]
+                k = 0  # closest to the left of j
+                while k < len(bad) and bad[k] > j:
+                    k += 1
+                assert (k == len(bad) or bad[k] != j)
+                i += max(j - (bad[k] if k < len(bad) else -1), 1)
+        return ret
+
+    def main_goodSuffix(self, str, pat):
+        # preprocess
+        tab = [0] * len(pat)
+        low, high = len(pat) - 1, len(pat) - 1
+        for i in range(len(pat) - 2, -1, -1):
+            assert (i < high and low <= high)
+            if i > low:
+                if i - low > tab[len(pat) - 1 - (high - i)]:
+                    tab[i] = tab[len(pat) - 1 - (high - i)]
+                    continue
+                else:
+                    j = i - low
+            else:
+                j = 0
+            while j <= i and pat[i - j] == pat[len(pat) - 1 - j]:
+                j += 1
+            tab[i] = j
+            low, high = i - j, i
+        # search
+        ret = []
+        i = 0
+        while i < len(str) - len(pat) + 1:
+            j = len(pat) - 1
+            while j >= 0 and str[i + j] == pat[j]:
+                j -= 1
+            if j == -1:
+                ret.append(i)
+                i += 1
+            else:
+                assert (str[i + j] != pat[j])
+                k = 1
+                while k <= len(pat) and tab[len(pat) - k] != len(pat) - j - 1:
+                    k += 1
+                i += k if k <= len(pat) else 1
+        return ret
+
+
 class PatternWithWildcard():
     def main(self, str, pat):
         for i in range(len(str)):
@@ -235,8 +259,9 @@ class PatternWithWildcard():
 
 
 if __name__ == '__main__':
-    BoyerMoore().testcase()
     RabinKarp().testcase()
+    KnuthMorrisPratt().testcase()
+    BoyerMoore().testcase()
     PatternWithWildcard().testcase()
 
     s = StringMatch()
