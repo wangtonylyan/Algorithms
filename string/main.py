@@ -16,7 +16,7 @@ class LongestRepeatedSubsequence(String):
                 return i
         return m
 
-    def main_brute_force(self, lst):
+    def main_bruteForce(self, lst):
         m, n = 0, 0
         for i in range(len(lst)):
             for j in range(i + 1, len(lst)):
@@ -25,7 +25,7 @@ class LongestRepeatedSubsequence(String):
                     m, n = i, k
         return lst[m:m + n]
 
-    def main_suffix_sort(self, lst):
+    def main_suffixSort(self, lst):
         sfx = [lst[i:] for i in range(len(lst))]
         sfx.sort()
         m, n = 0, 0
@@ -37,7 +37,7 @@ class LongestRepeatedSubsequence(String):
 
     def testcase(self):
         def test(cases):
-            assert (all(len(self.main_brute_force(case)) == len(self.main_suffix_sort(case)) for case in cases))
+            assert (all(len(self.main_bruteForce(case)) == len(self.main_suffixSort(case)) for case in cases))
 
         self._testcase(test, self._gencase())
 

@@ -10,33 +10,11 @@ from string import String
 class StringMatch(String):
     def __init__(self):
         super(StringMatch, self).__init__()
-        self.funcs = [
-            self.main_brute_force,
-            # self.main_automata,
-        ]
+        self.funcs = [self.main_bruteForce]
 
-    def testcase(self):
-        def test(case):
-            s, p = case
-            ret = s.find(p)
-            assert (all(f(s, p)[0] == ret for f in self.funcs))
-
-        cases = []
-        for i in range(100):
-            s = ''
-            for j in range(500):
-                s += chr(random.randint(ord('a'), ord('z')))
-            patlen = random.randint(1, len(s))
-            start = random.randint(0, len(s) - patlen)
-            assert (start + patlen <= len(s))
-            p = s[start:start + patlen]
-            assert (len(s) >= len(p) and s.find(p) != -1)
-            cases.append((s, p))
-        self._testcase(test, cases)
-
-    def main_brute_force(self, str, pat):
-        ret = []
+    def main_bruteForce(self, str, pat):
         # search
+        ret = []
         for i in range(len(str) - len(pat) + 1):
             j = 0
             while j < len(pat) and str[i + j] == pat[j]:
@@ -45,7 +23,7 @@ class StringMatch(String):
                 ret.append(i)
         return ret
 
-    def _preprocess_brute_force(self, str):
+    def _preprocess_bruteForce(self, str):
         tab = [0] * len(str)
         for i in range(1, len(str)):
             j = 0
@@ -56,30 +34,117 @@ class StringMatch(String):
 
     def _preprocess_fundamental(self, str):
         tab = [0] * len(str)
-        left, right = 0, 0  # [left,right) is a prefix of str
-        # @invariant: 'right' is the farthest to the right
+        low, high = 0, 0  # [low,high) is a prefix of str
+        # @invariant: variable high is the farthest index to the right
         # 目的是为了在从左至右的遍历顺序下，尽可能多地预知右边仍未被访问到的字符
-        # 简而言之'right'越右，tab可复用的几率就越高
+        # 简而言之high越右，tab可复用的几率就越高
         for i in range(1, len(str)):
-            assert (left < i and left <= right <= len(str))
-            if i < right:
-                assert (str[i:right] == str[i - left:right - left])
-                assert (right == len(str) or str[right] != str[right - left])
-                if right - i > tab[i - left]:
-                    assert (str[i:i + tab[i - left]] == str[i - left:i - left + tab[i - left]] == str[:tab[i - left]])
-                    assert (str[i + tab[i - left]] == str[i - left + tab[i - left]] != str[tab[i - left]])
-                    tab[i] = tab[i - left]
+            assert (low < i and low <= high <= len(str))
+            if i < high:
+                assert (str[i:high] == str[i - low:high - low])
+                assert (high == len(str) or str[high] != str[high - low])
+                if high - i > tab[i - low]:
+                    assert (str[i:i + tab[i - low]] == str[i - low:i - low + tab[i - low]] == str[:tab[i - low]])
+                    assert (str[i + tab[i - low]] == str[i - low + tab[i - low]] != str[tab[i - low]])
+                    tab[i] = tab[i - low]
                     continue
                 else:
-                    j = right - i
+                    j = high - i
             else:
                 j = 0
 
             while j < len(str) - i and str[i + j] == str[j]:
                 j += 1
             tab[i] = j
-            left, right = i, i + j
+            low, high = i, i + j
         return tab
+
+    def testcase(self):
+        def test(case):
+            assert (len(self.funcs) > 0)
+            ret = self.funcs[0](case[0], case[1])
+            assert (all(f(case[0], case[1]) == ret for f in self.funcs[1:]))
+
+        cases = [
+            ('abcabceabcde', 'abcd'),
+            ('aaababaabc', 'abc'),
+            ('abcabcabcabc', 'abc'),
+            ('aaaaaaaaaa', 'a'),
+        ]
+        for i in range(100):
+            s = ''
+            for j in range(500):
+                s += chr(random.randint(ord('a'), ord('z')))
+            patlen = random.randint(1, len(s))
+            start = random.randint(0, len(s) - patlen)
+            assert (start + patlen <= len(s))
+            p = s[start:start + patlen]
+            assert (len(s) >= len(p) and s.find(p) != -1)
+            cases.append((s, p))
+
+        self._testcase(test, cases)
+
+
+class BoyerMoore(StringMatch):
+    def __init__(self):
+        super(BoyerMoore, self).__init__()
+        self.funcs.append(self.main_badCharacter)
+        self.funcs.append(self.main_badCharacterExtended)
+
+    def main_bruteForce(self, str, pat):
+        # search
+        ret = []
+        for i in range(len(pat) - 1, len(str)):
+            j = 0
+            while j < len(pat) and str[i - j] == pat[len(pat) - 1 - j]:
+                j += 1
+            if j == len(pat):
+                ret.append(i - j + 1)
+        return ret
+
+    def main_badCharacter(self, str, pat):
+        # preprocess
+        tab = [-1] * self.alphabet
+        for i in range(len(pat)):
+            # rightmost occurrence of pat[i]
+            tab[ord(pat[i]) - ord('a')] = i
+        # search
+        ret = []
+        i = 0
+        while i < len(str) - len(pat) + 1:
+            j = len(pat) - 1
+            while j >= 0 and str[i + j] == pat[j]:
+                j -= 1
+            if j == -1:
+                ret.append(i)
+                i += 1
+            else:
+                i += max(j - tab[ord(str[i + j]) - ord('a')], 1)
+        return ret
+
+    def main_badCharacterExtended(self, str, pat):
+        # preprocess
+        tab = [[] for _ in range(self.alphabet)]
+        for i in range(len(pat)):
+            # all occurrences of pat[i]
+            tab[ord(pat[i]) - ord('a')].append(i)
+        # search
+        ret = []
+        i = 0
+        while i < len(str) - len(pat) + 1:
+            j = len(pat) - 1
+            while j >= 0 and str[i + j] == pat[j]:
+                j -= 1
+            if j == -1:
+                ret.append(i)
+                i += 1
+            else:
+                bad = tab[ord(str[i + j]) - ord('a')]
+                k = -1  # closest to the left of j
+                while k + 1 < len(bad) and bad[k + 1] < j:
+                    k += 1
+                i += max(j - (bad[k] if k > -1 else -1), 1)
+        return ret
 
 
 # 该算法的设计思想，就是利用哈希在暴力算法的基础上先进行一轮筛选
@@ -97,10 +162,9 @@ class RabinKarp(StringMatch):
     def __init__(self):
         super(RabinKarp, self).__init__()
         self.funcs.append(self.main)
-        self.alphabet = 128  # 7-bit ASCII
         self.prime = 6999997
 
-    def hash(self, str, strLen):
+    def _hash(self, str, strLen):
         assert (strLen <= len(str))
         # prepare
         factor = 1  # == d^(m-1)
@@ -119,10 +183,10 @@ class RabinKarp(StringMatch):
 
     def main(self, str, pat):
         ret = []
-        # step1) preprocess
-        pHash = self.hash(pat, len(pat)).next()
-        sHashFunc = self.hash(str, len(pat))
-        # step2) search
+        # preprocess
+        pHash = self._hash(pat, len(pat)).next()
+        sHashFunc = self._hash(str, len(pat))
+        # search
         for i in range(0, len(str) - len(pat) + 1):
             if pHash == sHashFunc.next():  # spurious hit
                 if str[i:i + len(pat)] == pat:
@@ -171,11 +235,12 @@ class PatternWithWildcard():
 
 
 if __name__ == '__main__':
-    StringMatch().testcase()
+    BoyerMoore().testcase()
+    RabinKarp().testcase()
     PatternWithWildcard().testcase()
 
     s = StringMatch()
     cases = ['aabaabcaxaabaabcy', 'aabcaabxaaz', 'abaabcabaac', 'abcdefg', 'aabcaabxaaz', 'abcabc']
-    assert (all(map(lambda x: s._preprocess_brute_force(x) == s._preprocess_fundamental(x), cases)))
+    assert (all(map(lambda x: s._preprocess_bruteForce(x) == s._preprocess_fundamental(x), cases)))
 
     print 'done'
