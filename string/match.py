@@ -43,6 +43,7 @@ class StringMatch(String):
             if i < high:
                 assert (str[i:high] == str[i - low:high - low])
                 assert (high == len(str) or str[high] != str[high - low])
+                # high是开区间，因此high-i与tab[i-low]都是长度值
                 if high - i > tab[i - low]:
                     assert (str[i:i + tab[i - low]] == str[i - low:i - low + tab[i - low]] == str[:tab[i - low]])
                     assert (str[i + tab[i - low]] == str[i - low + tab[i - low]] != str[tab[i - low]])
@@ -67,16 +68,22 @@ class StringMatch(String):
             assert (all(f(case[0], case[1]) == ret for f in self.funcs[1:]))
 
         cases = [
-            ('abcabceabcde', 'abcd'),
-            ('aaababaabc', 'abc'),
-            ('abcabcabcabc', 'abc'),
-            ('aaaaaaaaaa', 'a'),
+            # ('abcabceabcde', 'abcd'),
+            # ('aaababaabc', 'abc'),
+            # ('abcabcabcabc', 'abc'),
+            # ('aaaaaaaaaa', 'aaaa'),
+            # ('abcabceababcabcabcd', 'abcabcd'),
+            ('eabcabcabc', 'eabcabcabc'),
         ]
+
+        self._testcase(test, cases)
+        return
+
         for i in range(200):
             s = ''
-            for j in range(200):
+            for j in range(300):
                 s += chr(random.randint(ord('a'), ord('z')))
-            patlen = random.randint(1, 10)
+            patlen = random.randint(1, 20)
             start = random.randint(0, len(s) - patlen)
             assert (start + patlen <= len(s))
             p = s[start:start + patlen]
@@ -168,37 +175,33 @@ class BoyerMoore(StringMatch):
             j = len(pat) - 1
             while j >= 0 and str[i + j] == pat[j]:
                 j -= 1
-            if j == -1:
+            if j == -1:  # find the occurrence of pat in str
                 ret.append(i)
                 i += 1
-            else:
+            else:  # use the "bad character shift rule"
                 assert (str[i + j] != pat[j])
                 bad = tab[ord(str[i + j]) - ord('a')]
                 k = 0  # closest to the left of j
                 while k < len(bad) and bad[k] > j:
                     k += 1
                 assert (k == len(bad) or bad[k] != j)
-                i += max(j - (bad[k] if k < len(bad) else -1), 1)
+                i += j - (bad[k] if k < len(bad) else -1)
         return ret
 
     def main_goodSuffix(self, str, pat):
         # preprocess
-        tab = [0] * len(pat)
-        low, high = len(pat) - 1, len(pat) - 1
-        for i in range(len(pat) - 2, -1, -1):
-            assert (i < high and low <= high)
-            if i > low:
-                if i - low > tab[len(pat) - 1 - (high - i)]:
-                    tab[i] = tab[len(pat) - 1 - (high - i)]
-                    continue
-                else:
-                    j = i - low
-            else:
-                j = 0
-            while j <= i and pat[i - j] == pat[len(pat) - 1 - j]:
-                j += 1
-            tab[i] = j
-            low, high = i - j, i
+        tab = self._preprocess_fundamental(pat[::-1])  # string reversal
+        tab.reverse()  # list reversal
+
+        print '-' * 10
+        print pat
+        mis = [0] * len(pat)
+        for i in range(len(pat)):
+            # tab[i]是长度，因此len(pat)-tab[i]是tab[i]长度后缀的第一个字符
+            print pat[i - tab[i]], pat[len(pat) - tab[i] - 1], pat[i-tab[i]:i+1], pat[len(pat)-tab[i]-1:len(pat)]
+            assert (i < tab[i] or pat[i - tab[i]] != pat[len(pat) - tab[i] - 1])
+            mis[len(pat) - tab[i] - 1] = i
+
         # search
         ret = []
         i = 0
@@ -206,15 +209,20 @@ class BoyerMoore(StringMatch):
             j = len(pat) - 1
             while j >= 0 and str[i + j] == pat[j]:
                 j -= 1
-            if j == -1:
+            if j == -1:  # find the occurrence of pat in str
                 ret.append(i)
                 i += 1
-            else:
+            else:  # use the "good suffix shift rule"
                 assert (str[i + j] != pat[j])
-                k = 1
-                while k <= len(pat) and tab[len(pat) - k] != len(pat) - j - 1:
-                    k += 1
-                i += k if k <= len(pat) else 1
+                k = len(pat) - 1
+                while k >= 0 and tab[k] < len(pat) - 1 - j - 1 and pat[k + tab[k]] != str[i + j]:  # mismatch at j
+                    k -= 1
+
+                if 0 <= k < len(pat):
+                    # print len(pat) - k
+                    pass
+                i += (len(pat) - k) if 0 <= k < len(pat) else (j + 1)
+        print 'ret:', ret
         return ret
 
 
