@@ -23,30 +23,30 @@ class StringMatch(String):
                 ret.append(i)
         return ret
 
-    def _preprocess_bruteForce(self, str):
-        tab = [0] * len(str)
-        for i in range(1, len(str)):
+    def _preprocess_bruteForce(self, pat):
+        tab = [0] * len(pat)
+        for i in range(1, len(pat)):
             j = 0
-            while j < len(str) - i and str[i + j] == str[j]:
+            while j < len(pat) - i and pat[i + j] == pat[j]:
                 j += 1
             tab[i] = j
         return tab
 
-    def _preprocess_fundamental(self, str):
-        tab = [0] * len(str)
-        low, high = 0, 0  # [low,high) is a prefix of str
+    def _preprocess_fundamental(self, pat):
+        tab = [0] * len(pat)
+        low, high = 0, 0  # [low,high) is a prefix of pat
         # @invariant: variable high is the farthest index to the right
         # 目的是为了在从左至右的遍历顺序下，尽可能多地预知右边仍未被访问到的字符
         # 简而言之high越右，tab可复用的几率就越高
-        for i in range(1, len(str)):
-            assert (low < i and low <= high <= len(str))
+        for i in range(1, len(pat)):
+            assert (low < i and low <= high <= len(pat))
             if i < high:
-                assert (str[i:high] == str[i - low:high - low])
-                assert (high == len(str) or str[high] != str[high - low])
+                assert (pat[i:high] == pat[i - low:high - low])
+                assert (high == len(pat) or pat[high] != pat[high - low])
                 # high是开区间，因此high-i与tab[i-low]都是长度值
                 if high - i > tab[i - low]:
-                    assert (str[i:i + tab[i - low]] == str[i - low:i - low + tab[i - low]] == str[:tab[i - low]])
-                    assert (str[i + tab[i - low]] == str[i - low + tab[i - low]] != str[tab[i - low]])
+                    assert (pat[i:i + tab[i - low]] == pat[i - low:i - low + tab[i - low]] == pat[:tab[i - low]])
+                    assert (pat[i + tab[i - low]] == pat[i - low + tab[i - low]] != pat[tab[i - low]])
                     tab[i] = tab[i - low]
                     continue
                 else:
@@ -54,7 +54,7 @@ class StringMatch(String):
             else:
                 j = 0
 
-            while j < len(str) - i and str[i + j] == str[j]:
+            while j < len(pat) - i and pat[i + j] == pat[j]:
                 j += 1
             tab[i] = j
             low, high = i, i + j
@@ -68,16 +68,14 @@ class StringMatch(String):
             assert (all(f(case[0], case[1]) == ret for f in self.funcs[1:]))
 
         cases = [
-            # ('abcabceabcde', 'abcd'),
-            # ('aaababaabc', 'abc'),
-            # ('abcabcabcabc', 'abc'),
-            # ('aaaaaaaaaa', 'aaaa'),
-            # ('abcabceababcabcabcd', 'abcabcd'),
+            ('abcabceabcde', 'abcd'),
+            ('aaababaabc', 'abc'),
+            ('abcabcabcabc', 'abc'),
+            ('aaaaaaaaaa', 'aaaa'),
+            ('abcabceababcabcabcd', 'abcabcd'),
             ('eabcabcabc', 'eabcabcabc'),
+            ('baabraaabraaabraaa', 'aabraaabra'),
         ]
-
-        self._testcase(test, cases)
-        return
 
         for i in range(200):
             s = ''
@@ -148,8 +146,7 @@ class KnuthMorrisPratt(StringMatch):
 class BoyerMoore(StringMatch):
     def __init__(self):
         super(BoyerMoore, self).__init__()
-        self.funcs.append(self.main_badCharacter)
-        self.funcs.append(self.main_goodSuffix)
+        self.funcs.append(self.main)
 
     def main_bruteForce(self, str, pat):
         # search
@@ -162,12 +159,30 @@ class BoyerMoore(StringMatch):
                 ret.append(i - j + 1)
         return ret
 
-    def main_badCharacter(self, str, pat):
-        # preprocess
+    def _preprocess_badCharacter(self, pat):
         tab = [[] for _ in range(self.alphabet)]
         for i in range(len(pat) - 1, -1, -1):
             # all occurrences of pat[i], rightmost first
             tab[ord(pat[i]) - ord('a')].append(i)
+        return tab
+
+    def _preprocess_goodSuffix(self, pat):
+        tab = self._preprocess_fundamental(pat[::-1])  # string reversal
+        tab.reverse()  # list reversal
+
+        mis = [0] * len(pat)
+        for i in range(len(pat) - 1):
+            assert (i < tab[i] or pat[i - tab[i]] != pat[len(pat) - 1 - tab[i]])
+            if tab[i] > 0:
+                mis[len(pat) - 1 - tab[i]] = i
+
+        return mis
+
+    def main(self, str, pat):
+        # preprocess
+        tab = []
+        bc = self._preprocess_badCharacter(pat)
+        gs = self._preprocess_goodSuffix(pat)
         # search
         ret = []
         i = 0
@@ -186,43 +201,7 @@ class BoyerMoore(StringMatch):
                     k += 1
                 assert (k == len(bad) or bad[k] != j)
                 i += j - (bad[k] if k < len(bad) else -1)
-        return ret
 
-    def main_goodSuffix(self, str, pat):
-        # preprocess
-        tab = self._preprocess_fundamental(pat[::-1])  # string reversal
-        tab.reverse()  # list reversal
-
-        print '-' * 10
-        print pat
-        mis = [0] * len(pat)
-        for i in range(len(pat)):
-            # tab[i]是长度，因此len(pat)-tab[i]是tab[i]长度后缀的第一个字符
-            print pat[i - tab[i]], pat[len(pat) - tab[i] - 1], pat[i-tab[i]:i+1], pat[len(pat)-tab[i]-1:len(pat)]
-            assert (i < tab[i] or pat[i - tab[i]] != pat[len(pat) - tab[i] - 1])
-            mis[len(pat) - tab[i] - 1] = i
-
-        # search
-        ret = []
-        i = 0
-        while i < len(str) - len(pat) + 1:
-            j = len(pat) - 1
-            while j >= 0 and str[i + j] == pat[j]:
-                j -= 1
-            if j == -1:  # find the occurrence of pat in str
-                ret.append(i)
-                i += 1
-            else:  # use the "good suffix shift rule"
-                assert (str[i + j] != pat[j])
-                k = len(pat) - 1
-                while k >= 0 and tab[k] < len(pat) - 1 - j - 1 and pat[k + tab[k]] != str[i + j]:  # mismatch at j
-                    k -= 1
-
-                if 0 <= k < len(pat):
-                    # print len(pat) - k
-                    pass
-                i += (len(pat) - k) if 0 <= k < len(pat) else (j + 1)
-        print 'ret:', ret
         return ret
 
 
