@@ -184,7 +184,9 @@ class BoyerMoore(StringMatch):
         pfx = [0] * len(pat)
         for i in range(len(pat) - 1):
             if tab[i] == i + 1:
-                pfx[len(pat) - tab[i]] = i
+                for j in range(len(pat) - tab[i] + 1):
+                    pfx[j] = i
+                    # pfx[len(pat) - tab[i]] = i
 
         return sfx, pfx
 
@@ -201,6 +203,7 @@ class BoyerMoore(StringMatch):
                 j -= 1
             if j == -1:  # find the occurrence of pat in str
                 ret.append(i)
+                # i += len(pat) - 1 - pfxs[1] if len(pfxs) > 1 else 1
                 i += 1
             else:
                 # use the "bad character shift rule"
@@ -217,7 +220,7 @@ class BoyerMoore(StringMatch):
                 elif sfxs[j + 1] > 0:
                     gsShift = len(pat) - 1 - sfxs[j + 1]
                 else:
-                    gsShift = len(pat) - 1 - pfxs[j + 1]
+                    gsShift = pfxs[j + 1]
                 # make the maximum shift
                 i += max(bcShift, gsShift, 1)
 
