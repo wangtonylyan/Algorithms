@@ -66,7 +66,7 @@ class StringMatch(String):
             assert (self._preprocess_bruteForce(case[1]) == self._preprocess_fundamental(case[1]))
 
             assert (len(self.funcs) > 0)
-            ret = self.funcs[0](case[0], case[1])
+            ret = self.funcs[0](case[0], case[1])  # the brute-force algorithm
             assert (len(ret) > 0)  # only for current cases
             assert (all(f(case[0], case[1]) == ret for f in self.funcs[1:]))
 
@@ -79,7 +79,7 @@ class StringMatch(String):
             ('eabcabcabc', 'eabcabcabc'),
             ('baabraaabraaabraaa', 'aabraaabra'),
             ('aabaabcaxaabaabcy', 'aabaa'),
-
+            ('zbzzbzczbczzz', 'z'),
         ]
 
         for i in range(500):
@@ -115,26 +115,26 @@ class RabinKarp(StringMatch):
 
     def _hash(self, str, strLen):
         assert (strLen <= len(str))
-        # prepare
+        # 1) prepare
         factor = 1  # == d^(m-1)
         for i in range(1, strLen):
             factor = (factor * self.alphabet) % self.prime
         assert (factor == pow(self.alphabet, strLen - 1) % self.prime)
-        # caculate hash value of the first strLen-length substring in str
+        # 2) caculate hash value of the first strLen-length substring in str
         ret = 0
         for c in str[:strLen]:
             ret = (self.alphabet * ret + ord(c)) % self.prime
         yield ret
-        # calculate hash value of the i-th strLen-length substring in str
+        # 3) calculate hash value of the i-th strLen-length substring in str
         for i in range(1, len(str) - strLen + 1):
             ret = (self.alphabet * (ret - ord(str[i - 1]) * factor) + ord(str[i + strLen - 1])) % self.prime
             yield ret
 
     def main(self, str, pat):
-        # preprocess
+        # 1) preprocess
         pHash = self._hash(pat, len(pat)).next()
         sHashFunc = self._hash(str, len(pat))
-        # search
+        # 2) search
         ret = []
         for i in range(0, len(str) - len(pat) + 1):
             if pHash == sHashFunc.next():  # spurious hit
@@ -168,7 +168,7 @@ class BoyerMoore(StringMatch):
         bad = [[] for _ in range(self.alphabet)]
         for i in range(len(pat) - 1, -1, -1):
             # all occurrences of pat[i], rightmost first
-            bad[ord(pat[i]) - ord('a')].append(i)
+            bad[ord(pat[i]) - ord('a')].append(i)  # index
         return bad
 
     def _preprocess_goodSuffix(self, pat):
@@ -179,22 +179,24 @@ class BoyerMoore(StringMatch):
         for i in range(len(pat) - 1):
             assert (i < tab[i] or pat[i - tab[i]] != pat[len(pat) - 1 - tab[i]])
             if tab[i] > 0:
-                sfx[len(pat) - tab[i]] = i
+                sfx[len(pat) - tab[i]] = i  # index
 
         pfx = [0] * len(pat)
         for i in range(len(pat) - 1):
             if tab[i] == i + 1:
                 for j in range(len(pat) - tab[i] + 1):
-                    pfx[j] = i
-                    # pfx[len(pat) - tab[i]] = i
-
+                    pfx[j] = i  # index
+        all(pfx[i] + 1 <= len(pat) - i for i in range(len(pfx) - 1))
         return sfx, pfx
 
     def main(self, str, pat):
-        # preprocess
+        # 1) preprocess
+        # 预处理表描述内容的方式有两种：索引值或长度值，两者没有本质上的区别，可以相互转换
+        # 但其在生成和搜索过程中处理的方式会略有不同，此算法在实现上的主要区别就在于此
+        # 当前实现统一基于索引值，在pfxs的处理上可能会增加一些计算量
         bads = self._preprocess_badCharacter(pat)
         sfxs, pfxs = self._preprocess_goodSuffix(pat)
-        # search
+        # 2) search
         ret = []
         i = 0
         while i < len(str) - len(pat) + 1:
@@ -203,8 +205,8 @@ class BoyerMoore(StringMatch):
                 j -= 1
             if j == -1:  # find the occurrence of pat in str
                 ret.append(i)
-                # i += len(pat) - 1 - pfxs[1] if len(pfxs) > 1 else 1
-                i += 1
+                # as if str[i] and pat[0] mismatch
+                i += len(pat) - 1 - pfxs[1] if len(pfxs) > 1 else 1
             else:
                 # use the "bad character shift rule"
                 assert (str[i + j] != pat[j])
@@ -220,10 +222,9 @@ class BoyerMoore(StringMatch):
                 elif sfxs[j + 1] > 0:
                     gsShift = len(pat) - 1 - sfxs[j + 1]
                 else:
-                    gsShift = pfxs[j + 1]
+                    gsShift = len(pat) - 1 - pfxs[j + 1]
                 # make the maximum shift
                 i += max(bcShift, gsShift, 1)
-
         return ret
 
 
