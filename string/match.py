@@ -210,16 +210,16 @@ class BoyerMoore(StringMatch):
                 while k < len(bad) and bad[k] > j:
                     k += 1
                 assert (k == len(bad) or bad[k] != j)
-                bc = j - bad[k] if k < len(bad) else 1
+                bcShift = j - bad[k] if k < len(bad) else 1
                 # use the "good suffix shift rule"
                 if j == len(pat) - 1:
-                    gs = 1
+                    gsShift = 1
                 elif sfxs[j + 1] > 0:
-                    gs = len(pat) - 1 - sfxs[j + 1]
+                    gsShift = len(pat) - 1 - sfxs[j + 1]
                 else:
-                    gs = len(pat) - 1 - pfxs[j + 1]
-                # make the shift
-                i += max(bc, gs, 1)
+                    gsShift = len(pat) - 1 - pfxs[j + 1]
+                # make the maximum shift
+                i += max(bcShift, gsShift, 1)
 
         return ret
 
