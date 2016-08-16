@@ -62,6 +62,9 @@ class StringMatch(String):
 
     def testcase(self):
         def test(case):
+            assert (self._preprocess_bruteForce(case[0]) == self._preprocess_fundamental(case[0]))
+            assert (self._preprocess_bruteForce(case[1]) == self._preprocess_fundamental(case[1]))
+
             assert (len(self.funcs) > 0)
             ret = self.funcs[0](case[0], case[1])
             assert (len(ret) > 0)  # only for current cases
@@ -75,9 +78,11 @@ class StringMatch(String):
             ('abcabceababcabcabcd', 'abcabcd'),
             ('eabcabcabc', 'eabcabcabc'),
             ('baabraaabraaabraaa', 'aabraaabra'),
+            ('aabaabcaxaabaabcy', 'aabaa'),
+
         ]
 
-        for i in range(200):
+        for i in range(500):
             s = ''
             for j in range(300):
                 s += chr(random.randint(ord('a'), ord('z')))
@@ -126,11 +131,11 @@ class RabinKarp(StringMatch):
             yield ret
 
     def main(self, str, pat):
-        ret = []
         # preprocess
         pHash = self._hash(pat, len(pat)).next()
         sHashFunc = self._hash(str, len(pat))
         # search
+        ret = []
         for i in range(0, len(str) - len(pat) + 1):
             if pHash == sHashFunc.next():  # spurious hit
                 if str[i:i + len(pat)] == pat:
@@ -160,29 +165,33 @@ class BoyerMoore(StringMatch):
         return ret
 
     def _preprocess_badCharacter(self, pat):
-        tab = [[] for _ in range(self.alphabet)]
+        bad = [[] for _ in range(self.alphabet)]
         for i in range(len(pat) - 1, -1, -1):
             # all occurrences of pat[i], rightmost first
-            tab[ord(pat[i]) - ord('a')].append(i)
-        return tab
+            bad[ord(pat[i]) - ord('a')].append(i)
+        return bad
 
     def _preprocess_goodSuffix(self, pat):
         tab = self._preprocess_fundamental(pat[::-1])  # string reversal
         tab.reverse()  # list reversal
 
-        mis = [0] * len(pat)
+        sfx = [0] * len(pat)
         for i in range(len(pat) - 1):
             assert (i < tab[i] or pat[i - tab[i]] != pat[len(pat) - 1 - tab[i]])
             if tab[i] > 0:
-                mis[len(pat) - 1 - tab[i]] = i
+                sfx[len(pat) - tab[i]] = i
 
-        return mis
+        pfx = [0] * len(pat)
+        for i in range(len(pat) - 1):
+            if tab[i] == i + 1:
+                pfx[len(pat) - tab[i]] = i
+
+        return sfx, pfx
 
     def main(self, str, pat):
         # preprocess
-        tab = []
-        bc = self._preprocess_badCharacter(pat)
-        gs = self._preprocess_goodSuffix(pat)
+        bads = self._preprocess_badCharacter(pat)
+        sfxs, pfxs = self._preprocess_goodSuffix(pat)
         # search
         ret = []
         i = 0
@@ -193,14 +202,24 @@ class BoyerMoore(StringMatch):
             if j == -1:  # find the occurrence of pat in str
                 ret.append(i)
                 i += 1
-            else:  # use the "bad character shift rule"
+            else:
+                # use the "bad character shift rule"
                 assert (str[i + j] != pat[j])
-                bad = tab[ord(str[i + j]) - ord('a')]
+                bad = bads[ord(str[i + j]) - ord('a')]
                 k = 0  # closest to the left of j
                 while k < len(bad) and bad[k] > j:
                     k += 1
                 assert (k == len(bad) or bad[k] != j)
-                i += j - (bad[k] if k < len(bad) else -1)
+                bc = j - bad[k] if k < len(bad) else 1
+                # use the "good suffix shift rule"
+                if j == len(pat) - 1:
+                    gs = 1
+                elif sfxs[j + 1] > 0:
+                    gs = len(pat) - 1 - sfxs[j + 1]
+                else:
+                    gs = len(pat) - 1 - pfxs[j + 1]
+                # make the shift
+                i += max(bc, gs, 1)
 
         return ret
 
@@ -250,9 +269,4 @@ if __name__ == '__main__':
     KnuthMorrisPratt().testcase()
     BoyerMoore().testcase()
     PatternWithWildcard().testcase()
-
-    s = StringMatch()
-    cases = ['aabaabcaxaabaabcy', 'aabcaabxaaz', 'abaabcabaac', 'abcdefg', 'aabcaabxaaz', 'abcabc']
-    assert (all(map(lambda x: s._preprocess_bruteForce(x) == s._preprocess_fundamental(x), cases)))
-
     print 'done'
