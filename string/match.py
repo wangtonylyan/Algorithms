@@ -29,7 +29,7 @@ class StringMatch(String):
             j = 0
             while j < len(pat) - i and pat[i + j] == pat[j]:
                 j += 1
-            tab[i] = j
+            tab[i] = j  # length
         return tab
 
     def _preprocess_fundamental(self, pat):
@@ -43,7 +43,6 @@ class StringMatch(String):
             if i < high:
                 assert (pat[i:high] == pat[i - low:high - low])
                 assert (high == len(pat) or pat[high] != pat[high - low])
-                # high是开区间，因此high-i与tab[i-low]都是长度值
                 if high - i > tab[i - low]:
                     assert (pat[i:i + tab[i - low]] == pat[i - low:i - low + tab[i - low]] == pat[:tab[i - low]])
                     assert (pat[i + tab[i - low]] == pat[i - low + tab[i - low]] != pat[tab[i - low]])
@@ -56,7 +55,7 @@ class StringMatch(String):
 
             while j < len(pat) - i and pat[i + j] == pat[j]:
                 j += 1
-            tab[i] = j
+            tab[i] = j  # length
             low, high = i, i + j
         return tab
 
@@ -94,53 +93,6 @@ class StringMatch(String):
             cases.append((s, p))
 
         self._testcase(test, cases)
-
-
-# 该算法的设计思想，就是利用哈希在暴力算法的基础上先进行一轮筛选
-# 从第一个字符起，对目标字符串中每个与模式字符串长度相同的连续子字符进行哈希
-# 通过比较每个子字符串与模式字符串的哈希值，以判断是否需要逐个字符地比较
-# 这就对哈希算法提出了两点要求：
-# 令m为模式字符串长度，d为字符集大小，s为目标字符串
-# (a) 哈希算法本身必须是高效的，不然还不如暴力算法
-# hash(s[i:i+m]) = s[i]*d^(m-1) + ... + s[i+j]*d^(m-1-j) + ... + s[i+m-1]*d^0
-# 采用字符串哈希算法中的第三种：hash.StringHash.hash_3()
-# (b) 对于每个子字符串的哈希值的计算，应避免遍历整个子字符串
-# 通过前后两个相邻子字符串之间哈希值的递推关系式
-# hash(s[i+1:i+1+m]) = (hash(s[i:i+m]) - s[i]*d^(m-1))*d + s[i+m]
-class RabinKarp(StringMatch):
-    def __init__(self):
-        super(RabinKarp, self).__init__()
-        self.funcs.append(self.main)
-        self.prime = 6999997
-
-    def _hash(self, str, strLen):
-        assert (strLen <= len(str))
-        # 1) prepare
-        factor = 1  # == d^(m-1)
-        for i in range(1, strLen):
-            factor = (factor * self.alphabet) % self.prime
-        assert (factor == pow(self.alphabet, strLen - 1) % self.prime)
-        # 2) caculate hash value of the first strLen-length substring in str
-        ret = 0
-        for c in str[:strLen]:
-            ret = (self.alphabet * ret + ord(c)) % self.prime
-        yield ret
-        # 3) calculate hash value of the i-th strLen-length substring in str
-        for i in range(1, len(str) - strLen + 1):
-            ret = (self.alphabet * (ret - ord(str[i - 1]) * factor) + ord(str[i + strLen - 1])) % self.prime
-            yield ret
-
-    def main(self, str, pat):
-        # 1) preprocess
-        pHash = self._hash(pat, len(pat)).next()
-        sHashFunc = self._hash(str, len(pat))
-        # 2) search
-        ret = []
-        for i in range(0, len(str) - len(pat) + 1):
-            if pHash == sHashFunc.next():  # spurious hit
-                if str[i:i + len(pat)] == pat:
-                    ret.append(i)
-        return ret
 
 
 class KnuthMorrisPratt(StringMatch):
@@ -228,6 +180,53 @@ class BoyerMoore(StringMatch):
         return ret
 
 
+# 该算法的设计思想，就是利用哈希在暴力算法的基础上先进行一轮筛选
+# 从第一个字符起，对目标字符串中每个与模式字符串长度相同的连续子字符进行哈希
+# 通过比较每个子字符串与模式字符串的哈希值，以判断是否需要逐个字符地比较
+# 这就对哈希算法提出了两点要求：
+# 令m为模式字符串长度，d为字符集大小，s为目标字符串
+# (a) 哈希算法本身必须是高效的，不然还不如暴力算法
+# hash(s[i:i+m]) = s[i]*d^(m-1) + ... + s[i+j]*d^(m-1-j) + ... + s[i+m-1]*d^0
+# 采用字符串哈希算法中的第三种：hash.StringHash.hash_3()
+# (b) 对于每个子字符串的哈希值的计算，应避免遍历整个子字符串
+# 通过前后两个相邻子字符串之间哈希值的递推关系式
+# hash(s[i+1:i+1+m]) = (hash(s[i:i+m]) - s[i]*d^(m-1))*d + s[i+m]
+class RabinKarp(StringMatch):
+    def __init__(self):
+        super(RabinKarp, self).__init__()
+        self.funcs.append(self.main)
+        self.prime = 6999997
+
+    def _hash(self, str, strLen):
+        assert (strLen <= len(str))
+        # 1) prepare
+        factor = 1  # == d^(m-1)
+        for i in range(1, strLen):
+            factor = (factor * self.alphabet) % self.prime
+        assert (factor == pow(self.alphabet, strLen - 1) % self.prime)
+        # 2) caculate hash value of the first strLen-length substring in str
+        ret = 0
+        for c in str[:strLen]:
+            ret = (self.alphabet * ret + ord(c)) % self.prime
+        yield ret
+        # 3) calculate hash value of the i-th strLen-length substring in str
+        for i in range(1, len(str) - strLen + 1):
+            ret = (self.alphabet * (ret - ord(str[i - 1]) * factor) + ord(str[i + strLen - 1])) % self.prime
+            yield ret
+
+    def main(self, str, pat):
+        # 1) preprocess
+        pHash = self._hash(pat, len(pat)).next()
+        sHashFunc = self._hash(str, len(pat))
+        # 2) search
+        ret = []
+        for i in range(0, len(str) - len(pat) + 1):
+            if pHash == sHashFunc.next():  # spurious hit
+                if str[i:i + len(pat)] == pat:
+                    ret.append(i)
+        return ret
+
+
 class PatternWithWildcard():
     def main(self, str, pat):
         for i in range(len(str)):
@@ -269,8 +268,8 @@ class PatternWithWildcard():
 
 
 if __name__ == '__main__':
-    RabinKarp().testcase()
     KnuthMorrisPratt().testcase()
     BoyerMoore().testcase()
+    RabinKarp().testcase()
     PatternWithWildcard().testcase()
     print 'done'
