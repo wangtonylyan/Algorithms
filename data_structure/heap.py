@@ -141,7 +141,7 @@ class MaxHeap(Heap):
         # 由于堆排必须利用sink操作维护堆的性质
         # 因此为简化实现也推荐使用sink方式建堆
         hp = cls(lst)
-        for i in range((len(lst) - 1) >> 1, -1, -1):
+        for i in range((len(lst) >> 1) - 1, -1, -1):
             hp._sink_opt(i, len(lst))
         for i in range(len(lst) - 1, 0, -1):
             hp.hp[0], hp.hp[i] = hp.hp[i], hp.hp[0]
