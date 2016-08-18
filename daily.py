@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import random
 import time
+import copy
 
 
 def testsortint():
@@ -21,8 +22,8 @@ def testsortint():
         lst.sort()
         return lst
 
-    times = 500
-    strlen = 5000
+    times = 300
+    strlen = 500
     total = 0
     lst = [i for i in range(1, strlen + 1)]
     for i in range(times):
@@ -73,18 +74,29 @@ def testsortstr():
 
 def testdynamic():
     def func1(wgt, its):
-        tab = [[0] * (len(its) + 1) for i in range(wgt + 1)]
+        cpy = its[:]
+        for w, v in its:
+            k = 1
+            while (w << (k + 1)) - w <= wgt:
+                cpy.append((w << k, v << k))
+                k += 1
+            if (w << k) - w <= wgt - w:
+                k = (wgt - (w << k) + w) / w
+                assert (k > 0)
+                cpy.append((w * k, v * k))
+        its = cpy
+
+        tab = [[0] * (len(its) + 1) for _ in range(wgt + 1)]
         for i in range(1, wgt + 1):
             for j in range(1, len(its) + 1):
                 tab[i][j] = max(tab[i - its[j - 1][0]][j - 1] + its[j - 1][1] if i >= its[j - 1][0] else 0,
                                 tab[i][j - 1])
-
         return tab[-1][-1]
 
     def func2(wgt, its):
         tab = [0] * (wgt + 1)
         for i in range(len(its)):
-            for j in range(wgt, 0, -1):
+            for j in range(1, wgt + 1):
                 tab[j] = max(tab[j - its[i][0]] + its[i][1] if j >= its[i][0] else 0,
                              tab[j])
         return tab[-1]
@@ -96,7 +108,7 @@ def testdynamic():
         times = 10
         total = 0
         for i in range(times):
-            cpy = its[:]
+            cpy = copy.deepcopy(its)
             start = time.time()
             ret = func(wgt, cpy)
             end = time.time()
@@ -137,16 +149,9 @@ def testgraph():
                     if ((m, n), w) not in edge:
                         edge.append(((m, n), w))
             assert (len(edge) == sum(map(len, grp)) / 2)
+            edge.sort(key=lambda x: x[1])
 
-            cnt = [0] * (max(map(lambda x: x[1], edge)) + 1)
-            for (i, j), w in edge:
-                cnt[w] += 1
-            for i in range(len(cnt) - 1):
-                cnt[i + 1] += cnt[i]
-            cpy = edge[:]
-            for (i, j), w in cpy:
-                edge[cnt[w - 1]] = ((i, j), w)
-                cnt[w - 1] += 1
+            ds = [i for i in range(len(grp))]
 
             def find(ds, n):
                 while ds[n] != n:
@@ -160,38 +165,36 @@ def testgraph():
                     ds[p2] = p1
                 return p1
 
-            ds = [i for i in range(len(grp))]
             ret = []
             for (i, j), w in edge:
                 if find(ds, i) != find(ds, j):
                     union(ds, i, j)
                     ret.append(w)
-            print ret
+
             return sum(ret)
 
         def main_Prim(grp, src):
             vtx = [0] * len(grp)
-            dis = [None] * len(grp)
             vtx[src] = 1
+            dis = [None] * len(grp)
             dis[src] = 0
             for i, w in grp[src]:
                 dis[i] = w
 
             ret = []
-            for v in range(len(grp) - 1):
+            for _ in range(len(grp) - 1):
                 m = None
                 for i in range(len(grp)):
-                    if vtx[i] == 0 and dis[i] != None and (m == None or dis[m] > dis[i]):
-                        m = i
-
+                    if vtx[i] == 0 and dis[i] != None:
+                        if m == None or dis[m] > dis[i]:
+                            m = i
                 assert (m != None)
-                ret.append(dis[m])
                 vtx[m] = 1
-
+                ret.append(dis[m])
                 for i, w in grp[m]:
                     if vtx[i] == 0 and (dis[i] == None or dis[i] > w):
                         dis[i] = w
-            print ret
+
             return sum(ret)
 
         ret = main_Kruskal(grp)
@@ -203,13 +206,17 @@ def testgraph():
         def f1(grp, src):
             dis = [None] * len(grp)
             dis[src] = 0
-            for v in range(len(grp) - 1):
-                for i in range(len(grp)):
-                    if dis[i] != None:
-                        for j, w in grp[i]:
-                            if dis[j] == None or dis[j] > dis[i] + w:
-                                dis[j] = dis[i] + w
-            print dis
+            for i in range(len(grp)):
+                if dis[i] != None:
+                    for j, w in grp[i]:
+                        if dis[j] == None or dis[j] > dis[i] + w:
+                            dis[j] = dis[i] + w
+
+            for i in range(len(grp)):
+                if dis[i] != None:
+                    for j, w in grp[i]:
+                        if dis[j] == None or dis[j] > dis[i] + w:
+                            return None
             return sum(dis)
 
         def f2(grp, src):
@@ -218,28 +225,31 @@ def testgraph():
                 for i in range(len(grp)):
                     for j, w in grp[i]:
                         vtx[j] += 1
-                stk = []
+                st = set()
                 for i in range(len(grp)):
                     if vtx[i] == 0:
-                        stk.append(i)
+                        st.add(i)
                 ret = []
-                while len(stk) > 0:
-                    i = stk.pop()
+                while len(st) > 0:
+                    i = st.pop()
+                    assert (vtx[i] <= 0)
                     for j, w in grp[i]:
                         vtx[j] -= 1
                         if vtx[j] == 0:
-                            stk.append(j)
+                            st.add(j)
                     ret.append(i)
-                return ret
+                return ret if len(ret) == len(grp) else None
 
             dis = [None] * len(grp)
             dis[src] = 0
-            for i in sort(grp):
+            seq = sort(grp)
+            if seq == None:
+                return None
+            for i in seq:
                 if dis[i] != None:
                     for j, w in grp[i]:
                         if dis[j] == None or dis[j] > dis[i] + w:
                             dis[j] = dis[i] + w
-            print dis
             return sum(dis)
 
         def f3(grp, src):
@@ -343,5 +353,5 @@ if __name__ == '__main__':
     # testsortstr()
     # testdynamic()
     # testunionfindset()
-    # testgraph()
+    testgraph()
     print 'done'
