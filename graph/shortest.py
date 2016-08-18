@@ -29,10 +29,10 @@ class ShortestPath(DirectedAcyclicGraph):
                             pre[j] = i
         # 3) check
         for i in range(len(grp)):
-            for j, w in grp[i]:
-                if dis[i] != None and (dis[j] == None or dis[j] > dis[i] + w):  # if there exists negative-weight cycle
-                    return None
-                assert (dis[i] == None or (dis[i] != None and dis[j] != None and dis[j] <= dis[i] + w))
+            if dis[i] != None:
+                for j, w in grp[i]:
+                    if dis[j] == None or dis[j] > dis[i] + w:  # if there exists negative-weight cycle
+                        return None
         # 4) build shortest-path tree
         pass
         return dis, pre
