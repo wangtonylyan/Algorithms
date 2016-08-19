@@ -257,8 +257,7 @@ def testgraph():
                 vtx = [0] * len(grp)
                 vtx[src] = 1
                 stk = [src]
-                time = 1
-                ret = [None] * len(grp)
+                ret = []
                 while len(stk) > 0:
                     i = stk[-1]
                     if vtx[i] == 1:
@@ -269,23 +268,24 @@ def testgraph():
                                 stk.append(j)
                                 vtx[i] = 1
                                 break
+                            elif j in stk:
+                                return None
                     else:
                         assert (vtx[i] == 2)
                         stk.pop()
-                        ret[-time] = i
-                        time += 1
-                return ret
+                        ret = [i] + ret
+                return ret if len(ret) == len(grp) else None
 
             dis = [None] * len(grp)
             dis[src] = 0
-            ret = sort(grp, src)
-            for i in ret:
+            seq = sort(grp, src)
+            if seq == None:
+                return None
+            for i in seq:
                 if dis[i] != None:
                     for j, w in grp[i]:
                         if dis[j] == None or dis[j] > dis[i] + w:
                             dis[j] = dis[i] + w
-
-            print dis
             return sum(dis)
 
         def f4(grp, src):
@@ -295,9 +295,7 @@ def testgraph():
             dis[src] = 0
             for i, w in grp[src]:
                 dis[i] = w
-
-            ret = []
-            for v in range(len(grp) - 1):
+            for _ in range(len(grp) - 1):
                 m = None
                 for i in range(len(grp)):
                     if vtx[i] == 0 and dis[i] != None:
@@ -306,14 +304,10 @@ def testgraph():
                 if m == None:
                     break
                 vtx[m] = 1
-                ret.append(dis[m])
-
                 for i, w in grp[m]:
-                    if vtx[i] == 0:
-                        if dis[i] == None or dis[i] > dis[m] + w:
-                            dis[i] = dis[m] + w
-            print ret
-            return sum(ret)
+                    if vtx[i] == 0 and (dis[i] == None or dis[i] > dis[m] + w):
+                        dis[i] = dis[m] + w
+            return sum(dis)
 
         ret = f1(grp, src)
         assert (ret == f2(grp, src) == f3(grp, src) == f4(grp, src))
@@ -348,10 +342,147 @@ def testgraph():
     assert (shortest(dag, 0) == 119)
 
 
+def testmatch():
+    from string.match import StringMatch
+
+    class BM(StringMatch):
+        def __init__(self):
+            super(BM, self).__init__()
+            self.funcs.append(self.main)
+            self.debug = 0
+
+        def preprocess(self, pat):
+            tab = [0] * len(pat)
+            low, high = 0, 0
+            for i in range(1, len(pat)):
+                if i < high:
+                    if high - i > tab[i - low]:
+                        tab[i] = tab[i - low]
+                        continue
+                    else:
+                        j = 0 + high - i
+                else:
+                    j = 0
+
+                while j < len(pat) - i and pat[j] == pat[i + j]:
+                    j += 1
+                tab[i] = j
+                low, high = i, i + j
+            return tab
+
+        def preprocess_reverse(self, pat):
+            tab = [0] * len(pat)
+            low, high = len(pat) - 1, len(pat) - 1
+            for i in range(len(pat) - 2, -1, -1):
+                assert (low <= high and i < high)
+                if i > low:
+                    if i - low > tab[len(pat) - 1 - (high - i)]:
+                        tab[i] = tab[len(pat) - 1 - (high - i)]
+                        continue
+                    else:
+                        j = len(pat) - 1 - (i - low)
+                else:
+                    j = len(pat) - 1
+
+                while j >= len(pat) - 1 - i and pat[i - (len(pat) - 1 - j)] == pat[j]:
+                    j -= 1
+                tab[i] = len(pat) - 1 - j
+                low, high = i - (len(pat) - 1 - j), i
+            return tab
+
+        def badcharacter(self, pat):
+            tab = [[] for _ in range(self.alphabet)]
+            for i in range(len(pat) - 1, -1, -1):
+                tab[ord(pat[i]) - ord('a')].append(i)
+            return tab
+
+        def goodsuffix(self, pat):
+            tab = self.preprocess_reverse(pat)
+            if self.debug:
+                print 'tab', tab
+
+            sfx = [-1] * len(pat)
+            for i in range(len(pat) - 1):
+                if tab[i] > 0:
+                    sfx[len(pat) - tab[i]] = i
+
+            pfx = [-1] * len(pat)
+            for i in range(len(pat) - 1):
+                if i + 1 == tab[i]:
+                    for k in range(len(pat) - tab[i] + 1):
+                        pfx[k] = i
+
+            return sfx, pfx
+
+        def main(self, str, pat):
+            if self.debug:
+                print '-' * 10
+                print 'str', str
+                print 'pat', pat
+
+            bads = self.badcharacter(pat)
+            if self.debug:
+                print 'bad', bads
+
+            sfxs, pfxs = self.goodsuffix(pat)
+            if self.debug:
+                print 'sfx', sfxs
+                print 'pfx', pfxs
+
+            i = len(pat) - 1
+            ret = []
+            while i < len(str):
+                j = len(pat) - 1
+                while j >= 0 and pat[j] == str[i - (len(pat) - 1 - j)]:
+                    j -= 1
+                if j == -1:
+                    ret.append(i - len(pat) + 1)
+                    i += len(pat) - 1 - pfxs[1] if len(pat) > 1 else 1
+                else:
+                    bad = bads[ord(str[i - (len(pat) - 1 - j)]) - ord('a')]
+                    k = 0
+                    while k < len(bad) and bad[k] > j:
+                        k += 1
+                    shift1 = j - bad[k] if k < len(bad) else j + 1
+
+                    if j == len(pat) - 1:
+                        shift2 = 1
+                    elif sfxs[j + 1] >= 0:
+                        shift2 = len(pat) - 1 - sfxs[j + 1]
+                    else:
+                        shift2 = len(pat) - 1 - pfxs[j + 1]
+
+                    i += max(shift1, shift2, 1)
+
+            if self.debug:
+                print 'ret', ret
+            return ret
+
+        def testcase_preprocess(self):
+            cases = ['aabaabcaxaabaabcy', 'aabcaabxaaz', 'abaabcabaac', 'abcdefg', 'aabcaabxaaz', 'abcabc']
+
+            def test(case):
+                ret1 = self.preprocess_reverse(case[:])
+                ret2 = self.preprocess(case[::-1])
+                ret2.reverse()
+                if ret1 != ret2:
+                    print case
+                    print 'ret1:', ret1
+                    print 'ret2:', ret2
+
+            map(test, cases)
+            print 'pass: testcase_preprocess'
+
+    bm = BM()
+    bm.testcase()
+    bm.testcase_preprocess()
+
+
 if __name__ == '__main__':
     # testsortint()
     # testsortstr()
     # testdynamic()
     # testunionfindset()
-    testgraph()
+    # testgraph()
+    # testmatch()
     print 'done'
