@@ -83,7 +83,7 @@ class StringMatch(String):
 
         for i in range(500):
             s = ''
-            for j in range(300):
+            for j in range(500):
                 s += chr(random.randint(ord('a'), ord('z')))
             patlen = random.randint(1, 20)
             start = random.randint(0, len(s) - patlen)
@@ -182,14 +182,14 @@ class BoyerMoore(StringMatch):
                 # as if str[i] and pat[0] mismatch
                 i += len(pat) - 1 - pfxs[1] if len(pfxs) > 1 else 1
             else:
-                # use the "bad character shift rule"
                 assert (str[i + j] != pat[j])
+                # use the "bad character shift rule"
                 bad = bads[ord(str[i + j]) - ord('a')]
                 k = 0  # closest to the left of j
                 while k < len(bad) and bad[k] > j:
                     k += 1
                 assert (k == len(bad) or bad[k] != j)
-                bcShift = j - bad[k] if k < len(bad) else 1
+                bcShift = j - bad[k] if k < len(bad) else j + 1
                 # use the "good suffix shift rule"
                 if j == len(pat) - 1:
                     gsShift = 1
