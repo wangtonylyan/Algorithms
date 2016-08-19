@@ -116,6 +116,26 @@ class BoyerMoore(StringMatch):
                 ret.append(i - j + 1)
         return ret
 
+    def _preprocess_reverse(self, pat):
+        tab = [0] * len(pat)
+        low, high = len(pat) - 1, len(pat) - 1
+        for i in range(len(pat) - 2, -1, -1):
+            assert (low <= high and i < high)
+            if i > low:
+                if i - low > tab[len(pat) - 1 - (high - i)]:
+                    tab[i] = tab[len(pat) - 1 - (high - i)]
+                    continue
+                else:
+                    j = len(pat) - 1 - (i - low)
+            else:
+                j = len(pat) - 1
+
+            while j >= len(pat) - 1 - i and pat[i - (len(pat) - 1 - j)] == pat[j]:
+                j -= 1
+            tab[i] = len(pat) - 1 - j  # length
+            low, high = i - (len(pat) - 1 - j), i
+        return tab
+
     def _preprocess_badCharacter(self, pat):
         bad = [[] for _ in range(self.alphabet)]
         for i in range(len(pat) - 1, -1, -1):
@@ -126,6 +146,8 @@ class BoyerMoore(StringMatch):
     def _preprocess_goodSuffix(self, pat):
         tab = self._preprocess_fundamental(pat[::-1])  # string reversal
         tab.reverse()  # list reversal
+        # ==
+        tab = self._preprocess_reverse(pat)
 
         sfx = [0] * len(pat)
         for i in range(len(pat) - 1):
