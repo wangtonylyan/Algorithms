@@ -84,8 +84,8 @@ class StringMatch(String):
         for i in range(500):
             s = ''
             for j in range(500):
-                s += chr(random.randint(ord('a'), ord('z')))
-            patlen = random.randint(1, 20)
+                s += chr(random.randint(ord('a'), ord('d')))
+            patlen = random.randint(1, 50)
             start = random.randint(0, len(s) - patlen)
             assert (start + patlen <= len(s))
             p = s[start:start + patlen]
@@ -149,13 +149,16 @@ class BoyerMoore(StringMatch):
         # ==
         tab = self._preprocess_reverse(pat)
 
-        sfx = [0] * len(pat)
+        # sfx和pfx两个数组的缺省值都是-1的原因：
+        # 只要不存在前缀和后缀，则整个pat就可移动至所有当前已比较过的str字符的右边
+        # 且基于索引值的描述方式中，0是有意义的
+        sfx = [-1] * len(pat)
         for i in range(len(pat) - 1):
             assert (i < tab[i] or pat[i - tab[i]] != pat[len(pat) - 1 - tab[i]])
             if tab[i] > 0:
                 sfx[len(pat) - tab[i]] = i  # index
 
-        pfx = [0] * len(pat)
+        pfx = [-1] * len(pat)
         for i in range(len(pat) - 1):
             if tab[i] == i + 1:
                 for j in range(len(pat) - tab[i] + 1):
@@ -179,8 +182,7 @@ class BoyerMoore(StringMatch):
                 j -= 1
             if j == -1:  # find the occurrence of pat in str
                 ret.append(i)
-                # as if str[i] and pat[0] mismatch
-                i += len(pat) - 1 - pfxs[1] if len(pfxs) > 1 else 1
+                i += len(pat) - 1 - pfxs[1] if len(pfxs) > 1 else 1  # as if str[i] and pat[0] mismatch
             else:
                 assert (str[i + j] != pat[j])
                 # use the "bad character shift rule"
@@ -193,10 +195,12 @@ class BoyerMoore(StringMatch):
                 # use the "good suffix shift rule"
                 if j == len(pat) - 1:
                     gsShift = 1
-                elif sfxs[j + 1] > 0:
+                elif sfxs[j + 1] >= 0:
                     gsShift = len(pat) - 1 - sfxs[j + 1]
-                else:
+                elif pfxs[j + 1] >= 0:  # else
                     gsShift = len(pat) - 1 - pfxs[j + 1]
+                else:  # optional else
+                    gsShift = len(pat)
                 # make the maximum shift
                 i += max(bcShift, gsShift, 1)
         return ret
