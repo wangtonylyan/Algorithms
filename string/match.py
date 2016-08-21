@@ -24,16 +24,16 @@ class StringMatch(String):
         return ret
 
     def _preprocess_bruteForce(self, pat):
-        tab = [0] * len(pat)
+        tab = [0] * len(pat)  # (0,-1], length
         for i in range(1, len(pat)):
             j = 0
             while j < len(pat) - i and pat[i + j] == pat[j]:
                 j += 1
-            tab[i] = j  # length
+            tab[i] = j
         return tab
 
     def _preprocess_fundamental(self, pat):
-        tab = [0] * len(pat)
+        tab = [0] * len(pat)  # (0,-1], length
         low, high = 0, 0  # [low,high) is a prefix of pat
         # @invariant: variable high is the farthest index to the right
         # 目的是为了在从左至右的遍历顺序下，尽可能多地预知右边仍未被访问到的字符
@@ -55,7 +55,7 @@ class StringMatch(String):
 
             while j < len(pat) - i and pat[i + j] == pat[j]:
                 j += 1
-            tab[i] = j  # length
+            tab[i] = j
             low, high = i, i + j
         return tab
 
@@ -98,6 +98,33 @@ class StringMatch(String):
 class KnuthMorrisPratt(StringMatch):
     def __init__(self):
         super(KnuthMorrisPratt, self).__init__()
+        self.funcs.append(self.main)
+
+    def _preprocess_jmp(self, pat):
+        tab = self._preprocess_fundamental(pat)  # (0,-1], length
+        jmp = [0] * len(pat)  # [0,-1), index
+        for i in range(len(pat) - 1, 0, -1):
+            if tab[i] > 0:
+                jmp[i + tab[i] - 1] = tab[i]
+        return jmp
+
+    def main(self, str, pat):
+        # 1) preprocess
+        jmp = self._preprocess_jmp(pat)
+        # 2) search
+        ret = []
+        i, j = 0, 0
+        while i < len(str) - len(pat) + 1:
+            while j < len(pat) and str[i + j] == pat[j]:
+                j += 1
+            if j == 0:
+                i += 1
+                continue
+            elif j == len(pat):
+                ret.append(i)
+            i += j - jmp[j - 1]
+            j = jmp[j - 1]
+        return ret
 
 
 class BoyerMoore(StringMatch):
@@ -117,7 +144,7 @@ class BoyerMoore(StringMatch):
         return ret
 
     def _preprocess_reverse(self, pat):
-        tab = [0] * len(pat)
+        tab = [0] * len(pat)  # [0,-1), length
         low, high = len(pat) - 1, len(pat) - 1
         for i in range(len(pat) - 2, -1, -1):
             assert (low <= high and i < high)
@@ -132,37 +159,37 @@ class BoyerMoore(StringMatch):
 
             while j >= len(pat) - 1 - i and pat[i - (len(pat) - 1 - j)] == pat[j]:
                 j -= 1
-            tab[i] = len(pat) - 1 - j  # length
+            tab[i] = len(pat) - 1 - j  # mismatch at j
             low, high = i - (len(pat) - 1 - j), i
         return tab
 
     def _preprocess_badCharacter(self, pat):
-        bad = [[] for _ in range(self.alphabet)]
+        bad = [[] for _ in range(self.alphabet)]  # [0,-1], index
         for i in range(len(pat) - 1, -1, -1):
             # all occurrences of pat[i], rightmost first
-            bad[ord(pat[i]) - ord('a')].append(i)  # index
+            bad[ord(pat[i]) - ord('a')].append(i)
         return bad
 
     def _preprocess_goodSuffix(self, pat):
         tab = self._preprocess_fundamental(pat[::-1])  # string reversal
         tab.reverse()  # list reversal
         # ==
-        tab = self._preprocess_reverse(pat)
+        tab = self._preprocess_reverse(pat)  # [0,-1), length
 
         # sfx和pfx两个数组的缺省值都是-1的原因：
         # 只要不存在前缀和后缀，则整个pat就可移动至所有当前已比较过的str字符的右边
         # 且基于索引值的描述方式中，0是有意义的
-        sfx = [-1] * len(pat)
+        sfx = [-1] * len(pat)  # (0,-1], index
         for i in range(len(pat) - 1):
             assert (i < tab[i] or pat[i - tab[i]] != pat[len(pat) - 1 - tab[i]])
             if tab[i] > 0:
-                sfx[len(pat) - tab[i]] = i  # index
+                sfx[len(pat) - tab[i]] = i
 
-        pfx = [-1] * len(pat)
+        pfx = [-1] * len(pat)  # (0,-1], index
         for i in range(len(pat) - 1):
             if tab[i] == i + 1:
-                for j in range(len(pat) - tab[i] + 1):
-                    pfx[j] = i  # index
+                for j in range(1, len(pat) - tab[i] + 1):
+                    pfx[j] = i
         all(pfx[i] + 1 <= len(pat) - i for i in range(len(pfx) - 1))
         return sfx, pfx
 
@@ -182,7 +209,8 @@ class BoyerMoore(StringMatch):
                 j -= 1
             if j == -1:  # find the occurrence of pat in str
                 ret.append(i)
-                i += len(pat) - 1 - pfxs[1] if len(pfxs) > 1 else 1  # as if str[i] and pat[0] mismatch
+                # pfxs[0]没有意义，pfxs[1]则是最长前缀(缺省值-1也是适用的)
+                i += len(pat) - 1 - pfxs[1] if len(pfxs) > 1 else 1
             else:
                 assert (str[i + j] != pat[j])
                 # use the "bad character shift rule"

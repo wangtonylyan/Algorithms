@@ -409,7 +409,7 @@ def testmatch():
             pfx = [-1] * len(pat)
             for i in range(len(pat) - 1):
                 if i + 1 == tab[i]:
-                    for k in range(len(pat) - tab[i] + 1):
+                    for k in range(1, len(pat) - tab[i] + 1):
                         pfx[k] = i
 
             return sfx, pfx
@@ -474,8 +474,8 @@ def testmatch():
             print 'pass: testcase_preprocess'
 
     bm = BM()
-    bm.testcase()
     bm.testcase_preprocess()
+    bm.testcase()
 
 
 if __name__ == '__main__':
