@@ -100,16 +100,36 @@ class KnuthMorrisPratt(StringMatch):
         super(KnuthMorrisPratt, self).__init__()
         self.funcs.append(self.main)
 
-    def _preprocess_jmp(self, pat):
+    def _preprocess_based_on_fundamental(self, pat):
         tab = self._preprocess_fundamental(pat)  # (0,-1], length
-        jmp = [0] * len(pat)  # [0,-1], index
+        jmp = [0] * len(pat)  # [0,-1], length
         for i in range(len(pat) - 1, 0, -1):
             if tab[i] > 0:
                 jmp[i + tab[i] - 1] = tab[i]
         return jmp
 
+    def _preprocess_jmp(self, pat):
+        # jmp[i]等于使得pat[0:k]==pat[i+1-k:i+1]成立的最大k值
+
+        jmp = [0] * len(pat)
+        for i in range(1, len(pat)):
+            j = jmp[i - 1]
+            while jmp[j] < j and pat[j] != pat[i]:
+                j = jmp[j]
+            # j is either index or length
+            if pat[j] == pat[i]:
+                jmp[i] = j + 1
+            else:
+                jmp[i] = 0
+        print jmp
+        return jmp
+
+    def _preprocess_dfa(self, pat):
+        pass
+
     def main(self, str, pat):
         # 1) preprocess
+        # jmp = self._preprocess_based_on_fundamental(pat)
         jmp = self._preprocess_jmp(pat)
         # 2) search
         ret = []
@@ -124,6 +144,8 @@ class KnuthMorrisPratt(StringMatch):
                 ret.append(i)
             i += j - jmp[j - 1]
             j = jmp[j - 1]
+
+        print str, pat, ret
         return ret
 
 
