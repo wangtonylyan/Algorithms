@@ -360,11 +360,10 @@ def testmatch():
                         tab[i] = tab[i - low]
                         continue
                     else:
-                        j = 0 + high - i
+                        j = high - i
                 else:
                     j = 0
-
-                while j < len(pat) - i and pat[j] == pat[i + j]:
+                while j < len(pat) - i and pat[i + j] == pat[j]:
                     j += 1
                 tab[i] = j
                 low, high = i, i + j
@@ -397,20 +396,22 @@ def testmatch():
             return tab
 
         def goodsuffix(self, pat):
-            tab = self.preprocess_reverse(pat)
-            if self.debug:
-                print 'tab', tab
+            tab = self.preprocess_reverse(pat)  # [0,-1)
+            assert (len(tab) == len(pat))
 
-            sfx = [-1] * len(pat)
-            for i in range(len(pat) - 1):
+            if self.debug:
+                print 'reverse tab', tab
+
+            sfx = [-1] * len(pat)  # (0,-1]
+            for i in range(len(tab) - 1):
                 if tab[i] > 0:
                     sfx[len(pat) - tab[i]] = i
 
-            pfx = [-1] * len(pat)
-            for i in range(len(pat) - 1):
-                if i + 1 == tab[i]:
-                    for k in range(1, len(pat) - tab[i] + 1):
-                        pfx[k] = i
+            pfx = [-1] * len(pat)  # (0,-1]
+            if tab[0] == 1:
+                pfx[len(pat) - 1] = 0
+            for i in range(1, len(pat) - 1):
+                pfx[len(pat) - (i + 1)] = i if tab[i] == i + 1 else pfx[len(pat) - i]
 
             return sfx, pfx
 
@@ -469,13 +470,48 @@ def testmatch():
                     print case
                     print 'ret1:', ret1
                     print 'ret2:', ret2
+                assert (ret1 == ret2)
 
             map(test, cases)
             print 'pass: testcase_preprocess'
 
+    class KMP(StringMatch):
+        def __init__(self):
+            super(KMP, self).__init__()
+            self.funcs.append(self.main)
+
+        def preprocess(self, pat):
+            tab = self._preprocess_fundamental(pat)
+            jmp = [0] * len(pat)
+            for i in range(len(pat) - 1, 0, -1):
+                if tab[i] > 0:
+                    jmp[i + tab[i] - 1] = tab[i]
+            return jmp
+
+        def main(self, str, pat):
+            jmp = self.preprocess(pat)
+            ret = []
+            i, j = 0, 0
+            while i < len(str) - len(pat) + 1:
+                while j < len(pat) and str[i + j] == pat[j]:
+                    j += 1
+                if j == len(pat):
+                    ret.append(i)
+                    i += j - jmp[j - 1]
+                    j = jmp[j - 1]
+                else:
+                    if j == 0:
+                        i += 1
+                    else:
+                        i += j - jmp[j - 1]
+                        j = jmp[j - 1]
+            return ret
+
     bm = BM()
     bm.testcase_preprocess()
     bm.testcase()
+    kmp = KMP()
+    kmp.testcase()
 
 
 if __name__ == '__main__':

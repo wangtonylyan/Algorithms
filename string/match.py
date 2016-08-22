@@ -56,7 +56,7 @@ class StringMatch(String):
             while j < len(pat) - i and pat[i + j] == pat[j]:
                 j += 1
             tab[i] = j
-            low, high = i, i + j
+            low, high = i, i + tab[i]
         return tab
 
     def testcase(self):
@@ -102,7 +102,7 @@ class KnuthMorrisPratt(StringMatch):
 
     def _preprocess_jmp(self, pat):
         tab = self._preprocess_fundamental(pat)  # (0,-1], length
-        jmp = [0] * len(pat)  # [0,-1), index
+        jmp = [0] * len(pat)  # [0,-1], index
         for i in range(len(pat) - 1, 0, -1):
             if tab[i] > 0:
                 jmp[i + tab[i] - 1] = tab[i]
@@ -160,7 +160,7 @@ class BoyerMoore(StringMatch):
             while j >= len(pat) - 1 - i and pat[i - (len(pat) - 1 - j)] == pat[j]:
                 j -= 1
             tab[i] = len(pat) - 1 - j  # mismatch at j
-            low, high = i - (len(pat) - 1 - j), i
+            low, high = i - tab[i], i
         return tab
 
     def _preprocess_badCharacter(self, pat):
@@ -186,10 +186,10 @@ class BoyerMoore(StringMatch):
                 sfx[len(pat) - tab[i]] = i
 
         pfx = [-1] * len(pat)  # (0,-1], index
-        for i in range(len(pat) - 1):
-            if tab[i] == i + 1:
-                for j in range(1, len(pat) - tab[i] + 1):
-                    pfx[j] = i
+        if tab[0] == 1:
+            pfx[len(pat) - 1] = 0
+        for i in range(1, len(pat) - 1):
+            pfx[len(pat) - (i + 1)] = i if tab[i] == i + 1 else pfx[len(pat) - i]
         all(pfx[i] + 1 <= len(pat) - i for i in range(len(pfx) - 1))
         return sfx, pfx
 
