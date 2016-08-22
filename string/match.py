@@ -100,7 +100,7 @@ class KnuthMorrisPratt(StringMatch):
         super(KnuthMorrisPratt, self).__init__()
         self.funcs.append(self.main)
 
-    def _preprocess_based_on_fundamental(self, pat):
+    def _preprocess_jmp_fundamental(self, pat):
         tab = self._preprocess_fundamental(pat)  # (0,-1], length
         jmp = [0] * len(pat)  # [0,-1], length
         for i in range(len(pat) - 1, 0, -1):
@@ -108,29 +108,36 @@ class KnuthMorrisPratt(StringMatch):
                 jmp[i + tab[i] - 1] = tab[i]
         return jmp
 
-    def _preprocess_jmp(self, pat):
-        # jmp[i]等于使得pat[0:k]==pat[i+1-k:i+1]成立的最大k值
-
-        jmp = [0] * len(pat)
+    def _preprocess_jmp_classical(self, pat):
+        # jmp[i]是使得pat[0:k]==pat[i+1-k:i+1]的最大k值
+        jmp = [0] * len(pat)  # [0,-1], length
         for i in range(1, len(pat)):
             j = jmp[i - 1]
-            while jmp[j] < j and pat[j] != pat[i]:
-                j = jmp[j]
-            # j is either index or length
+            while j > 0 and pat[j] != pat[i]:
+                j = jmp[j - 1]
             if pat[j] == pat[i]:
                 jmp[i] = j + 1
-            else:
-                jmp[i] = 0
-        print jmp
         return jmp
 
-    def _preprocess_dfa(self, pat):
+        # jmp[i]是使得pat[0:k]==pat[i-k:i]的最大k值
+        jmp = [0] * (len(pat) + 1)
+        for i in range(2, len(pat) + 1):
+            j = jmp[i - 1]
+            while j > 0 and pat[j] != pat[i - 1]:
+                j = jmp[j]
+            if pat[j] == pat[i - 1]:
+                jmp[i] = j + 1
+        jmp = jmp[1:]
+        return jmp
+
+    # deterministic finite state string matcher
+    def _preprocess_jmp_realtime(self, pat):
         pass
 
     def main(self, str, pat):
         # 1) preprocess
-        # jmp = self._preprocess_based_on_fundamental(pat)
-        jmp = self._preprocess_jmp(pat)
+        jmp = self._preprocess_jmp_classical(pat)
+        assert (sum(jmp) >= sum(self._preprocess_jmp_fundamental(pat)))
         # 2) search
         ret = []
         i, j = 0, 0
@@ -144,8 +151,6 @@ class KnuthMorrisPratt(StringMatch):
                 ret.append(i)
             i += j - jmp[j - 1]
             j = jmp[j - 1]
-
-        print str, pat, ret
         return ret
 
 
@@ -165,7 +170,7 @@ class BoyerMoore(StringMatch):
                 ret.append(i - j + 1)
         return ret
 
-    def _preprocess_reverse(self, pat):
+    def _preprocess_fundamental_reversed(self, pat):
         tab = [0] * len(pat)  # [0,-1), length
         low, high = len(pat) - 1, len(pat) - 1
         for i in range(len(pat) - 2, -1, -1):
@@ -183,6 +188,7 @@ class BoyerMoore(StringMatch):
                 j -= 1
             tab[i] = len(pat) - 1 - j  # mismatch at j
             low, high = i - tab[i], i
+        assert (tab == self._preprocess_fundamental(pat[::-1])[::-1])
         return tab
 
     def _preprocess_badCharacter(self, pat):
@@ -193,11 +199,7 @@ class BoyerMoore(StringMatch):
         return bad
 
     def _preprocess_goodSuffix(self, pat):
-        tab = self._preprocess_fundamental(pat[::-1])  # string reversal
-        tab.reverse()  # list reversal
-        # ==
-        tab = self._preprocess_reverse(pat)  # [0,-1), length
-
+        tab = self._preprocess_fundamental_reversed(pat)  # [0,-1), length
         # sfx和pfx两个数组的缺省值都是-1的原因：
         # 只要不存在前缀和后缀，则整个pat就可移动至所有当前已比较过的str字符的右边
         # 且基于索引值的描述方式中，0是有意义的
@@ -206,7 +208,6 @@ class BoyerMoore(StringMatch):
             assert (i < tab[i] or pat[i - tab[i]] != pat[len(pat) - 1 - tab[i]])
             if tab[i] > 0:
                 sfx[len(pat) - tab[i]] = i
-
         pfx = [-1] * len(pat)  # (0,-1], index
         if tab[0] == 1:
             pfx[len(pat) - 1] = 0
