@@ -149,7 +149,7 @@ class KnuthMorrisPratt(StringMatch):
                 continue
             elif j == len(pat):
                 ret.append(i)
-            i += j - jmp[j - 1]
+            i += j - jmp[j - 1]  # use as index
             j = jmp[j - 1]
         return ret
 
