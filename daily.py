@@ -349,7 +349,6 @@ def testmatch():
         def __init__(self):
             super(BM, self).__init__()
             self.funcs.append(self.main)
-            self.debug = 0
 
         def preprocess(self, pat):
             tab = [0] * len(pat)
@@ -366,14 +365,13 @@ def testmatch():
                 while j < len(pat) - i and pat[i + j] == pat[j]:
                     j += 1
                 tab[i] = j
-                low, high = i, i + j
+                low, high = i, i + tab[i]
             return tab
 
         def preprocess_reverse(self, pat):
             tab = [0] * len(pat)
             low, high = len(pat) - 1, len(pat) - 1
             for i in range(len(pat) - 2, -1, -1):
-                assert (low <= high and i < high)
                 if i > low:
                     if i - low > tab[len(pat) - 1 - (high - i)]:
                         tab[i] = tab[len(pat) - 1 - (high - i)]
@@ -382,25 +380,20 @@ def testmatch():
                         j = len(pat) - 1 - (i - low)
                 else:
                     j = len(pat) - 1
-
                 while j >= len(pat) - 1 - i and pat[i - (len(pat) - 1 - j)] == pat[j]:
                     j -= 1
                 tab[i] = len(pat) - 1 - j
-                low, high = i - (len(pat) - 1 - j), i
+                low, high = i - tab[i], i
             return tab
 
         def badcharacter(self, pat):
-            tab = [[] for _ in range(self.alphabet)]
+            bad = [[] for _ in range(self.alphabet)]
             for i in range(len(pat) - 1, -1, -1):
-                tab[ord(pat[i]) - ord('a')].append(i)
-            return tab
+                bad[ord(pat[i]) - ord('a')].append(i)
+            return bad
 
         def goodsuffix(self, pat):
             tab = self.preprocess_reverse(pat)  # [0,-1)
-            assert (len(tab) == len(pat))
-
-            if self.debug:
-                print 'reverse tab', tab
 
             sfx = [-1] * len(pat)  # (0,-1]
             for i in range(len(tab) - 1):
@@ -416,19 +409,8 @@ def testmatch():
             return sfx, pfx
 
         def main(self, str, pat):
-            if self.debug:
-                print '-' * 10
-                print 'str', str
-                print 'pat', pat
-
             bads = self.badcharacter(pat)
-            if self.debug:
-                print 'bad', bads
-
             sfxs, pfxs = self.goodsuffix(pat)
-            if self.debug:
-                print 'sfx', sfxs
-                print 'pfx', pfxs
 
             i = len(pat) - 1
             ret = []
@@ -454,9 +436,6 @@ def testmatch():
                         shift2 = len(pat) - 1 - pfxs[j + 1]
 
                     i += max(shift1, shift2, 1)
-
-            if self.debug:
-                print 'ret', ret
             return ret
 
         def testcase_preprocess(self):
@@ -464,8 +443,7 @@ def testmatch():
 
             def test(case):
                 ret1 = self.preprocess_reverse(case[:])
-                ret2 = self.preprocess(case[::-1])
-                ret2.reverse()
+                ret2 = self.preprocess(case[::-1])[::-1]
                 if ret1 != ret2:
                     print case
                     print 'ret1:', ret1
@@ -481,11 +459,13 @@ def testmatch():
             self.funcs.append(self.main)
 
         def preprocess(self, pat):
-            tab = self._preprocess_fundamental(pat)
             jmp = [0] * len(pat)
-            for i in range(len(pat) - 1, 0, -1):
-                if tab[i] > 0:
-                    jmp[i + tab[i] - 1] = tab[i]
+            for i in range(1, len(pat)):
+                j = jmp[i - 1]
+                while j > 0 and pat[j] != pat[i]:
+                    j = jmp[j - 1]
+                if pat[j] == pat[i]:
+                    jmp[i] = j + 1
             return jmp
 
         def main(self, str, pat):
