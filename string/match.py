@@ -102,33 +102,34 @@ class KnuthMorrisPratt(StringMatch):
 
     def _preprocess_jmp_fundamental(self, pat):
         tab = self._preprocess_fundamental(pat)  # (0,-1], length
-        jmp = [0] * len(pat)  # [0,-1], length
+        jmp = [-1] * len(pat)  # [0,-1], index
         for i in range(len(pat) - 1, 0, -1):
             if tab[i] > 0:
-                jmp[i + tab[i] - 1] = tab[i]
+                jmp[i + tab[i] - 1] = tab[i] - 1
         return jmp
 
     def _preprocess_jmp_classical(self, pat):
-        # jmp[i]是使得pat[0:k]==pat[i+1-k:i+1]的最大k值
-        jmp = [0] * len(pat)  # [0,-1], length
-        for i in range(1, len(pat)):
-            j = jmp[i - 1]
-            while j > 0 and pat[j] != pat[i]:
-                j = jmp[j - 1]
-            if pat[j] == pat[i]:
-                jmp[i] = j + 1
+        # jmp[i]是使得pat[0:k]==pat[i+1-k:i+1]的最大k(长度)值再减一
+        jmp = [-1] * len(pat)  # [0,-1], index
+        for i in range(len(pat) - 1):
+            j = jmp[i]
+            # 当j==0即pat[0]==pat[i]时，即使pat[1]!=pat[i+1]
+            # 仍存在pat[0]==pat[i+1]即jmp[i+1]==0的可能性
+            while j >= 0 and pat[j + 1] != pat[i + 1]:
+                j = jmp[j]
+            if pat[j + 1] == pat[i + 1]:
+                jmp[i + 1] = j + 1
         return jmp
 
-        # jmp[i]是使得pat[0:k]==pat[i-k:i]的最大k值
-        jmp = [0] * (len(pat) + 1)
-        for i in range(2, len(pat) + 1):
-            j = jmp[i - 1]
-            while j > 0 and pat[j] != pat[i - 1]:
-                j = jmp[j]
-            if pat[j] == pat[i - 1]:
-                jmp[i] = j + 1
-        jmp = jmp[1:]
-        return jmp
+        # jmp[i]是使得pat[0:k]==pat[i-k:i]的最大k(长度)值再减一
+        jmp = [-1] * (len(pat) + 1)  # index
+        for i in range(1, len(pat)):
+            j = jmp[i]
+            while j >= 0 and pat[j + 1] != pat[i]:
+                j = jmp[j + 1]
+            if pat[j + 1] == pat[i]:
+                jmp[i + 1] = j + 1
+        return jmp[1:]
 
     # deterministic finite state string matcher
     def _preprocess_jmp_realtime(self, pat):
@@ -136,8 +137,9 @@ class KnuthMorrisPratt(StringMatch):
 
     def main(self, str, pat):
         # 1) preprocess
-        jmp = self._preprocess_jmp_classical(pat)
-        assert (sum(jmp) >= sum(self._preprocess_jmp_fundamental(pat)))
+        # jmp = self._preprocess_jmp_fundamental(pat)  # worst
+        jmp = self._preprocess_jmp_classical(pat)  # better
+        # jmp = self._preprocess_jmp_realtime(pat)  # best
         # 2) search
         ret = []
         i, j = 0, 0
@@ -149,8 +151,8 @@ class KnuthMorrisPratt(StringMatch):
                 continue
             elif j == len(pat):
                 ret.append(i)
-            i += j - jmp[j - 1]
-            j = jmp[j - 1]
+            i += j - (jmp[j - 1] + 1)
+            j = jmp[j - 1] + 1
         return ret
 
 
