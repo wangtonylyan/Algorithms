@@ -351,7 +351,7 @@ def testmatch():
             self.funcs.append(self.main)
 
         def preprocess(self, pat):
-            tab = [0] * len(pat)
+            tab = [0] * len(pat)  # length
             low, high = 0, 0
             for i in range(1, len(pat)):
                 if i < high:
@@ -362,14 +362,15 @@ def testmatch():
                         j = high - i
                 else:
                     j = 0
+
                 while j < len(pat) - i and pat[i + j] == pat[j]:
                     j += 1
                 tab[i] = j
                 low, high = i, i + tab[i]
             return tab
 
-        def preprocess_reverse(self, pat):
-            tab = [0] * len(pat)
+        def preprocess_reversed(self, pat):
+            tab = [0] * len(pat)  # length
             low, high = len(pat) - 1, len(pat) - 1
             for i in range(len(pat) - 2, -1, -1):
                 if i > low:
@@ -380,27 +381,28 @@ def testmatch():
                         j = len(pat) - 1 - (i - low)
                 else:
                     j = len(pat) - 1
-                while j >= len(pat) - 1 - i and pat[i - (len(pat) - 1 - j)] == pat[j]:
+                while j >= len(pat) - 1 - i and pat[j] == pat[i - (len(pat) - 1 - j)]:
                     j -= 1
                 tab[i] = len(pat) - 1 - j
                 low, high = i - tab[i], i
+            assert (tab == self.preprocess(pat[::-1])[::-1])
             return tab
 
         def badcharacter(self, pat):
-            bad = [[] for _ in range(self.alphabet)]
+            tab = [[] for _ in range(self.alphabet)]  # index
             for i in range(len(pat) - 1, -1, -1):
-                bad[ord(pat[i]) - ord('a')].append(i)
-            return bad
+                tab[ord(pat[i]) - ord('a')].append(i)
+            return tab
 
         def goodsuffix(self, pat):
-            tab = self.preprocess_reverse(pat)  # [0,-1)
+            tab = self.preprocess_reversed(pat)  # length
 
-            sfx = [-1] * len(pat)  # (0,-1]
-            for i in range(len(tab) - 1):
+            sfx = [-1] * len(pat)  # index
+            for i in range(len(pat) - 1):
                 if tab[i] > 0:
                     sfx[len(pat) - tab[i]] = i
 
-            pfx = [-1] * len(pat)  # (0,-1]
+            pfx = [-1] * len(pat)  # index
             if tab[0] == 1:
                 pfx[len(pat) - 1] = 0
             for i in range(1, len(pat) - 1):
@@ -409,49 +411,40 @@ def testmatch():
             return sfx, pfx
 
         def main(self, str, pat):
-            bads = self.badcharacter(pat)
-            sfxs, pfxs = self.goodsuffix(pat)
+            bad = self.badcharacter(pat)
+            sfx, pfx = self.goodsuffix(pat)
 
-            i = len(pat) - 1
             ret = []
-            while i < len(str):
+            i = 0
+            while i < len(str) - len(pat) + 1:
                 j = len(pat) - 1
-                while j >= 0 and pat[j] == str[i - (len(pat) - 1 - j)]:
+                while j >= 0 and str[i + j] == pat[j]:
                     j -= 1
+
                 if j == -1:
-                    ret.append(i - len(pat) + 1)
-                    i += len(pat) - 1 - pfxs[1] if len(pat) > 1 else 1
+                    ret.append(i)
+                    i += len(pat) - 1 - pfx[1] if len(pat) > 1 else 1
                 else:
-                    bad = bads[ord(str[i - (len(pat) - 1 - j)]) - ord('a')]
+                    bd = bad[ord(str[i + j]) - ord('a')]
                     k = 0
-                    while k < len(bad) and bad[k] > j:
+                    while k < len(bd) and bd[k] > j:
                         k += 1
-                    shift1 = j - bad[k] if k < len(bad) else j + 1
+                    if k < len(bd):
+                        st1 = j - bd[k]
+                    else:
+                        st1 = j + 1
 
                     if j == len(pat) - 1:
-                        shift2 = 1
-                    elif sfxs[j + 1] >= 0:
-                        shift2 = len(pat) - 1 - sfxs[j + 1]
+                        st2 = 1
+                    elif sfx[j + 1] >= 0:
+                        st2 = len(pat) - 1 - sfx[j + 1]
+                    elif pfx[j + 1] >= 0:
+                        st2 = len(pat) - 1 - pfx[j + 1]
                     else:
-                        shift2 = len(pat) - 1 - pfxs[j + 1]
+                        st2 = len(pat)
 
-                    i += max(shift1, shift2, 1)
+                    i += max(st1, st2, 1)
             return ret
-
-        def testcase_preprocess(self):
-            cases = ['aabaabcaxaabaabcy', 'aabcaabxaaz', 'abaabcabaac', 'abcdefg', 'aabcaabxaaz', 'abcabc']
-
-            def test(case):
-                ret1 = self.preprocess_reverse(case[:])
-                ret2 = self.preprocess(case[::-1])[::-1]
-                if ret1 != ret2:
-                    print case
-                    print 'ret1:', ret1
-                    print 'ret2:', ret2
-                assert (ret1 == ret2)
-
-            map(test, cases)
-            print 'pass: testcase_preprocess'
 
     class KMP(StringMatch):
         def __init__(self):
@@ -459,17 +452,18 @@ def testmatch():
             self.funcs.append(self.main)
 
         def preprocess(self, pat):
-            jmp = [0] * len(pat)
-            for i in range(1, len(pat)):
-                j = jmp[i - 1]
-                while j > 0 and pat[j] != pat[i]:
-                    j = jmp[j - 1]
-                if pat[j] == pat[i]:
-                    jmp[i] = j + 1
-            return jmp
+            tab = [0] * len(pat)  # length
+            for i in range(len(pat) - 1):
+                j = tab[i]
+                while j > 0 and pat[j] != pat[i + 1]:
+                    j = tab[j - 1]
+                if pat[j] == pat[i + 1]:
+                    tab[i + 1] = j + 1
+            return tab
 
         def main(self, str, pat):
             jmp = self.preprocess(pat)
+
             ret = []
             i, j = 0, 0
             while i < len(str) - len(pat) + 1:
@@ -477,21 +471,15 @@ def testmatch():
                     j += 1
                 if j == len(pat):
                     ret.append(i)
-                    i += j - jmp[j - 1]
-                    j = jmp[j - 1]
-                else:
-                    if j == 0:
-                        i += 1
-                    else:
-                        i += j - jmp[j - 1]
-                        j = jmp[j - 1]
+                elif j == 0:
+                    i += 1
+                    continue
+                i += j - jmp[j - 1]
+                j = jmp[j - 1]
             return ret
 
-    bm = BM()
-    bm.testcase_preprocess()
-    bm.testcase()
-    kmp = KMP()
-    kmp.testcase()
+    BM().testcase()
+    KMP().testcase()
 
 
 if __name__ == '__main__':
