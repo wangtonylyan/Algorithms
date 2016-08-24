@@ -151,8 +151,6 @@ def testgraph():
             assert (len(edge) == sum(map(len, grp)) / 2)
             edge.sort(key=lambda x: x[1])
 
-            ds = [i for i in range(len(grp))]
-
             def find(ds, n):
                 while ds[n] != n:
                     n = ds[n]
@@ -166,36 +164,33 @@ def testgraph():
                 return p1
 
             ret = []
+            ds = [i for i in range(len(grp))]
             for (i, j), w in edge:
                 if find(ds, i) != find(ds, j):
                     union(ds, i, j)
                     ret.append(w)
-
             return sum(ret)
 
         def main_Prim(grp, src):
             vtx = [0] * len(grp)
-            vtx[src] = 1
             dis = [None] * len(grp)
+            vtx[src] = 1
             dis[src] = 0
             for i, w in grp[src]:
                 dis[i] = w
-
-            ret = []
             for _ in range(len(grp) - 1):
                 m = None
                 for i in range(len(grp)):
                     if vtx[i] == 0 and dis[i] != None:
                         if m == None or dis[m] > dis[i]:
                             m = i
-                assert (m != None)
+                if m == None:
+                    break
                 vtx[m] = 1
-                ret.append(dis[m])
                 for i, w in grp[m]:
                     if vtx[i] == 0 and (dis[i] == None or dis[i] > w):
                         dis[i] = w
-
-            return sum(ret)
+            return sum(dis)
 
         ret = main_Kruskal(grp)
         for i in range(len(grp)):
@@ -206,11 +201,13 @@ def testgraph():
         def f1(grp, src):
             dis = [None] * len(grp)
             dis[src] = 0
-            for i in range(len(grp)):
-                if dis[i] != None:
-                    for j, w in grp[i]:
-                        if dis[j] == None or dis[j] > dis[i] + w:
-                            dis[j] = dis[i] + w
+
+            for _ in range(len(grp) - 1):
+                for i in range(len(grp)):
+                    if dis[i] != None:
+                        for j, w in grp[i]:
+                            if dis[j] == None or dis[j] > dis[i] + w:
+                                dis[j] = dis[i] + w
 
             for i in range(len(grp)):
                 if dis[i] != None:
@@ -232,20 +229,19 @@ def testgraph():
                 ret = []
                 while len(st) > 0:
                     i = st.pop()
-                    assert (vtx[i] <= 0)
                     for j, w in grp[i]:
                         vtx[j] -= 1
                         if vtx[j] == 0:
                             st.add(j)
-                    ret.append(i)
+                    ret = [i] + ret
                 return ret if len(ret) == len(grp) else None
 
-            dis = [None] * len(grp)
-            dis[src] = 0
             seq = sort(grp)
             if seq == None:
                 return None
-            for i in seq:
+            dis = [None] * len(grp)
+            dis[src] = 0
+            for i in range(len(grp)):
                 if dis[i] != None:
                     for j, w in grp[i]:
                         if dis[j] == None or dis[j] > dis[i] + w:
@@ -253,35 +249,37 @@ def testgraph():
             return sum(dis)
 
         def f3(grp, src):
-            def sort(grp, src):
-                vtx = [0] * len(grp)
-                vtx[src] = 1
-                stk = [src]
+            def sort(grp):
                 ret = []
-                while len(stk) > 0:
-                    i = stk[-1]
-                    if vtx[i] == 1:
-                        vtx[i] = 2
-                        for j, w in grp[i]:
-                            if vtx[j] == 0:
-                                vtx[j] = 1
-                                stk.append(j)
-                                vtx[i] = 1
-                                break
-                            elif j in stk:
-                                return None
-                    else:
-                        assert (vtx[i] == 2)
-                        stk.pop()
-                        ret = [i] + ret
+                vtx = [0] * len(grp)
+                for i in range(len(grp)):
+                    if vtx[i] == 0:
+                        stk = [i]
+                        vtx[i] = 1
+                        while len(stk) > 0:
+                            i = stk[-1]
+                            if vtx[i] == 1:
+                                vtx[i] = 2
+                                for j, w in grp[i]:
+                                    if vtx[j] == 0:
+                                        vtx[j] = 1
+                                        stk.append(j)
+                                        vtx[i] = 1
+                                        break
+                                    elif j in stk:
+                                        return None
+                            else:
+                                assert (vtx[i] == 2)
+                                stk.pop()
+                                ret = [i] + ret
                 return ret if len(ret) == len(grp) else None
 
-            dis = [None] * len(grp)
-            dis[src] = 0
-            seq = sort(grp, src)
+            seq = sort(grp)
             if seq == None:
                 return None
-            for i in seq:
+            dis = [None] * len(grp)
+            dis[src] = 0
+            for i in range(len(grp)):
                 if dis[i] != None:
                     for j, w in grp[i]:
                         if dis[j] == None or dis[j] > dis[i] + w:
@@ -290,11 +288,12 @@ def testgraph():
 
         def f4(grp, src):
             vtx = [0] * len(grp)
-            vtx[src] = 1
             dis = [None] * len(grp)
+            vtx[src] = 1
             dis[src] = 0
             for i, w in grp[src]:
                 dis[i] = w
+
             for _ in range(len(grp) - 1):
                 m = None
                 for i in range(len(grp)):
