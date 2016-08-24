@@ -159,7 +159,7 @@ class RedBlackTree(bst.BalancedBinarySearchTree):
             if not (self.root.left and self.root.left.color) and not (self.root.right and self.root.right.color):
                 # make sure that the root node isn't a 2-node before recursion
                 self.root.color = True
-            self.root = recur(self.root) if len(args) == 0 else recur(self.root, *args)  # start recursion
+            self.root = recur(self.root, *args)  # start recursion
             if self.root and self.root.color:
                 assert (not (self.root.left and self.root.left.color and self.root.right and self.root.right.color))
                 self.root.color = False
