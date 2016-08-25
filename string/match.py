@@ -127,7 +127,7 @@ class KnuthMorrisPratt(StringMatch):
                 j = jmp[j]
             if pat[j] == pat[i]:
                 jmp[i + 1] = j + 1
-        return jmp[1:]
+        return jmp[1:]  # not necessary, just for compatibility
 
     # deterministic finite state string matcher
     def _preprocess_jmp_realtime(self, pat):
