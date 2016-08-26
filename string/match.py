@@ -12,12 +12,12 @@ class StringMatch(String):
         super(StringMatch, self).__init__()
         self.funcs = [self.main_bruteForce]
 
-    def main_bruteForce(self, str, pat):
+    def main_bruteForce(self, txt, pat):
         # search
         ret = []
-        for i in range(len(str) - len(pat) + 1):
+        for i in range(len(txt) - len(pat) + 1):
             j = 0
-            while j < len(pat) and str[i + j] == pat[j]:
+            while j < len(pat) and txt[i + j] == pat[j]:
                 j += 1
             if j == len(pat):
                 ret.append(i)
@@ -133,7 +133,7 @@ class KnuthMorrisPratt(StringMatch):
     def _preprocess_jmp_realtime(self, pat):
         pass
 
-    def main(self, str, pat):
+    def main(self, txt, pat):
         # 1) preprocess
         # jmp = self._preprocess_jmp_fundamental(pat)  # worst
         jmp = self._preprocess_jmp_classical(pat)  # better
@@ -141,8 +141,8 @@ class KnuthMorrisPratt(StringMatch):
         # 2) search
         ret = []
         i, j = 0, 0
-        while i < len(str) - len(pat) + 1:
-            while j < len(pat) and str[i + j] == pat[j]:
+        while i < len(txt) - len(pat) + 1:
+            while j < len(pat) and txt[i + j] == pat[j]:
                 j += 1
             if j == 0:
                 i += 1
@@ -159,12 +159,12 @@ class BoyerMoore(StringMatch):
         super(BoyerMoore, self).__init__()
         self.funcs.append(self.main)
 
-    def main_bruteForce(self, str, pat):
+    def main_bruteForce(self, txt, pat):
         # search
         ret = []
-        for i in range(len(pat) - 1, len(str)):
+        for i in range(len(pat) - 1, len(txt)):
             j = 0
-            while j < len(pat) and str[i - j] == pat[len(pat) - 1 - j]:
+            while j < len(pat) and txt[i - j] == pat[len(pat) - 1 - j]:
                 j += 1
             if j == len(pat):
                 ret.append(i - j + 1)
@@ -216,7 +216,7 @@ class BoyerMoore(StringMatch):
         all(pfx[i] + 1 <= len(pat) - i for i in range(len(pfx) - 1))
         return sfx, pfx
 
-    def main(self, str, pat):
+    def main(self, txt, pat):
         # 1) preprocess
         # 预处理表描述内容的方式有两种：索引值或长度值，两者没有本质上的区别，可以相互转换
         # 但其在生成和搜索过程中处理的方式会略有不同，此算法在实现上的主要区别就在于此
@@ -226,18 +226,18 @@ class BoyerMoore(StringMatch):
         # 2) search
         ret = []
         i = 0
-        while i < len(str) - len(pat) + 1:
+        while i < len(txt) - len(pat) + 1:
             j = len(pat) - 1
-            while j >= 0 and str[i + j] == pat[j]:
+            while j >= 0 and txt[i + j] == pat[j]:
                 j -= 1
-            if j == -1:  # find the occurrence of pat in str
+            if j == -1:  # find the occurrence of pat in txt
                 ret.append(i)
                 # pfxs[0]没有意义，pfxs[1]则是最长前缀(缺省值-1也是适用的)
                 i += len(pat) - 1 - pfxs[1] if len(pfxs) > 1 else 1
             else:
-                assert (str[i + j] != pat[j])
+                assert (txt[i + j] != pat[j])
                 # use the "bad character shift rule"
-                bad = bads[ord(str[i + j]) - ord('a')]
+                bad = bads[ord(txt[i + j]) - ord('a')]
                 k = 0  # closest to the left of j
                 while k < len(bad) and bad[k] > j:
                     k += 1
@@ -305,18 +305,18 @@ class RabinKarp(StringMatch):
 
 
 class PatternWithWildcard():
-    def main(self, str, pat):
-        for i in range(len(str)):
+    def main(self, txt, pat):
+        for i in range(len(txt)):
             j = 0
             stk = []
             while True:
                 if j >= len(pat) or (j == len(pat) - 1 and pat[j] == '*'):
                     return True
-                elif i >= len(str):  # backtracking
+                elif i >= len(txt):  # backtracking
                     if len(stk) > 0:
                         i, j = stk[-1]
                         i += 1
-                        if i >= len(str):
+                        if i >= len(txt):
                             stk.pop()
                         else:
                             stk[-1] = (i, j)
@@ -325,11 +325,11 @@ class PatternWithWildcard():
                 elif pat[j] == '*':
                     j += 1
                     stk.append((i, j))
-                elif str[i] == pat[j]:
+                elif txt[i] == pat[j]:
                     i += 1
                     j += 1
                 else:
-                    i = len(str)
+                    i = len(txt)
 
         return False
 
