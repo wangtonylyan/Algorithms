@@ -20,9 +20,9 @@ class RedBlackTree(bst.BalancedBinarySearchTree):
 
     # ------------------------------------------------------------------------------------
 
-    # 1）rotate left：no side-effect
-    # 2）rotate right：no side-effect
-    # 3）flip color：change of height of rbt subtree
+    # 1) rotate left：no side-effect
+    # 2) rotate right：no side-effect
+    # 3) flip color：change of height of rbt subtree
 
     # @invariant: rbt subtree is a red-black tree
     def _rotateLeft(self, rbt):
@@ -154,12 +154,13 @@ class RedBlackTree(bst.BalancedBinarySearchTree):
     # ------------------------------------------------------------------------------------
 
     # used by deleteMax, deleteMin, delete
-    def _deletePattern(self, recur, *args):
+    def _deletePattern(self, func, *args):
+        assert (callable(func))
         if self.root:
             if not (self.root.left and self.root.left.color) and not (self.root.right and self.root.right.color):
                 # make sure that the root node isn't a 2-node before recursion
                 self.root.color = True
-            self.root = recur(self.root, *args)  # start recursion
+            self.root = func(self.root, *args)  # start recursion
             if self.root and self.root.color:
                 assert (not (self.root.left and self.root.left.color and self.root.right and self.root.right.color))
                 self.root.color = False
@@ -178,28 +179,30 @@ class RedBlackTree(bst.BalancedBinarySearchTree):
     def _deleteMax(self, rbt):
         assert (rbt)
         assert (rbt.color or (rbt.left and rbt.left.color) or (rbt.right and rbt.right.color))
-        if rbt.right == None:
+        if rbt.right:
+            # step1) top-down
+            rbt = self._makeRightRed(rbt)
+            # step2) recursion
+            rbt.right = self._deleteMax(rbt.right)
+            # step3) bottom-up
+            rbt = self._balance(rbt)
+        else:
             if rbt.left:
                 rbt.left.color = rbt.color
-            return rbt.left
-        # step1) top-down
-        rbt = self._makeRightRed(rbt)
-        # step2) recursion
-        rbt.right = self._deleteMax(rbt.right)
-        # step3) bottom-up
-        rbt = self._balance(rbt)
+            rbt = rbt.left
         return rbt
 
     def _deleteMin(self, rbt):
         assert (rbt)
         assert (rbt.color or (rbt.left and rbt.left.color) or (rbt.right and rbt.right.color))
-        if rbt.left == None:
+        if rbt.left:
+            rbt = self._makeLeftRed(rbt)
+            rbt.left = self._deleteMin(rbt.left)
+            rbt = self._balance(rbt)
+        else:
             if rbt.right:
                 rbt.right.color = rbt.color
-            return rbt.right
-        rbt = self._makeLeftRed(rbt)
-        rbt.left = self._deleteMin(rbt.left)
-        rbt = self._balance(rbt)
+            rbt = rbt.right
         return rbt
 
     def _delete(self, rbt, key):
@@ -259,7 +262,7 @@ class RedBlackTree(bst.BalancedBinarySearchTree):
 
 
 if __name__ == '__main__':
-    test = bst.BinarySearchTreeTest(RedBlackTree, 500, True)
+    test = bst.BinarySearchTreeTest(RedBlackTree, 1000, True)
     test.deleteMaxMin()
     test.delete()
     print 'done'
