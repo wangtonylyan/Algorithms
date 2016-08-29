@@ -344,129 +344,23 @@ def testgraph():
 def testmatch():
     from string.match import StringMatch
 
-    class BM(StringMatch):
-        def __init__(self):
-            super(BM, self).__init__()
-            self.funcs.append(self.main)
-
-        def preprocess(self, pat):
-            tab = [0] * len(pat)  # length
-            low, high = 0, 0
-            for i in range(1, len(pat)):
-                if i < high:
-                    if high - i > tab[i - low]:
-                        tab[i] = tab[i - low]
-                        continue
-                    else:
-                        j = high - i
-                else:
-                    j = 0
-
-                while j < len(pat) - i and pat[i + j] == pat[j]:
-                    j += 1
-                tab[i] = j
-                low, high = i, i + tab[i]
-            return tab
-
-        def preprocess_reversed(self, pat):
-            tab = [0] * len(pat)  # length
-            low, high = len(pat) - 1, len(pat) - 1
-            for i in range(len(pat) - 2, -1, -1):
-                if i > low:
-                    if i - low > tab[len(pat) - 1 - (high - i)]:
-                        tab[i] = tab[len(pat) - 1 - (high - i)]
-                        continue
-                    else:
-                        j = len(pat) - 1 - (i - low)
-                else:
-                    j = len(pat) - 1
-                while j >= len(pat) - 1 - i and pat[j] == pat[i - (len(pat) - 1 - j)]:
-                    j -= 1
-                tab[i] = len(pat) - 1 - j
-                low, high = i - tab[i], i
-            assert (tab == self.preprocess(pat[::-1])[::-1])
-            return tab
-
-        def badcharacter(self, pat):
-            tab = [[] for _ in range(self.alphabet)]  # index
-            for i in range(len(pat) - 1, -1, -1):
-                tab[ord(pat[i]) - ord('a')].append(i)
-            return tab
-
-        def goodsuffix(self, pat):
-            tab = self.preprocess_reversed(pat)  # length
-
-            sfx = [-1] * len(pat)  # index
-            for i in range(len(pat) - 1):
-                if tab[i] > 0:
-                    sfx[len(pat) - tab[i]] = i
-
-            pfx = [-1] * len(pat)  # index
-            if tab[0] == 1:
-                pfx[len(pat) - 1] = 0
-            for i in range(1, len(pat) - 1):
-                pfx[len(pat) - (i + 1)] = i if tab[i] == i + 1 else pfx[len(pat) - i]
-
-            return sfx, pfx
-
-        def main(self, str, pat):
-            bad = self.badcharacter(pat)
-            sfx, pfx = self.goodsuffix(pat)
-
-            ret = []
-            i = 0
-            while i < len(str) - len(pat) + 1:
-                j = len(pat) - 1
-                while j >= 0 and str[i + j] == pat[j]:
-                    j -= 1
-
-                if j == -1:
-                    ret.append(i)
-                    i += len(pat) - 1 - pfx[1] if len(pat) > 1 else 1
-                else:
-                    bd = bad[ord(str[i + j]) - ord('a')]
-                    k = 0
-                    while k < len(bd) and bd[k] > j:
-                        k += 1
-                    if k < len(bd):
-                        st1 = j - bd[k]
-                    else:
-                        st1 = j + 1
-
-                    if j == len(pat) - 1:
-                        st2 = 1
-                    elif sfx[j + 1] >= 0:
-                        st2 = len(pat) - 1 - sfx[j + 1]
-                    elif pfx[j + 1] >= 0:
-                        st2 = len(pat) - 1 - pfx[j + 1]
-                    else:
-                        st2 = len(pat)
-
-                    i += max(st1, st2, 1)
-            return ret
-
     class KMP(StringMatch):
         def __init__(self):
             super(KMP, self).__init__()
             self.funcs.append(self.main)
 
-        def preprocess(self, pat):
-            tab = [0] * len(pat)  # length
+        def main(self, txt, pat):
+            jmp = [0] * len(pat)
             for i in range(len(pat) - 1):
-                j = tab[i]
+                j = jmp[i]
                 while j > 0 and pat[j] != pat[i + 1]:
-                    j = tab[j - 1]
+                    j = jmp[j - 1]
                 if pat[j] == pat[i + 1]:
-                    tab[i + 1] = j + 1
-            return tab
-
-        def main(self, str, pat):
-            jmp = self.preprocess(pat)
-
+                    jmp[i + 1] = j + 1
             ret = []
             i, j = 0, 0
-            while i < len(str) - len(pat) + 1:
-                while j < len(pat) and str[i + j] == pat[j]:
+            while i < len(txt) - len(pat) + 1:
+                while j < len(pat) and txt[i + j] == pat[j]:
                     j += 1
                 if j == len(pat):
                     ret.append(i)
@@ -477,8 +371,85 @@ def testmatch():
                 j = jmp[j - 1]
             return ret
 
-    BM().testcase()
+    class BM(StringMatch):
+        def __init__(self):
+            super(BM, self).__init__()
+            self.funcs.append(self.main)
+
+        def main(self, txt, pat):
+            def preprocess(pat):
+                tab = [0] * len(pat)
+                low, high = 0, 0
+                for i in range(1, len(pat)):
+                    if i < high:
+                        if high - i > tab[i - low]:
+                            tab[i] = tab[i - low]
+                            continue
+                        else:
+                            j = high - i
+                    else:
+                        j = 0
+
+                    while j < len(pat) - i and pat[i + j] == pat[j]:
+                        j += 1
+                    tab[i] = j
+                    low, high = i, i + tab[i]
+                return tab
+
+            tab = [0] * len(pat)
+            low, high = len(pat) - 1, len(pat) - 1
+            for i in range(len(pat) - 2, -1, -1):
+                if i > low:
+                    if i - low > tab[len(pat) - 1 - (high - i)]:
+                        tab[i] = tab[len(pat) - 1 - (high - i)]
+                        continue
+                    else:
+                        j = len(pat) - 1 - (i - low)
+                else:
+                    j = len(pat) - 1
+                while j >= len(pat) - 1 - i and pat[i - (len(pat) - 1 - j)] == pat[j]:
+                    j -= 1
+                tab[i] = len(pat) - 1 - j
+                low, high = i - tab[i], i
+            assert (tab == preprocess(pat[::-1])[::-1])
+            bad = [[] for _ in range(self.alphabet)]
+            for i in range(len(pat) - 1, -1, -1):
+                bad[ord(pat[i]) - ord('a')].append(i)
+            sfx = [-1] * len(pat)
+            for i in range(len(pat) - 1):
+                if tab[i] > 0:
+                    sfx[len(pat) - tab[i]] = i
+            pfx = [-1] * len(pat)
+            if tab[0] == 1:
+                pfx[len(pat) - 1] = 0
+            for i in range(1, len(pat) - 1):
+                pfx[len(pat) - (i + 1)] = i if tab[i] == i + 1 else pfx[len(pat) - i]
+            ret = []
+            i = 0
+            while i < len(txt) - len(pat) + 1:
+                j = len(pat) - 1
+                while j >= 0 and txt[i + j] == pat[j]:
+                    j -= 1
+                if j == -1:
+                    ret.append(i)
+                    i += len(pat) - 1 - pfx[1] if len(pfx) > 1 else 1
+                else:
+                    bd = bad[ord(txt[i + j]) - ord('a')]
+                    k = 0
+                    while k < len(bd) and bd[k] > j:
+                        k += 1
+                    st1 = j - bd[k] if k < len(bd) else j + 1
+                    if j == len(pat) - 1:
+                        st2 = 1
+                    elif sfx[j + 1] >= 0:
+                        st2 = len(pat) - 1 - sfx[j + 1]
+                    else:
+                        st2 = len(pat) - 1 - pfx[j + 1]
+                    i += max(st1, st2, 1)
+            return ret
+
     KMP().testcase()
+    BM().testcase()
 
 
 if __name__ == '__main__':
