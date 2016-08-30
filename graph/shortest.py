@@ -37,6 +37,17 @@ class ShortestPath(DirectedAcyclicGraph):
         pass
         return dis, pre
 
+        for n in range(len(grp)):  # the last loop is used to check
+            for i in range(len(grp)):
+                if dis[i] != None:
+                    for j, w in grp[i]:
+                        if dis[j] == None or dis[j] > dis[i] + w:
+                            if n == len(grp) - 1:
+                                return None
+                            dis[j] = dis[i] + w
+                            pre[j] = i
+        return dis, pre
+
     # dag (directed acyclic graph)
     # 仅适用于无环的有向图，O(V+E)
     def main_dag(self, grp, src):

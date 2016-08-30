@@ -309,7 +309,7 @@ def testgraph():
             return sum(dis)
 
         ret = f1(grp, src)
-        assert (ret == f2(grp, src) == f3(grp, src) == f4(grp, src))
+        assert (ret == f4(grp, src) == f2(grp, src) == f3(grp, src))
         return ret
 
     ugrp = [
