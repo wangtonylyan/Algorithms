@@ -6,6 +6,7 @@
 
 from graph import UndirectedGraph, DirectedGraph
 from data_structure.tree.disjoint import DisjointSetForest
+from data_structure.heap import MinHeap
 
 
 # Kruskal从“边”的角度入手，Prim从“点”的角度入手
@@ -68,7 +69,7 @@ class MinimumSpanningTree(UndirectedGraph):
     # 与Kruskal思想互逆的算法：从权值最大的边开始删除
     # 如果删除某条边不会改变图的连通性，则可以删除之
     def main_Kruskal(self, grp, src=None):
-        # 1) build edges array and sort
+        # 1) build array of edges and sort
         edge = []
         for i in range(len(grp)):
             for j, w in grp[i]:
@@ -77,7 +78,7 @@ class MinimumSpanningTree(UndirectedGraph):
                     edge.append(((m, n), w))
         assert (len(edge) == sum(map(len, grp)) / 2)
         edge.sort(key=lambda x: x[1])
-        # 2) build mst by selecting edges
+        # 2) build MST by selecting edges
         mst = []
         ds = DisjointSetForest(len(grp))
         for (i, j), w in edge:
@@ -87,26 +88,7 @@ class MinimumSpanningTree(UndirectedGraph):
         assert (len(mst) == len(grp) - 1)
         return mst
 
-    # 从树中的节点开始搜索
     def main_Prim_1(self, grp, src=0):
-        vtx = [0 if i != src else 1 for i in range(len(grp))]
-        mst = []
-        for _ in range(len(grp) - 1):
-            m = None
-            for i in range(len(grp)):
-                if vtx[i] == 1:
-                    for j, w in grp[i]:
-                        if vtx[j] == 0 and (m == None or m[1] > w):
-                            m = ((i, j), w)
-            assert (m != None and vtx[m[0][0]] == 1 and vtx[m[0][1]] == 0)
-            vtx[m[0][1]] = 1
-            mst.append(m)
-        assert (len(mst) == len(grp) - 1)
-        assert (sum(vtx) == len(vtx))
-        return mst
-
-    # 从树外的节点开始搜索
-    def main_Prim_2(self, grp, src=0):
         # 1) initialize
         vtx = [0 if i != src else 1 for i in range(len(grp))]
         dis = [None if i != src else 0 for i in range(len(grp))]
@@ -114,23 +96,51 @@ class MinimumSpanningTree(UndirectedGraph):
         for i, w in grp[src]:
             dis[i] = w
             pre[i] = src
-        # 2) build mst by selecting vertices
+        # 2) build MST by selecting vertices，从'dis!=None'的点集中进行贪婪选择
         mst = []
-        for _ in range(len(grp) - 1):
+        for _ in range(len(grp) - 1):  # the 'src' vertex has been selected
             m = None
             for i in range(len(grp)):
-                if vtx[i] == 0 and dis[i] != None:
+                if vtx[i] == 0 and dis[i] != None:  # 从树外的节点开始搜索
                     assert (vtx[pre[i]] == 1)
                     if m == None or dis[m] > dis[i]:
                         m = i
             assert (m != None and vtx[m] == 0 and vtx[pre[m]] == 1)
             mst.append(((m, pre[m]), dis[m]))
             vtx[m] = 1
-            # update dis array by incremental approach
+            # update 'dis' array by incremental approach
             for i, w in grp[m]:
                 if vtx[i] == 0 and (dis[i] == None or dis[i] > w):
                     dis[i] = w
                     pre[i] = m
+        assert (len(mst) == len(grp) - 1)
+        assert (sum(vtx) == len(vtx))
+        return mst
+
+    def main_Prim_2(self, grp, src=0):
+        # 1) initialize
+        vtx = [0 if i != src else 1 for i in range(len(grp))]
+        dis = [None if i != src else 0 for i in range(len(grp))]
+        pre = [None] * len(grp)
+        hp = MinHeap(key=lambda x: x[1])
+        for i, w in grp[src]:
+            dis[i] = w
+            pre[i] = src
+            hp.push((i, dis[i]))
+        # 2) build MST by selecting vertices from 'hp'
+        mst = []
+        while len(hp) > 0:
+            i, w = hp.pop()
+            assert (w >= dis[i])
+            if w > dis[i] or vtx[i] != 0:
+                continue
+            mst.append(((i, pre[i]), dis[i]))
+            vtx[i] = 1
+            for j, v in grp[i]:
+                if vtx[j] == 0 and (dis[j] == None or dis[j] > v):
+                    dis[j] = v
+                    pre[j] = i
+                    hp.push((j, dis[j]))
         assert (len(mst) == len(grp) - 1)
         assert (sum(vtx) == len(vtx))
         return mst

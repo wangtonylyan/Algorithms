@@ -5,6 +5,7 @@
 
 from graph import DirectedAcyclicGraph
 from sort import TopologicalSort
+from data_structure.heap import MinHeap
 
 
 class ShortestPath(DirectedAcyclicGraph):
@@ -34,15 +35,14 @@ class ShortestPath(DirectedAcyclicGraph):
                     if dis[j] == None or dis[j] > dis[i] + w:  # if there exists negative-weight cycle
                         return None
         # 4) build shortest-path tree
-        pass
         return dis, pre
 
-        for n in range(len(grp)):  # the last loop is used to check
+        for n in range(len(grp)):
             for i in range(len(grp)):
                 if dis[i] != None:
                     for j, w in grp[i]:
                         if dis[j] == None or dis[j] > dis[i] + w:
-                            if n == len(grp) - 1:
+                            if n == len(grp) - 1:  # the last iteration is used to check
                                 return None
                             dis[j] = dis[i] + w
                             pre[j] = i
@@ -68,16 +68,13 @@ class ShortestPath(DirectedAcyclicGraph):
                         dis[j] = dis[i] + w
                         pre[j] = i
         # 4) build shortest-path tree
-        pass
         return dis, pre
 
-    # weighted directed graph with nonnegative-weight edges
-    # 适用于权值非负的有向图
+    # weighted directed graph with nonnegative-weight edges，仅适用于权值非负的有向图
     # Dijkstra与Prim的区别在于：
     # 1) dis数组中维护的是某点与源点之间的最短距离，而不是连接该点的边的最小权值
-    # 2) 有向图中以任意点为起始点，未必可以到达其他所有点
-    # 换言之，最短路径树未必包含了所有连通的点
-    def main_Dijkstra(self, grp, src):
+    # 2) 有向图中以任意点为起始点，未必可以到达其他所有点，即最短路径树未必包含了所有连通的点
+    def main_Dijkstra_1(self, grp, src):
         # 1) initialize
         vtx = [0 if i != src else 1 for i in range(len(grp))]
         dis = [None if i != src else 0 for i in range(len(grp))]
@@ -86,7 +83,7 @@ class ShortestPath(DirectedAcyclicGraph):
             dis[i] = w
             pre[i] = src
         # 2) calculate by selecting vertices
-        for _ in range(len(grp) - 1):
+        for _ in range(len(grp) - 1):  # the 'src' vertex has been selected
             m = None
             for i in range(len(grp)):
                 if vtx[i] == 0 and dis[i] != None:
@@ -102,14 +99,38 @@ class ShortestPath(DirectedAcyclicGraph):
                     dis[i] = dis[m] + w
                     pre[i] = m
         # 3) build shortest-path tree
-        pass
+        return dis, pre
+
+    def main_Dijkstra_2(self, grp, src):
+        # 1) initialize
+        vtx = [0 if i != src else 1 for i in range(len(grp))]
+        dis = [None if i != src else 0 for i in range(len(grp))]
+        pre = [None] * len(grp)
+        hp = MinHeap(key=lambda x: x[1])
+        for i, w in grp[src]:
+            dis[i] = w
+            pre[i] = src
+            hp.push((i, dis[i]))
+        # 2) calculate by selecting vertices
+        while len(hp) > 0:
+            i, w = hp.pop()
+            assert (w >= dis[i])
+            if w > dis[i] or vtx[i] != 0:
+                continue
+            vtx[i] = 1
+            for j, v in grp[i]:
+                if vtx[j] == 0 and (dis[j] == None or dis[j] > dis[i] + v):
+                    dis[j] = dis[i] + v
+                    pre[j] = i
+                    hp.push((j, dis[j]))
+        # 3) build shortest-path tree
         return dis, pre
 
     def testcase(self):
         def test(case):
             for i in range(len(case)):
                 assert (self.main_BellmanFord(case, i) == self.main_dag(case, i)
-                        == self.main_Dijkstra(case, i))
+                        == self.main_Dijkstra_1(case, i) == self.main_Dijkstra_2(case, i))
 
         self._testcase(test, self._gencase())
 
