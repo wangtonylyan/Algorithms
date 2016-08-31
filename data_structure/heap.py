@@ -84,12 +84,12 @@ class Heap(object):
 
     def replace(self, old, new):
         for i in range(len(self.hp)):
-            if self.hp == old:
-                self.hp = new
-                if i > 0:
-                    self._float(i, 0)
-                else:
+            if self.key(self.hp[i]) == self.key(old):
+                self.hp[i] = new
+                if self.cmp(self.key(old), self.key(new)):
                     self._sink(i, len(self.hp))
+                else:
+                    self._float(i, 0)
                 return True
         return False
 
