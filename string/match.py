@@ -110,15 +110,21 @@ class KnuthMorrisPratt(StringMatch):
 
     def _preprocess_jmp_classical(self, pat):
         # jmp[i]是使得pat[0:k]==pat[i+1-k:i+1]的最大k值
-        jmp = [0] * len(pat)  # [0,-1], length
-        for i in range(len(pat) - 1):
-            j = jmp[i]
-            while j > 0 and pat[j] != pat[i + 1]:
-                j = jmp[j - 1]
+        jmp = [0] * len(pat)  # [0,-1], length, but will be used as index
+        i, j = 0, jmp[0]
+        while i < len(pat) - 1:
+            assert (j <= i)
             if pat[j] == pat[i + 1]:
-                jmp[i + 1] = j + 1
+                i += 1
+                j += 1
+                jmp[i] = j
+            elif j == 0:
+                i += 1
+            else:
+                j = jmp[j - 1]
         return jmp
 
+        # 以下构建'jmp'的方式更为直观
         # jmp[i]是使得pat[0:k]==pat[i-k:i]的最大k值
         jmp = [0] * (len(pat) + 1)  # (0,-1], length
         for i in range(1, len(pat)):
@@ -149,7 +155,7 @@ class KnuthMorrisPratt(StringMatch):
                 continue
             elif j == len(pat):
                 ret.append(i)
-            i += j - jmp[j - 1]  # use as index
+            i += j - jmp[j - 1]
             j = jmp[j - 1]
         return ret
 
