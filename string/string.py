@@ -4,8 +4,8 @@ import random
 
 
 class String(object):
-    def __init__(self):
-        self.alphabet = ord('z') + 1  # 256  # number of legal characters by ASCII, [0,255]
+    alphabet = ord('z') - ord('a') + 1  # 256  # number of legal characters by ASCII, [0,255]
+    ord = lambda self, x: ord(x) - ord('a')
 
     def _gencase(self, fixed=False, maxLen=40, each=50, total=100):
         cases = []
@@ -13,11 +13,8 @@ class String(object):
             case = []
             width = random.randint(1, maxLen) if fixed else None
             for _ in range(each):
-                s = ''
                 width = width if fixed else random.randint(1, maxLen)
-                for _ in range(width):
-                    s += chr(random.randint(ord('a'), ord('z')))
-                case.append(s)
+                case.append(''.join([chr(random.randint(ord('a'), ord('z'))) for _ in range(width)]))
             cases.append(case)
         return cases
 
@@ -27,4 +24,10 @@ class String(object):
 
 
 if __name__ == '__main__':
+    cases = String()._gencase()
+    for case in cases:
+        assert (isinstance(case, list) and len(case) > 0)
+        assert (all(isinstance(i, str) and len(i) > 0 for i in case))
+        print case
+    print len(cases)
     print 'done'

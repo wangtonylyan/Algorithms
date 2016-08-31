@@ -23,15 +23,15 @@ class StringSort(String):
             cnt = [0] * (self.alphabet + 2)
             for i in lst:
                 if w < len(i):
-                    cnt[ord(i[w]) + 2] += 1
+                    cnt[self.ord(i[w]) + 2] += 1
                 else:
                     cnt[1] += 1
             for i in range(len(cnt) - 1):
                 cnt[i + 1] += cnt[i]
             for i in lst:
                 if w < len(i):
-                    aux[cnt[ord(i[w]) + 1]] = i
-                    cnt[ord(i[w]) + 1] += 1
+                    aux[cnt[self.ord(i[w]) + 1]] = i
+                    cnt[self.ord(i[w]) + 1] += 1
                 else:
                     aux[cnt[0]] = i
                     cnt[0] += 1
@@ -44,13 +44,13 @@ class StringSort(String):
                 return
             cnt = [0] * (self.alphabet + 2)
             for i in lst[low:high]:
-                cnt[ord(i[wid]) + 2 if wid < len(i) else 1] += 1
+                cnt[self.ord(i[wid]) + 2 if wid < len(i) else 1] += 1
             for i in range(len(cnt) - 1):
                 cnt[i + 1] += cnt[i]
             aux = [None] * (high - low)
             for i in lst[low:high]:
-                aux[cnt[ord(i[wid]) + 1 if wid < len(i) else 0]] = i
-                cnt[ord(i[wid]) + 1 if wid < len(i) else 0] += 1
+                aux[cnt[self.ord(i[wid]) + 1 if wid < len(i) else 0]] = i
+                cnt[self.ord(i[wid]) + 1 if wid < len(i) else 0] += 1
             lst[low:high] = aux
 
             assert (max(map(len, lst[low:low + cnt[0]])) <= wid if cnt[0] > 0 else True)
