@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 # data structure: binary search tree
 
-class BinarySearchTree(object):
-    class Node(object):
+from tree import Tree, TreeTest
+
+
+class BinarySearchTree(Tree):
+    class Node():
         def __init__(self, key, value):
             self.left = None
             self.right = None
@@ -10,80 +13,16 @@ class BinarySearchTree(object):
             self.value = value
 
     def __init__(self):
+        super(BinarySearchTree, self).__init__()
         self.root = None
 
-    def insert(self, key, value):
-        def _recur(bst, key, value):
-            if bst == None:
-                return self.__class__.Node(key, value)
-            if key < bst.key:
-                bst.left = _recur(bst.left, key, value)
-            elif key > bst.key:
-                bst.right = _recur(bst.right, key, value)
-            else:
-                bst.value = value
-            return bst
+    def __len__(self):
+        return self._len(self.root)
 
-        self.root = _recur(self.root, key, value)
-
-    def deleteMax(self):
-        self.root = self._deleteMax(self.root)
-
-    def _deleteMax(self, bst):
-        if bst:
-            if bst.right:
-                it = bst
-                while it.right.right:
-                    it = it.right
-                it.right = it.right.left
-            else:
-                bst = bst.left
-        return bst
-
-    def deleteMin(self):
-        self.root = self._deleteMin(self.root)
-
-    def _deleteMin(self, bst):
-        if bst:
-            if bst.left:
-                it = bst
-                while it.left.left:
-                    it = it.left
-                it.left = it.left.right
-            else:
-                bst = bst.right
-        return bst
-
-    def delete(self, key):
-        def _recur(bst, key):
-            if bst == None:
-                return None
-            if key < bst.key:
-                bst.left = _recur(bst.left, key)
-            elif key > bst.key:
-                bst.right = _recur(bst.right, key)
-            else:  # bst就是需要被删除的节点
-                if bst.left == None:
-                    bst = bst.right
-                elif bst.right == None:
-                    bst = bst.left
-                else:  # 将bst节点替换为其左子树中的最大节点或右子树中的最小节点
-                    if bst.left.right == None:
-                        bst.left.right = bst.right
-                        bst = bst.left
-                    elif bst.right.left == None:
-                        bst.right.left = bst.left
-                        bst = bst.right
-                    else:
-                        it = bst.left
-                        while it.right.right:
-                            it = it.right
-                        bst.key = it.right.key
-                        bst.value = it.right.value
-                        it.right = it.right.left
-            return bst
-
-        self.root = _recur(self.root, key)
+    def _len(self, bst):
+        if bst == None:
+            return 0
+        return self._len(bst.left) + self._len(bst.right) + 1
 
     def search(self, key):
         bst = self._search(self.root, key)
@@ -139,30 +78,100 @@ class BinarySearchTree(object):
 
         return recur(self.root)
 
-    def size(self):
-        return self._size(self.root)
+    def insert(self, key, value):
+        def recur(bst, key, value):
+            if bst == None:
+                return self.__class__.Node(key, value)
+            if key < bst.key:
+                bst.left = recur(bst.left, key, value)
+            elif key > bst.key:
+                bst.right = recur(bst.right, key, value)
+            else:
+                bst.value = value
+            return bst
 
-    def _size(self, bst):
-        if bst == None:
-            return 0
-        return self._size(bst.left) + self._size(bst.right) + 1
+        self.root = recur(self.root, key, value)
+
+    def delete(self, key):
+        def recur(bst, key):
+            if bst == None:
+                return None
+            if key < bst.key:
+                bst.left = recur(bst.left, key)
+            elif key > bst.key:
+                bst.right = recur(bst.right, key)
+            else:
+                if bst.left == None:
+                    bst = bst.right
+                elif bst.right == None:
+                    bst = bst.left
+                else:
+                    if bst.left.right == None:
+                        bst.left.right = bst.right
+                        bst = bst.left
+                    elif bst.right.left == None:
+                        bst.right.left = bst.left
+                        bst = bst.right
+                    else:
+                        it = bst.left
+                        while it.right.right:
+                            it = it.right
+                        bst.key = it.right.key
+                        bst.value = it.right.value
+                        it.right = it.right.left
+            return bst
+
+        self.root = recur(self.root, key)
+
+    def deleteMax(self):
+        self.root = self._deleteMax(self.root)
+
+    def _deleteMax(self, bst):
+        if bst:
+            if bst.right:
+                it = bst
+                while it.right.right:
+                    it = it.right
+                it.right = it.right.left
+            else:
+                bst = bst.left
+        return bst
+
+    def deleteMin(self):
+        self.root = self._deleteMin(self.root)
+
+    def _deleteMin(self, bst):
+        if bst:
+            if bst.left:
+                it = bst
+                while it.left.left:
+                    it = it.left
+                it.left = it.left.right
+            else:
+                bst = bst.right
+        return bst
 
     def clean(self):
         self.root = None
 
     def check(self):
-        def _recur(bst):
-            return self._check(bst, _recur(bst.left), _recur(bst.right)) if bst else None
+        def recur(bst):
+            return self._check(bst, recur(bst.left), recur(bst.right)) if bst else \
+                self._check(None, self._check(None, None, None), self._check(None, None, None))
 
-        _recur(self.root)
+        recur(self.root)
 
     def _check(self, bst, left, right):
-        assert (bst)
+        if bst == None:
+            return 0
         # check symmetric order property
         if bst.left:
             assert (bst.left.key < bst.key)
         if bst.right:
             assert (bst.right.key > bst.key)
+        # check size consistency
+        assert (self._len(bst) == left + right + 1)
+        return left + right + 1
 
 
 class BalancedBinarySearchTree(BinarySearchTree):
@@ -192,89 +201,15 @@ class BalancedBinarySearchTree(BinarySearchTree):
         return bbst
 
     def _balance(self, bbst):
-        pass
+        assert (False)
 
 
-import time, random
-
-
-class BinarySearchTreeTest(object):
-    def __init__(self, clsobj, num, check=False, time=True):
-        assert (issubclass(clsobj, BinarySearchTree))
-        self.tcls = clsobj
-        self.tree = None
-        self.dic = {}
-        assert (0 < num < 100000)
-        for i in range(num):
-            r = random.randint(0, 100000)
-            self.dic[r] = r + 1
-        print "dic's size: ", len(self.dic)
-        self.check = check
-        self.time = time
-        self.start_t = 0
-        self.end_t = 0
-
-    def new(self):
-        self.tree = self.tcls()
-        c = 0
-        if self.time:
-            self.start_t = time.time()
-        for i, j in self.dic.viewitems():
-            self.tree.insert(i, j)
-            if self.check:
-                self.tree.check()
-            assert (self.tree.search(i) == j)
-            c += 1
-            assert (self.tree.size() == c)
-        if self.time:
-            self.end_t = time.time()
-            print 'new:\t\t', self.end_t - self.start_t
-        assert (self.tree.size() == len(self.dic))
-
-    def deleteMaxMin(self):
-        def test(get, delete):
-            c = s = self.tree.size()
-            if self.time:
-                self.start_t = time.time()
-            for i in range(s):
-                m = getattr(self.tree, get)()
-                getattr(self.tree, delete)()
-                if self.check:
-                    self.tree.check()
-                assert (self.tree.search(m.key) == None)
-                c -= 1
-                assert (self.tree.size() == c)
-            if self.time:
-                self.end_t = time.time()
-                print delete + ':\t', self.end_t - self.start_t
-            assert (self.tree.size() == 0)
-
-        self.new()
-        test('getMax', 'deleteMax')
-        self.new()
-        test('getMin', 'deleteMin')
-
-    def delete(self):
-        self.new()
-        c = self.tree.size()
-        if self.time:
-            self.start_t = time.time()
-        for i in self.dic:
-            assert (self.tree.search(i))
-            self.tree.delete(i)
-            if self.check:
-                self.tree.check()
-            assert (self.tree.search(i) == None)
-            c -= 1
-            assert (self.tree.size() == c)
-        if self.time:
-            self.end_t = time.time()
-            print 'delete:\t\t', self.end_t - self.start_t
-        assert (self.tree.size() == 0)
+class BinarySearchTreeTest(TreeTest):
+    def __init__(self, clsobj, num, check=True, time=True):
+        assert (issubclass(clsobj, BinarySearchTree) and num > 0)
+        super(BinarySearchTreeTest, self).__init__(clsobj, num, check, time)
 
 
 if __name__ == '__main__':
-    test = BinarySearchTreeTest(BinarySearchTree, 800, True)
-    test.deleteMaxMin()
-    test.delete()
+    BinarySearchTreeTest(BinarySearchTree, 500).testcase()
     print 'done'

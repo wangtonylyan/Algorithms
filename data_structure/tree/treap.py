@@ -11,10 +11,12 @@
 # 总之，树堆实现简单、效率快、支持多数操作，性价比很高
 # 树堆的设计思想就是：randomized BST是趋向于平衡的
 
-import bst, random
+
+from bst import BalancedBinarySearchTree, BinarySearchTreeTest
+import random
 
 
-class Treap(bst.BalancedBinarySearchTree):
+class Treap(BalancedBinarySearchTree):
     class Node(object):
         def __init__(self, key, value, priority):
             self.left = None
@@ -23,84 +25,104 @@ class Treap(bst.BalancedBinarySearchTree):
             self.value = value
             self.priority = priority
 
-    def __init__(self, total=10000):
+    def __init__(self, total=1000):
         super(Treap, self).__init__()
         self.total = total * 5
-        # 利用该数组来维护priority的唯一性，也有算法在实现上会利用哈希表
-        self.prioritySet = [0 for i in range(self.total)]
+        # 利用该数组来维护priority的唯一性，有的实现也会利用哈希表
+        self.prioritySet = [0] * self.total
 
-    def _balance(self, tp):
-        assert (tp)
-        if tp.left and tp.left.priority < tp.priority:
-            tp = self._rotateRight(tp)
-        elif tp.right and tp.right.priority < tp.priority:
-            tp = self._rotateLeft(tp)
-        return tp
+    def _balance(self, trp):
+        assert (trp)
+        # binary search tree + minimum heap
+        if trp.left and trp.left.priority < trp.priority:
+            trp = self._rotateRight(trp)
+        elif trp.right and trp.right.priority < trp.priority:
+            trp = self._rotateLeft(trp)
+        return trp
 
     def insert(self, key, value):
-        def _recur(tp, key, value):
-            if tp == None:
-                priority = random.randint(0, self.total)
+        def recur(trp, key, value):
+            if trp == None:
+                priority = random.randint(0, self.total - 1)
                 while self.prioritySet[priority]:
                     # 不能直接搜索prioritySet数组，并使用下一个未被标识的数
                     # 因为这样不够随机
-                    priority = random.randint(0, self.total)
+                    priority = random.randint(0, self.total - 1)
                 self.prioritySet[priority] = 1
                 return self.__class__.Node(key, value, priority)  # insertion
-            if key < tp.key:
-                tp.left = _recur(tp.left, key, value)
-                tp = self._balance(tp)
-            elif key > tp.key:
-                tp.right = _recur(tp.right, key, value)
-                tp = self._balance(tp)
+            if key < trp.key:
+                trp.left = recur(trp.left, key, value)
+                trp = self._balance(trp)
+            elif key > trp.key:
+                trp.right = recur(trp.right, key, value)
+                trp = self._balance(trp)
             else:
-                tp.value = value
-            return tp
+                trp.value = value
+            return trp
 
-        self.root = _recur(self.root, key, value)
+        self.root = recur(self.root, key, value)
 
-    # 删除操作只需在top-down阶段不断地将目标节点进行旋转
-    # 直至其成为叶子节点，并删除即可
+    # 删除操作只需在top-down阶段不断地将目标节点进行旋转，直至其成为叶子节点，再直接删除即可
     def delete(self, key):
-        def _recur(tp, key):
-            if tp == None:
-                return tp  # deletion failed
-            if key < tp.key:
-                tp.left = _recur(tp.left, key)
-            elif key > tp.key:
-                tp.right = _recur(tp.right, key)
+        def recur(trp, key):
+            if trp == None:
+                return trp  # deletion fails
+            if key < trp.key:
+                trp.left = recur(trp.left, key)
+            elif key > trp.key:
+                trp.right = recur(trp.right, key)
             else:
-                if tp.left == None and tp.right == None:
-                    self.prioritySet[tp.priority] = 0
-                    return None  # deletion
-                elif tp.left == None:
-                    tp = self._rotateLeft(tp)
-                    tp.left = _recur(tp.left, key)
-                elif tp.right == None:
-                    tp = self._rotateRight(tp)
-                    tp.right = _recur(tp.right, key)
-                elif tp.left.priority < tp.right.priority:  # 维护最小堆的性质
-                    tp = self._rotateRight(tp)
-                    tp.right = _recur(tp.right, key)
+                if trp.left == None and trp.right == None:
+                    self.prioritySet[trp.priority] = 0
+                    trp = None  # deletion
+                elif trp.left == None:
+                    trp = self._rotateLeft(trp)
+                    trp.left = recur(trp.left, key)
+                elif trp.right == None:
+                    trp = self._rotateRight(trp)
+                    trp.right = recur(trp.right, key)
+                elif trp.left.priority < trp.right.priority:
+                    trp = self._rotateRight(trp)
+                    trp.right = recur(trp.right, key)
                 else:
-                    assert (tp.left.priority > tp.right.priority)
-                    tp = self._rotateLeft(tp)
-                    tp.left = _recur(tp.left, key)
-            return tp
+                    assert (trp.left.priority > trp.right.priority)
+                    trp = self._rotateLeft(trp)
+                    trp.left = recur(trp.left, key)
+            return trp
 
-        self.root = _recur(self.root, key)
+        self.root = recur(self.root, key)
 
-    def _check(self, tp, left, right):
-        super(Treap, self)._check(tp, left, right)
-        # check heap order property
-        if tp.left:
-            assert (tp.priority < tp.left.priority)
-        if tp.right:
-            assert (tp.priority < tp.right.priority)
+    def deleteMax(self):
+        # self.delete(self.getMax().key) # @premise: self.delete() doesn't rely on self.deleteMax/Min()
+        m = self.getMax()
+        super(Treap, self).deleteMax()
+        self.prioritySet[m.priority] = 0
+
+    def deleteMin(self):
+        # self.delete(self.getMin().key)
+        m = self.getMin()
+        super(Treap, self).deleteMin()
+        self.prioritySet[m.priority] = 0
+
+    def clean(self):
+        super(Treap, self).clean()
+        assert (len(self.prioritySet) == self.total)
+        self.prioritySet = [0] * self.total
+
+    def _check(self, trp, left, right):
+        if trp:
+            # check heap order property
+            if trp.left:
+                assert (trp.priority < trp.left.priority)
+            if trp.right:
+                assert (trp.priority < trp.right.priority)
+            if trp == self.root:
+                assert (left + right + 1 == sum(self.prioritySet))
+            else:
+                assert (left + right + 1 < sum(self.prioritySet))
+        return super(Treap, self)._check(trp, left, right)
 
 
 if __name__ == '__main__':
-    test = bst.BinarySearchTreeTest(Treap, 1000, True)
-    test.deleteMaxMin()
-    test.delete()
+    BinarySearchTreeTest(Treap, 500).testcase()
     print 'done'

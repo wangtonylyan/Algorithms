@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # data structure: red-black tree
-# 红黑树属于2-3树的一种变种
+# 红黑树属于2-3(-4)树的一种变种
 
-import bst
+from bst import BalancedBinarySearchTree, BinarySearchTreeTest
 
 
-class RedBlackTree(bst.BalancedBinarySearchTree):
-    class Node(object):
+class RedBlackTree(BalancedBinarySearchTree):
+    class Node():
         def __init__(self, key, value):
             self.left = None
             self.right = None
@@ -75,23 +75,23 @@ class RedBlackTree(bst.BalancedBinarySearchTree):
 
     def insert(self, key, value):
         # @invariant: rbt subtree is a red-black tree
-        def _recur(rbt, key, value):
+        def recur(rbt, key, value):
             if rbt == None:  # termination of recursion
                 return self.__class__.Node(key, value)  # insertion
             # step1) top-down
             pass  # naturally no 4-node
             # step2) recursion: traverse
             if key < rbt.key:
-                rbt.left = _recur(rbt.left, key, value)
+                rbt.left = recur(rbt.left, key, value)
             elif key > rbt.key:
-                rbt.right = _recur(rbt.right, key, value)
+                rbt.right = recur(rbt.right, key, value)
             else:
                 rbt.value = value  # override
             # step3) bottom-up: re-balance in order to maintain invariant
             rbt = self._balance(rbt)
             return rbt
 
-        self.root = _recur(self.root, key, value)
+        self.root = recur(self.root, key, value)
         if self.root.color:
             assert (not (self.root.left and self.root.left.color and self.root.right and self.root.right.color))
             self.root.color = False
@@ -165,45 +165,8 @@ class RedBlackTree(bst.BalancedBinarySearchTree):
                 assert (not (self.root.left and self.root.left.color and self.root.right and self.root.right.color))
                 self.root.color = False
 
-    def deleteMax(self):
-        self._deletePattern(self._deleteMax)
-
-    def deleteMin(self):
-        self._deletePattern(self._deleteMin)
-
     def delete(self, key):
         self._deletePattern(self._delete, key)
-
-    # @premise: rbt node is a 3-node
-    # @invariant: rbt subtree is a relaxed red-black tree
-    def _deleteMax(self, rbt):
-        assert (rbt)
-        assert (rbt.color or (rbt.left and rbt.left.color) or (rbt.right and rbt.right.color))
-        if rbt.right:
-            # step1) top-down
-            rbt = self._makeRightRed(rbt)
-            # step2) recursion
-            rbt.right = self._deleteMax(rbt.right)
-            # step3) bottom-up
-            rbt = self._balance(rbt)
-        else:
-            if rbt.left:
-                rbt.left.color = rbt.color
-            rbt = rbt.left
-        return rbt
-
-    def _deleteMin(self, rbt):
-        assert (rbt)
-        assert (rbt.color or (rbt.left and rbt.left.color) or (rbt.right and rbt.right.color))
-        if rbt.left:
-            rbt = self._makeLeftRed(rbt)
-            rbt.left = self._deleteMin(rbt.left)
-            rbt = self._balance(rbt)
-        else:
-            if rbt.right:
-                rbt.right.color = rbt.color
-            rbt = rbt.right
-        return rbt
 
     def _delete(self, rbt, key):
         if rbt == None:  # termination of recursion
@@ -245,12 +208,52 @@ class RedBlackTree(bst.BalancedBinarySearchTree):
                 rbt = None  # deletion
         return rbt
 
+    def deleteMax(self):
+        self._deletePattern(self._deleteMax)
+
+    # @premise: rbt node is a 3-node
+    # @invariant: rbt subtree is a relaxed red-black tree
+    def _deleteMax(self, rbt):
+        assert (rbt)
+        assert (rbt.color or (rbt.left and rbt.left.color) or (rbt.right and rbt.right.color))
+        if rbt.right:
+            # step1) top-down
+            rbt = self._makeRightRed(rbt)
+            # step2) recursion
+            rbt.right = self._deleteMax(rbt.right)
+            # step3) bottom-up
+            rbt = self._balance(rbt)
+        else:
+            if rbt.left:
+                rbt.left.color = rbt.color
+            rbt = rbt.left
+        return rbt
+
+    def deleteMin(self):
+        self._deletePattern(self._deleteMin)
+
+    def _deleteMin(self, rbt):
+        assert (rbt)
+        assert (rbt.color or (rbt.left and rbt.left.color) or (rbt.right and rbt.right.color))
+        if rbt.left:
+            rbt = self._makeLeftRed(rbt)
+            rbt.left = self._deleteMin(rbt.left)
+            rbt = self._balance(rbt)
+        else:
+            if rbt.right:
+                rbt.right.color = rbt.color
+            rbt = rbt.right
+        return rbt
+
     # ------------------------------------------------------------------------------------
 
     def _check(self, rbt, left, right):
-        super(RedBlackTree, self)._check(rbt, left, right)
-        left = 0 if left == None else left
-        right = 0 if right == None else right
+        if rbt == None:
+            return 0
+        if rbt.left:
+            assert (rbt.left.key < rbt.key)
+        if rbt.right:
+            assert (rbt.right.key > rbt.key)
         assert (left == right)  # left and right subtree hold the same black-height
         assert (not (rbt.left and rbt.left.color and rbt.right and rbt.right.color))
         if rbt == self.root:
@@ -258,11 +261,9 @@ class RedBlackTree(bst.BalancedBinarySearchTree):
         if rbt.color:
             assert (not (rbt.left and rbt.left.color) and not (rbt.right and rbt.right.color))
             return left
-        return left + 1
+        return left + 1  # returns black-height
 
 
 if __name__ == '__main__':
-    test = bst.BinarySearchTreeTest(RedBlackTree, 1000, True)
-    test.deleteMaxMin()
-    test.delete()
+    BinarySearchTreeTest(RedBlackTree, 500).testcase()
     print 'done'
