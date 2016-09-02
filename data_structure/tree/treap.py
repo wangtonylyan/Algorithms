@@ -17,7 +17,7 @@ import random
 
 
 class Treap(BalancedBinarySearchTree):
-    class Node(object):
+    class Node():
         def __init__(self, key, value, priority):
             self.left = None
             self.right = None

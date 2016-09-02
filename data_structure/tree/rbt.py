@@ -78,16 +78,16 @@ class RedBlackTree(BalancedBinarySearchTree):
         def recur(rbt, key, value):
             if rbt == None:  # termination of recursion
                 return self.__class__.Node(key, value)  # insertion
-            # step1) top-down
+            # 1) top-down
             pass  # naturally no 4-node
-            # step2) recursion: traverse
+            # 2) recursion: traverse
             if key < rbt.key:
                 rbt.left = recur(rbt.left, key, value)
             elif key > rbt.key:
                 rbt.right = recur(rbt.right, key, value)
             else:
                 rbt.value = value  # override
-            # step3) bottom-up: re-balance in order to maintain invariant
+            # 3) bottom-up: re-balance in order to maintain invariant
             rbt = self._balance(rbt)
             return rbt
 
@@ -173,11 +173,11 @@ class RedBlackTree(BalancedBinarySearchTree):
             return rbt  # deletion failed
         assert (rbt.color or (rbt.left and rbt.left.color) or (rbt.right and rbt.right.color))
         if key < rbt.key:
-            # step1) top-down
+            # 1) top-down
             rbt = self._makeLeftRed(rbt)
-            # step2) recursion
+            # 2) recursion
             rbt.left = self._delete(rbt.left, key)
-            # step3) bottom-up
+            # 3) bottom-up
             rbt = self._balance(rbt)
         elif key > rbt.key:
             rbt = self._makeRightRed(rbt)
@@ -187,9 +187,9 @@ class RedBlackTree(BalancedBinarySearchTree):
             # 用左子树中的最大点还是右子树中的最小点来替换要被删除的目标点：_deleteMax(rbt.left) vs. _deleteMin(rbt.right)
             # 两种策略的实现方式是完全对称的，但对于LLRB树而言，由于其左倾的特性，选择后者效率会更高
             if rbt.right:
-                # step1) top-down
+                # 1) top-down
                 rbt = self._makeRightRed(rbt)
-                # step2) deletion or traversal
+                # 2) deletion or traversal
                 if rbt.key != key:  # if rbt node is no longer the one before _makeRightRed
                     rbt.right = self._delete(rbt.right, key)  # go on traverse
                 else:
@@ -198,7 +198,7 @@ class RedBlackTree(BalancedBinarySearchTree):
                     assert (not self._search(rbt.right, m.key))
                     rbt.key = m.key
                     rbt.value = m.value
-                # step3) bottom-up
+                # 3) bottom-up
                 rbt = self._balance(rbt)
             elif rbt.left:
                 rbt.left.color = rbt.color
@@ -217,11 +217,11 @@ class RedBlackTree(BalancedBinarySearchTree):
         assert (rbt)
         assert (rbt.color or (rbt.left and rbt.left.color) or (rbt.right and rbt.right.color))
         if rbt.right:
-            # step1) top-down
+            # 1) top-down
             rbt = self._makeRightRed(rbt)
-            # step2) recursion
+            # 2) recursion
             rbt.right = self._deleteMax(rbt.right)
-            # step3) bottom-up
+            # 3) bottom-up
             rbt = self._balance(rbt)
         else:
             if rbt.left:
@@ -247,6 +247,7 @@ class RedBlackTree(BalancedBinarySearchTree):
 
     # ------------------------------------------------------------------------------------
 
+    # @return: black-height
     def _check(self, rbt, left, right):
         if rbt == None:
             return 0
@@ -261,7 +262,7 @@ class RedBlackTree(BalancedBinarySearchTree):
         if rbt.color:
             assert (not (rbt.left and rbt.left.color) and not (rbt.right and rbt.right.color))
             return left
-        return left + 1  # returns black-height
+        return left + 1
 
 
 if __name__ == '__main__':

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-# data structure: trie search tree (aka. digital tree)
+# data structure: trie tree (aka. digital tree, prefix tree, or radix tree)
+# 字典树，典型的"空间换时间"的设计，多适用于字符串相关问题
 # The term "trie" comes from retrieval, which is sometimes pronounced "try" to avoid confusion with "tree".
 
 
@@ -7,15 +8,15 @@ from tree import Tree, TreeTest
 from string.string import String
 
 
-class TrieSearchTree(Tree, String):
+class TrieTree(Tree, String):
     class Node():
         def __init__(self):
             # 'key' is a character as the index of 'self.next' array
-            self.next = [None] * TrieSearchTree.alphabet
+            self.next = [None] * TrieTree.alphabet
             self.value = None  # initialized as a void node
 
     def __init__(self):
-        super(TrieSearchTree, self).__init__()
+        super(TrieTree, self).__init__()
         self.root = None
 
     def __len__(self):
@@ -32,7 +33,9 @@ class TrieSearchTree(Tree, String):
             if trie == None:
                 break
             trie = trie.next[self.ord(c)]
-        return trie.value if trie else None
+        if trie == None or trie.value == None:  # 这两个条件都表示该字符串不存在
+            return None
+        return trie.value
 
     def insert(self, key, value):
         assert (len(key) > 0 and value != None)
@@ -44,6 +47,7 @@ class TrieSearchTree(Tree, String):
                 trie.next[self.ord(c)] = self.__class__.Node()
             trie = trie.next[self.ord(c)]
         trie.value = value
+        assert (self.root.value == None)
         return
 
     def delete(self, key):
@@ -80,12 +84,13 @@ class TrieSearchTree(Tree, String):
             return cnt
 
         assert (recur(self.root) == len(self))
+        assert (self.root == None or self.root.value == None)
 
 
-class TrieSearchTreeTest(TreeTest, String):
+class TrieTreeTest(TreeTest, String):
     def __init__(self, num):
         assert (num > 0)
-        TreeTest.__init__(self, TrieSearchTree, 0, True, True)
+        TreeTest.__init__(self, TrieTree, 0, True, True)
         self.tree = None
         self.dic = {}
         cases = self._gencase(each=1, total=num)
@@ -102,5 +107,5 @@ class TrieSearchTreeTest(TreeTest, String):
 
 
 if __name__ == '__main__':
-    TrieSearchTreeTest(200).testcase()
+    TrieTreeTest(200).testcase()
     print 'done'
