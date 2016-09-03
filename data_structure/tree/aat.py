@@ -42,19 +42,19 @@ class AATree(BalancedBinarySearchTree):
 
     def _balance(self, aat):
         # scenarios after insertion in one subtree:
-        #       a        a
-        #      / \        \
-        # (1) b   c   (2)  b
-        #                   \
-        #                    c
+        #          a             a
+        #         / \             \
+        # [left] b   c   [right]   b
+        #                           \
+        #                            c
         # scenarios after deletion in one subtree:
-        #     a             a
-        #      \           /
-        # (1)   b     (2) b
-        #      / \         \
-        #     c   d         c
-        #      \   \
-        #       e   f
+        #        a                 a
+        #         \               /
+        # [left]   b     [right] b
+        #         / \             \
+        #        c   d             c
+        #         \   \
+        #          e   f
         assert (aat)
         # 1) decrease 'aat' level as much as possible
         # actually it only matters during deletion in case that one subtree is lower

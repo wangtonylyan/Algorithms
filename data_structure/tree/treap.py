@@ -71,7 +71,7 @@ class Treap(BalancedBinarySearchTree):
                 trp.left = recur(trp.left, key)
             elif key > trp.key:
                 trp.right = recur(trp.right, key)
-            else:
+            else:  # == Heap.sink
                 if trp.left == None and trp.right == None:
                     self.prioritySet[trp.priority] = 0
                     trp = None  # deletion
@@ -81,13 +81,14 @@ class Treap(BalancedBinarySearchTree):
                 elif trp.right == None:
                     trp = self._rotateRight(trp)
                     trp.right = recur(trp.right, key)
-                elif trp.left.priority < trp.right.priority:
-                    trp = self._rotateRight(trp)
-                    trp.right = recur(trp.right, key)
                 else:
-                    assert (trp.left.priority > trp.right.priority)
-                    trp = self._rotateLeft(trp)
-                    trp.left = recur(trp.left, key)
+                    if trp.left.priority < trp.right.priority:
+                        trp = self._rotateRight(trp)
+                        trp.right = recur(trp.right, key)
+                    else:
+                        assert (trp.left.priority > trp.right.priority)
+                        trp = self._rotateLeft(trp)
+                        trp.left = recur(trp.left, key)
             return trp
 
         self.root = recur(self.root, key)
