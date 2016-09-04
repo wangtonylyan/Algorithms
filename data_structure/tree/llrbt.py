@@ -139,5 +139,5 @@ class LeftLeaningRedBlackTree(RedBlackTree):
 
 
 if __name__ == '__main__':
-    BinarySearchTreeTest(LeftLeaningRedBlackTree, 500).testcase()
+    BinarySearchTreeTest(LeftLeaningRedBlackTree, 1000).testcase()
     print 'done'

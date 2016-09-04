@@ -7,7 +7,9 @@ from bst import BalancedBinarySearchTree, BinarySearchTreeTest
 
 
 class AATree(BalancedBinarySearchTree):
-    class Node():
+    class Node(object):
+        __slots__ = ['left', 'right', 'key', 'value', 'level']
+
         def __init__(self, key, value):
             self.left = None
             self.right = None
@@ -159,5 +161,5 @@ class AATree(BalancedBinarySearchTree):
 
 
 if __name__ == '__main__':
-    BinarySearchTreeTest(AATree, 500).testcase()
+    BinarySearchTreeTest(AATree, 1000).testcase()
     print 'done'

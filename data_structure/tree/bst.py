@@ -5,7 +5,9 @@ from tree import Tree, TreeTest
 
 
 class BinarySearchTree(Tree):
-    class Node():
+    class Node(object):
+        __slots__ = ['left', 'right', 'key', 'value']
+
         def __init__(self, key, value):
             self.left = None
             self.right = None
@@ -211,5 +213,5 @@ class BinarySearchTreeTest(TreeTest):
 
 
 if __name__ == '__main__':
-    BinarySearchTreeTest(BinarySearchTree, 500).testcase()
+    BinarySearchTreeTest(BinarySearchTree, 1000).testcase()
     print 'done'

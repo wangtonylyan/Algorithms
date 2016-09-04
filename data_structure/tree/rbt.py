@@ -6,7 +6,9 @@ from bst import BalancedBinarySearchTree, BinarySearchTreeTest
 
 
 class RedBlackTree(BalancedBinarySearchTree):
-    class Node():
+    class Node(object):
+        __slots__ = ['left', 'right', 'key', 'value', 'color']
+
         def __init__(self, key, value):
             self.left = None
             self.right = None
@@ -266,5 +268,5 @@ class RedBlackTree(BalancedBinarySearchTree):
 
 
 if __name__ == '__main__':
-    BinarySearchTreeTest(RedBlackTree, 500).testcase()
+    BinarySearchTreeTest(RedBlackTree, 1000).testcase()
     print 'done'

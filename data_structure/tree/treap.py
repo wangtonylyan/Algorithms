@@ -17,7 +17,9 @@ import random
 
 
 class Treap(BalancedBinarySearchTree):
-    class Node():
+    class Node(object):
+        __slots__ = ['left', 'right', 'key', 'value', 'priority']
+
         def __init__(self, key, value, priority):
             self.left = None
             self.right = None
@@ -27,7 +29,7 @@ class Treap(BalancedBinarySearchTree):
 
     def __init__(self, total=1000):
         super(Treap, self).__init__()
-        self.total = total * 5
+        self.total = total * 10
         # 利用该数组来维护priority的唯一性，有的实现也会利用哈希表
         self.prioritySet = [0] * self.total
 

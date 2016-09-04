@@ -9,7 +9,9 @@ from string.string import String
 
 
 class TrieTree(Tree, String):
-    class Node():
+    class Node(object):
+        __slots__ = ['next', 'value']
+
         def __init__(self):
             # 'key' is a character as the index of 'self.next' array
             self.next = [None] * TrieTree.alphabet
@@ -107,5 +109,5 @@ class TrieTreeTest(TreeTest, String):
 
 
 if __name__ == '__main__':
-    TrieTreeTest(200).testcase()
+    TrieTreeTest(500).testcase()
     print 'done'

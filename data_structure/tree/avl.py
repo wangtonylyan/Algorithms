@@ -5,7 +5,9 @@ from bst import BalancedBinarySearchTree, BinarySearchTreeTest
 
 
 class AVLTree(BalancedBinarySearchTree):
-    class Node():
+    class Node(object):
+        __slots__ = ['left', 'right', 'key', 'value', 'factor']
+
         def __init__(self, key, value):
             self.left = None
             self.right = None
