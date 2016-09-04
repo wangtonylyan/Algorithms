@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
-
-import time, random
+import time, random, platform
 
 
 # interface
@@ -41,7 +40,7 @@ class Tree(object):
 
 
 class TreeTest(object):
-    def __init__(self, clsobj, num, check, time):
+    def __init__(self, clsobj, num, check, timer):
         super(TreeTest, self).__init__()
         assert (issubclass(clsobj, Tree))
         self.tcls = clsobj
@@ -53,20 +52,26 @@ class TreeTest(object):
                 self.dic[r] = r + 1
             print "sample size:\t", len(self.dic)
         self.check = check
-        self.time = time
+        if timer:
+            if platform.system() == 'Windows':
+                self.timer = time.clock
+            else:
+                self.timer = time.time
+        else:
+            self.timer = None
 
     def insert(self):
         print '-' * 50
         tree = self.tcls()
-        cost = 0
+        cost = 0.0
         cnt = 0
         for i, j in self.dic.viewitems():
-            if self.time:
-                start_t = time.time()
+            if callable(self.timer):
+                start_t = self.timer()
             tree.insert(i, j)
-            if self.time:
-                end_t = time.time()
-                cost += end_t - start_t
+            if callable(self.timer):
+                end_t = self.timer()
+                cost += (end_t - start_t) * 1000
             if self.check:
                 tree.check()
             assert (tree.search(i) == j)
@@ -79,16 +84,16 @@ class TreeTest(object):
     def deleteMaxMin(self):
         def test(tree, getFunc, delFunc):
             print '-' * 50
-            cost = 0
+            cost = 0.0
             cnt = len(tree)
             while cnt > 0:
                 m = getFunc()
-                if self.time:
-                    start_t = time.time()
+                if callable(self.timer):
+                    start_t = self.timer()
                 delFunc()
-                if self.time:
-                    end_t = time.time()
-                    cost += end_t - start_t
+                if callable(self.timer):
+                    end_t = self.timer()
+                    cost += (end_t - start_t) * 1000
                 if self.check:
                     tree.check()
                 assert (tree.search(m.key) == None)
@@ -105,15 +110,15 @@ class TreeTest(object):
     def delete(self):
         tree = self.insert()
         print '-' * 50
-        cost = 0
+        cost = 0.0
         cnt = len(tree)
         for i, j in self.dic.viewitems():
-            if self.time:
-                start_t = time.time()
+            if callable(self.timer):
+                start_t = self.timer()
             tree.delete(i)
-            if self.time:
-                end_t = time.time()
-                cost += end_t - start_t
+            if callable(self.timer):
+                end_t = self.timer()
+                cost += (end_t - start_t) * 1000
             if self.check:
                 tree.check()
             assert (tree.search(i) == None)

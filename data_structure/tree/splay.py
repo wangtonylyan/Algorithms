@@ -8,11 +8,14 @@
 # 例如需要删除某个区间(a,b)内所有节点，区间树就很难完成，但对于伸展树而言就很简单
 # 将a结点splay至根，将b结点伸展至根的右节点，最后再将b节点的左子树整体删除即可
 
-import bst
+
+from bst import BalancedBinarySearchTree, BinarySearchTreeTest
 
 
-class SplayTree(bst.BalancedBinarySearchTree):
+class SplayTree(BalancedBinarySearchTree):
     class Node(object):
+        __slots__ = ['left', 'right', 'parent', 'key', 'value']
+
         def __init__(self, key, value, parent):
             self.left = None
             self.right = None
@@ -220,7 +223,7 @@ class SplayTree(bst.BalancedBinarySearchTree):
 
 
 if __name__ == '__main__':
-    test = bst.BinarySearchTreeTest(SplayTree, 800, True)
+    test = BinarySearchTreeTest(SplayTree, 800)
     test.deleteMaxMin()
     test.delete()
     print 'done'
