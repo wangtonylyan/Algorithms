@@ -29,7 +29,7 @@ class Treap(BalancedBinarySearchTree):
 
     def __init__(self, total=1000):
         super(Treap, self).__init__()
-        self.total = total * 10
+        self.total = total * 5
         # 利用该数组来维护priority的唯一性，有的实现也会利用哈希表
         self.prioritySet = [0] * self.total
 
@@ -121,11 +121,9 @@ class Treap(BalancedBinarySearchTree):
                 assert (trp.priority < trp.right.priority)
             if trp == self.root:
                 assert (left + right + 1 == sum(self.prioritySet))
-            else:
-                assert (left + right + 1 < sum(self.prioritySet))
         return super(Treap, self)._check(trp, left, right)
 
 
 if __name__ == '__main__':
-    BinarySearchTreeTest(Treap, 500).testcase()
+    BinarySearchTreeTest(Treap, 1000).testcase()
     print 'done'

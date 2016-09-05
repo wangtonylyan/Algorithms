@@ -172,7 +172,8 @@ class BinarySearchTree(Tree):
         if bst.right:
             assert (bst.right.key > bst.key)
         # check size consistency
-        assert (self._len(bst) == left + right + 1)
+        if bst == self.root:
+            assert (self._len(bst) == left + right + 1)
         return left + right + 1
 
 
