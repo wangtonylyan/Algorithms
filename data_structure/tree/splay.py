@@ -19,8 +19,7 @@ class SplayTree(BalancedBinarySearchTree):
         def __init__(self, key, value, parent):
             self.left = None
             self.right = None
-            # 该父节点指针简化了平衡算法的表达
-            # 但对于其自身的维护也增加了额外的复杂度
+            # 使用该指针简化了平衡算法的表达，但对于其自身的维护也增加了些许额外的复杂度
             self.parent = parent
             self.key = key
             self.value = value
@@ -213,17 +212,16 @@ class SplayTree(BalancedBinarySearchTree):
                 self.root = None
 
     def _check(self, spt, left, right):
-        super(SplayTree, self)._check(spt, left, right)
-        if spt.left:
-            assert (spt.left.parent == spt)
-        if spt.right:
-            assert (spt.right.parent == spt)
-        if spt == self.root:
-            assert (not spt.parent)
+        if spt:
+            if spt.left:
+                assert (spt.left.parent == spt)
+            if spt.right:
+                assert (spt.right.parent == spt)
+            if spt == self.root:
+                assert (not spt.parent)
+        return super(SplayTree, self)._check(spt, left, right)
 
 
 if __name__ == '__main__':
-    test = BinarySearchTreeTest(SplayTree, 800)
-    test.deleteMaxMin()
-    test.delete()
+    BinarySearchTreeTest(SplayTree, 1000).testcase()
     print 'done'
