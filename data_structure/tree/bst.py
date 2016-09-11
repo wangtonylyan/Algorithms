@@ -5,14 +5,13 @@ from tree import Tree, TreeTest
 
 
 class BinarySearchTree(Tree):
-    class Node(object):
-        __slots__ = ['left', 'right', 'key', 'value']
+    class Node(Tree.Node):
+        __slots__ = ['left', 'right']
 
         def __init__(self, key, value):
+            super(BinarySearchTree.Node, self).__init__(key, value)
             self.left = None
             self.right = None
-            self.key = key
-            self.value = value
 
     def __init__(self):
         super(BinarySearchTree, self).__init__()

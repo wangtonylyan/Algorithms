@@ -5,6 +5,13 @@ import time, random, platform
 
 # interface
 class Tree(object):
+    class Node(object):
+        __slots__ = ['key', 'value']
+
+        def __init__(self, key, value):
+            self.key = key
+            self.value = value
+
     def __init__(self):
         super(Tree, self).__init__()
 

@@ -9,13 +9,10 @@ from string.string import String
 
 
 class TrieTree(Tree, String):
-    class Node(object):
-        __slots__ = ['next', 'value']
-
-        def __init__(self):
-            # 'key' is a character as the index of 'self.next' array
-            self.next = [None] * TrieTree.alphabet
-            self.value = None  # initialized as a void node
+    class Node(Tree.Node):
+        def __init__(self):  # initialized as a void node
+            # key is a character as the index of 'self.key' array
+            super(TrieTree.Node, self).__init__([None] * TrieTree.alphabet, None)
 
     def __init__(self):
         super(TrieTree, self).__init__()
@@ -25,7 +22,7 @@ class TrieTree(Tree, String):
         def recur(trie):
             if trie == None:
                 return 0
-            return sum(recur(t) if t else 0 for t in trie.next) + (1 if trie.value else 0)
+            return sum(recur(t) if t else 0 for t in trie.key) + (1 if trie.value else 0)
 
         return recur(self.root)
 
@@ -34,7 +31,7 @@ class TrieTree(Tree, String):
         for c in key:
             if trie == None:
                 break
-            trie = trie.next[self.ord(c)]
+            trie = trie.key[self.ord(c)]
         if trie == None or trie.value == None:  # 这两个条件都表示该字符串不存在
             return None
         return trie.value
@@ -45,9 +42,9 @@ class TrieTree(Tree, String):
             self.root = self.__class__.Node()
         trie = self.root
         for c in key:
-            if trie.next[self.ord(c)] == None:
-                trie.next[self.ord(c)] = self.__class__.Node()
-            trie = trie.next[self.ord(c)]
+            if trie.key[self.ord(c)] == None:
+                trie.key[self.ord(c)] = self.__class__.Node()
+            trie = trie.key[self.ord(c)]
         trie.value = value
         assert (self.root.value == None)
         return
@@ -60,8 +57,8 @@ class TrieTree(Tree, String):
                 assert (trie.value != None)
                 trie.value = None  # find it
             else:
-                trie.next[self.ord(key[ind])] = recur(trie.next[self.ord(key[ind])], ind + 1)
-            if trie.value == None and all(i == None for i in trie.next):
+                trie.key[self.ord(key[ind])] = recur(trie.key[self.ord(key[ind])], ind + 1)
+            if trie.value == None and all(i == None for i in trie.key):
                 return None  # delete the 'trie' subtree
             return trie
 
@@ -73,7 +70,7 @@ class TrieTree(Tree, String):
                 return 0
             cnt = 0
             flg = True
-            for t in trie.next:
+            for t in trie.key:
                 if t != None:
                     assert (isinstance(t, self.__class__.Node))
                     cnt += recur(t)

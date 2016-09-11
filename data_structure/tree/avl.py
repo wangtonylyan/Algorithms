@@ -5,14 +5,11 @@ from bst import BalancedBinarySearchTree, BinarySearchTreeTest
 
 
 class AVLTree(BalancedBinarySearchTree):
-    class Node(object):
-        __slots__ = ['left', 'right', 'key', 'value', 'factor']
+    class Node(BalancedBinarySearchTree.Node):
+        __slots__ = ['factor']
 
         def __init__(self, key, value):
-            self.left = None
-            self.right = None
-            self.key = key
-            self.value = value
+            super(AVLTree.Node, self).__init__(key, value)
             self.factor = 0
 
     def __init__(self):

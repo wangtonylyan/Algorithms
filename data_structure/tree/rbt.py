@@ -6,14 +6,11 @@ from bst import BalancedBinarySearchTree, BinarySearchTreeTest
 
 
 class RedBlackTree(BalancedBinarySearchTree):
-    class Node(object):
-        __slots__ = ['left', 'right', 'key', 'value', 'color']
+    class Node(BalancedBinarySearchTree.Node):
+        __slots__ = ['color']
 
         def __init__(self, key, value):
-            self.left = None
-            self.right = None
-            self.key = key
-            self.value = value
+            super(RedBlackTree.Node, self).__init__(key, value)
             # default color of a new leaf node is red
             self.color = True  # True if red else False (black)
 

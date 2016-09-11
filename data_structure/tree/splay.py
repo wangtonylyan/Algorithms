@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # data structure: splay tree
-# 伸展树的核心是围绕splay操作
+# 伸展树只是一种self-adjusting树，其核心是splay操作
 # Splay operation does rotations along the access path
 # and moves the target node all the way up to the root,
 # which still preserves the symmetric order of the whole tree.
@@ -9,56 +9,19 @@
 # 将a结点splay至根，将b结点伸展至根的右节点，最后再将b节点的左子树整体删除即可
 
 
-from bst import BalancedBinarySearchTree, BinarySearchTreeTest
+from bst import BinarySearchTree, BinarySearchTreeTest
 
 
-class SplayTree(BalancedBinarySearchTree):
-    class Node(object):
-        __slots__ = ['left', 'right', 'parent', 'key', 'value']
+class SplayTree(BinarySearchTree):
+    class Node(BinarySearchTree.Node):
+        __slots__ = ['parent']
 
         def __init__(self, key, value, parent):
-            self.left = None
-            self.right = None
-            # 使用该指针简化了平衡算法的表达，但对于其自身的维护也增加了些许额外的复杂度
+            super(SplayTree.Node, self).__init__(key, value)
             self.parent = parent
-            self.key = key
-            self.value = value
 
     def __init__(self):
         super(SplayTree, self).__init__()
-
-    def _rotateLeft(self, spt):
-        assert (spt and spt.right)
-        spt = super(SplayTree, self)._rotateLeft(spt)
-        # 以下需要额外地维护父节点指针
-        assert (spt.left)
-        if spt.left.right:
-            spt.left.right.parent = spt.left
-        spt.parent = spt.left.parent
-        spt.left.parent = spt
-        if spt.parent:
-            if spt.parent.left == spt.left:
-                spt.parent.left = spt
-            else:
-                assert (spt.parent.right == spt.left)
-                spt.parent.right = spt
-        return spt
-
-    def _rotateRight(self, spt):
-        assert (spt and spt.left)
-        spt = super(SplayTree, self)._rotateRight(spt)
-        assert (spt.right)
-        if spt.right.left:
-            spt.right.left.parent = spt.right
-        spt.parent = spt.right.parent
-        spt.right.parent = spt
-        if spt.parent:
-            if spt.parent.left == spt.right:
-                spt.parent.left = spt
-            else:
-                assert (spt.parent.right == spt.right)
-                spt.parent.right = spt
-        return spt
 
     # Splay操作有两种实现策略：
     # 1）top down
@@ -68,6 +31,38 @@ class SplayTree(BalancedBinarySearchTree):
     # 从树根开始遍历直至找到目标节点，再将目标节点向上旋转直至树根
     # 需要维护access path信息，无论是使用栈还是父节点指针
     def _splay(self, spt, root):
+        def rotateLeft(spt):
+            assert (spt and spt.right)
+            tmp = spt.right
+            spt.right = tmp.left
+            if spt.right:
+                spt.right.parent = spt
+            if spt.parent:
+                if spt == spt.parent.left:
+                    spt.parent.left = tmp
+                else:
+                    assert (spt == spt.parent.right)
+                    spt.parent.right = tmp
+            tmp.parent = spt.parent
+            tmp.left = spt
+            spt.parent = tmp
+
+        def rotateRight(spt):
+            assert (spt and spt.left)
+            tmp = spt.left
+            spt.left = tmp.right
+            if spt.left:
+                spt.left.parent = spt
+            if spt.parent:
+                if spt == spt.parent.left:
+                    spt.parent.left = tmp
+                else:
+                    assert (spt == spt.parent.right)
+                    spt.parent.right = tmp
+            tmp.parent = spt.parent
+            tmp.right = spt
+            spt.parent = tmp
+
         # 当前的数据结构是完全基于bottom up实现的，如下top down版本仅作参考
         # push root, rather than root.child, down until spt
         # strategy: split root subtree into three parts
@@ -105,34 +100,34 @@ class SplayTree(BalancedBinarySearchTree):
             root.right = middle.left
             return root
 
-        # push spt up until root.child
-        def _bottom_up(spt, root):
+        # push 'spt' up until its becoming 'root.child'
+        def bottomUp(spt, root):
+            assert (spt)
             while spt.parent != root:
                 assert (spt.parent)
                 if spt.parent.parent:
                     if spt == spt.parent.left and spt.parent == spt.parent.parent.left:
-                        spt.parent = self._rotateRight(spt.parent.parent)
-                        spt = self._rotateRight(spt.parent)
+                        rotateRight(spt.parent.parent)
+                        rotateRight(spt.parent)
                     elif spt == spt.parent.left and spt.parent == spt.parent.parent.right:
-                        spt = self._rotateRight(spt.parent)
-                        spt = self._rotateLeft(spt.parent)
-                    elif spt == spt.parent.right and spt.parent == spt.parent.parent.left:
-                        spt = self._rotateLeft(spt.parent)
-                        spt = self._rotateRight(spt.parent)
+                        rotateRight(spt.parent)
+                        rotateLeft(spt.parent)
+                    elif spt == spt.parent.right and spt.parent == spt.parent.parent.right:
+                        rotateLeft(spt.parent.parent)
+                        rotateLeft(spt.parent)
                     else:
-                        assert (spt == spt.parent.right and spt.parent == spt.parent.parent.right)
-                        spt.parent = self._rotateLeft(spt.parent.parent)
-                        spt = self._rotateLeft(spt.parent)
+                        assert (spt == spt.parent.right and spt.parent == spt.parent.parent.left)
+                        rotateLeft(spt.parent)
+                        rotateRight(spt.parent)
                 else:
                     if spt == spt.parent.left:
-                        spt = self._rotateRight(spt.parent)
+                        self._rotateRight(spt.parent)
                     else:
                         assert (spt == spt.parent.right)
-                        spt = self._rotateLeft(spt.parent)
+                        self._rotateLeft(spt.parent)
             return spt
 
-        assert (spt)
-        return _bottom_up(spt, root)
+        return bottomUp(spt, root)
 
     def _balance(self, spt):
         assert (spt)

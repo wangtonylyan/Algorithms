@@ -7,14 +7,11 @@ from bst import BalancedBinarySearchTree, BinarySearchTreeTest
 
 
 class AATree(BalancedBinarySearchTree):
-    class Node(object):
-        __slots__ = ['left', 'right', 'key', 'value', 'level']
+    class Node(BalancedBinarySearchTree.Node):
+        __slots__ = ['level']
 
         def __init__(self, key, value):
-            self.left = None
-            self.right = None
-            self.key = key
-            self.value = value
+            super(AATree.Node, self).__init__(key, value)
             self.level = 1
 
     def __init__(self):

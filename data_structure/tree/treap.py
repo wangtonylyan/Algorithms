@@ -17,14 +17,11 @@ import random
 
 
 class Treap(BalancedBinarySearchTree):
-    class Node(object):
-        __slots__ = ['left', 'right', 'key', 'value', 'priority']
+    class Node(BalancedBinarySearchTree.Node):
+        __slots__ = ['priority']
 
         def __init__(self, key, value, priority):
-            self.left = None
-            self.right = None
-            self.key = key
-            self.value = value
+            super(Treap.Node, self).__init__(key, value)
             self.priority = priority
 
     def __init__(self, total=1000):
@@ -64,7 +61,7 @@ class Treap(BalancedBinarySearchTree):
 
         self.root = recur(self.root, key, value)
 
-    # 删除操作只需在top-down阶段不断地将目标节点进行旋转，直至其成为叶子节点，再直接删除即可
+    # delete的过程可被视为是与insert互逆的：在top-down阶段将目标节点旋转至叶子节点，再直接删除
     def delete(self, key):
         def recur(trp, key):
             if trp == None:
