@@ -82,17 +82,19 @@ class CompleteKnapsack(Knapsack):
             dup = []
             w, v = it[0], it[1]
             k = 1  # exponential of 2
-            # while (w << (k + 1)) - w <= weight:
-            while w << (k + 1) <= weight:
+            # 当前items中已有该种物品的总重量：(w<<k)-w
+            # 下一个将要被加入items中的该种物品的重量：w<<k
+            # 因此就有：
+            # while weight - ((w << k) - w) >= w << k:
+            while (w << k + 1) - w <= weight:
                 dup.append((w << k, v << k))
                 k += 1
-            # 该if条件可以同时弥补/覆盖上述两个while条件所造成的"空隙"
-            if (w << k) - w <= weight - w:
+            if (w << k) - w <= weight - w:  # 弥补上述while条件失效后的空隙
                 k = (weight - (w << k) + w) / w
                 assert (isinstance(k, int) and k > 0)
                 dup.append((w * k, v * k))
             # @assert: items中同种物品的重量总和不大于weight
-            assert (w > weight or weight - sum([x[0] for x in dup + [(w, v)]]) <= w)
+            assert (w > weight or weight - sum([x[0] for x in dup + [(w, v)]]) < w)
             items += dup
         return ZeroOneKnapsack().main_3(weight, items)
 
