@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-# data structure: max-heap
-# 1）完全二叉树存储于数组中，父与子节点之间的数值关系
+# data structure: binary heap
+# 1) 完全二叉树存储于数组中，父与子节点之间的数值关系
 # 0-based indexing：left=root*2+1, right=root*2+2, root=(child-1)/2
 # 1-based indexing：left=root*2, right=root*2+1, root=child/2
-# 2）堆的所有逻辑都是基于两个核心的操作：float()和sink()
+# 2) 堆的所有逻辑都是基于两个核心的操作：float()和sink()
 # 最大/最小堆在实现上的区别也仅在于此
 
 import random
@@ -16,6 +16,9 @@ class BinaryHeap(object):
         self.key = key
         self.cmp = cmp
         self._build()
+
+    def __len__(self):
+        return len(self.hp)
 
     def _float(self, iter, root):
         t = (iter - 1) >> 1
@@ -92,9 +95,6 @@ class BinaryHeap(object):
                     self._float(i, 0)
                 return True
         return False
-
-    def __len__(self):
-        return len(self.hp)
 
     def _check(self):
         assert (isinstance(self.hp, list))
@@ -174,19 +174,19 @@ class SortANearlySortedArray():
             return lst
 
         # build heap
-        alst = lst[:k]  # auxiliary space
+        tmp = lst[:k]  # auxiliary space
         for i in range((k - 1) >> 1, -1, -1):
-            alst = _sink(alst, i, k)
+            tmp = _sink(tmp, i, k)
         # sort by heap
         for i in range(0, len(lst)):
-            lst[i] = alst[0]  # heap.pop
+            lst[i] = tmp[0]  # heap.pop
             if i + k < len(lst):
-                alst[0] = lst[i + k]  # heap.push
-                alst = _sink(alst, 0, k)
+                tmp[0] = lst[i + k]  # heap.push
+                tmp = _sink(tmp, 0, k)
             else:
-                alst[0] = alst[len(alst) - 1]  # heap.push
-                alst.pop()
-                alst = _sink(alst, 0, len(alst))
+                tmp[0] = tmp[len(tmp) - 1]  # heap.push
+                tmp.pop()
+                tmp = _sink(tmp, 0, len(tmp))
         return lst
 
     def testcase(self):

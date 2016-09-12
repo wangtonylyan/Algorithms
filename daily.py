@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+
+import copy
 import random
 import time
-import copy
+from data_structure.heap.binary import MinBinaryHeap
 
 
 def testsortint():
@@ -141,7 +143,7 @@ def testunionfindset():
 
 def testgraph():
     def mst(grp):
-        def main_Kruskal(grp):
+        def main_1(grp):
             edge = []
             for i in range(len(grp)):
                 for j, w in grp[i]:
@@ -152,7 +154,7 @@ def testgraph():
             edge.sort(key=lambda x: x[1])
 
             def find(ds, n):
-                while ds[n] != n:
+                while n != ds[n]:
                     n = ds[n]
                 return n
 
@@ -171,30 +173,29 @@ def testgraph():
                     ret.append(w)
             return sum(ret)
 
-        def main_Prim(grp, src):
+        def main_2(grp, src):
             vtx = [0] * len(grp)
             dis = [None] * len(grp)
-            vtx[src] = 1
+            hp = MinBinaryHeap(key=lambda x: x[1])
             dis[src] = 0
+            vtx[src] = 1
             for i, w in grp[src]:
                 dis[i] = w
-            for _ in range(len(grp) - 1):
-                m = None
-                for i in range(len(grp)):
-                    if vtx[i] == 0 and dis[i] != None:
-                        if m == None or dis[m] > dis[i]:
-                            m = i
-                if m == None:
-                    break
-                vtx[m] = 1
-                for i, w in grp[m]:
-                    if vtx[i] == 0 and (dis[i] == None or dis[i] > w):
-                        dis[i] = w
+                hp.push((i, dis[i]))
+            while len(hp) > 0:
+                i, w = hp.pop()
+                if vtx[i] == 1 or dis[i] < w:
+                    continue
+                vtx[i] = 1
+                for j, v in grp[i]:
+                    if vtx[j] == 0 and (dis[j] == None or dis[j] > v):
+                        dis[j] = v
+                        hp.push((j, dis[j]))
             return sum(dis)
 
-        ret = main_Kruskal(grp)
+        ret = main_1(grp)
         for i in range(len(grp)):
-            assert (main_Prim(grp, i) == ret)
+            assert (main_2(grp, i) == ret)
         return ret
 
     def shortest(grp, src):
@@ -291,21 +292,19 @@ def testgraph():
             dis = [None] * len(grp)
             vtx[src] = 1
             dis[src] = 0
+            hp = MinBinaryHeap(key=lambda x: x[1])
             for i, w in grp[src]:
                 dis[i] = w
-
-            for _ in range(len(grp) - 1):
-                m = None
-                for i in range(len(grp)):
-                    if vtx[i] == 0 and dis[i] != None:
-                        if m == None or dis[m] > dis[i]:
-                            m = i
-                if m == None:
-                    break
-                vtx[m] = 1
-                for i, w in grp[m]:
-                    if vtx[i] == 0 and (dis[i] == None or dis[i] > dis[m] + w):
-                        dis[i] = dis[m] + w
+                hp.push((i, dis[i]))
+            while len(hp) > 0:
+                i, w = hp.pop()
+                if vtx[i] == 1 or dis[i] < w:
+                    continue
+                vtx[i] = 1
+                for j, v in grp[i]:
+                    if vtx[j] == 0 and (dis[j] == None or dis[j] > dis[i] + v):
+                        dis[j] = dis[i] + v
+                        hp.push((j, dis[j]))
             return sum(dis)
 
         ret = f1(grp, src)
