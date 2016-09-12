@@ -153,9 +153,6 @@ class BinarySearchTree(Tree):
                 bst = bst.right
         return bst
 
-    def clean(self):
-        self.root = None
-
     def check(self):
         def recur(bst):
             return self._check(bst, recur(bst.left), recur(bst.right)) if bst else \

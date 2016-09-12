@@ -106,9 +106,9 @@ class Treap(SelfBalancingBinarySearchTree):
         self.prioritySet[m.priority] = 0
 
     def clean(self):
-        super(Treap, self).clean()
         assert (len(self.prioritySet) == self.total)
         self.prioritySet = [0] * self.total
+        super(Treap, self).clean()
 
     def _check(self, trp, left, right):
         if trp:

@@ -195,7 +195,7 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
                 else:
                     m = self._getMin(rbt.right)
                     rbt.right = self._deleteMin(rbt.right)  # deletion
-                    assert (not self._search(rbt.right, m.key))
+                    assert (self._search(rbt.right, m.key) is None)
                     rbt.key = m.key
                     rbt.value = m.value
                 # 3) bottom-up

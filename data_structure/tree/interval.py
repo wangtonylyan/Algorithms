@@ -2,7 +2,7 @@
 # data structure: interval tree
 # Interval tree is used to represent a dynamic set of intervals.
 
-import bst, rbt
+from data_structure.tree.binary import bst, rbt
 
 
 # interval is represented as pair (tuple datatype)
@@ -38,7 +38,7 @@ class IntervalTree(rbt.RedBlackTree):
     # 删除等操作也完全类似，实现略
     def _maintain(self):
         def _recur(ivt):
-            if ivt == None:
+            if not ivt:
                 return 0
             ivt.max = max(_recur(ivt.left), _recur(ivt.right), ivt.value[1])
             return ivt.max
@@ -68,8 +68,8 @@ class IntervalTree(rbt.RedBlackTree):
 
     def _check(self, ivt, left, right):
         ret = super(IntervalTree, self)._check(ivt, left, right)
-        assert (ivt.max == max(ivt.left.max if ivt.left else 0, \
-                               ivt.right.max if ivt.right else 0, \
+        assert (ivt.max == max(ivt.left.max if ivt.left else 0,
+                               ivt.right.max if ivt.right else 0,
                                ivt.value[1]))
         return ret
 

@@ -42,7 +42,7 @@ class Tree(object):
         assert (False)
 
     def clean(self):
-        assert (False)
+        self.root = None
 
     def check(self):
         assert (False)
