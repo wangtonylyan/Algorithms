@@ -4,8 +4,8 @@
 # 针对于连通图，最小生成树属于无向图，最小树形图属于有向图
 
 
+from data_structure.disjoint import DisjointSetForest
 from data_structure.heap.binary import MinBinaryHeap
-from data_structure.tree.disjoint import DisjointSetForest
 from graph import UndirectedGraph, DirectedGraph
 
 

@@ -56,19 +56,19 @@ class SplayTree(SelfAdjustingBinarySearchTree):
         return spt
 
     # Splay操作有两种实现策略：
-    # 1）top down
+    # 1) top-down
     # 从树根开始遍历的同时就进行旋转操作，当遍历到目标节点时也就完成了整棵树的伸展
     # 若目标节点不存在，则与目标节点的key较接近的某个叶子节点将成为新的树根
-    # 2）bottom up
+    # 2) bottom-up
     # 从树根开始遍历直至找到目标节点，再将目标节点向上旋转直至树根
     # 需要维护access path信息，无论是使用栈还是父节点指针
     def _splay(self, spt, root=None):
-
-        # 当前的数据结构是完全基于bottom up实现的，如下top down版本仅作参考
-        # push root, rather than root.child, down until spt
-        # strategy: split root subtree into three parts
-        def _top_down(root, spt):
-            middle = self.__class__.Node(0, 0, 0)
+        # 当前实现是完全基于bottom-up的，如下top-down实现仅作参考
+        # push 'root', rather than 'root.child', down until 'spt'
+        # strategy: split 'root' subtree into three parts
+        def topDown(root, spt):
+            assert (root and spt)
+            middle = self.__class__.Node(0, 0, None)
             liter = middle.left
             riter = middle.right
             while root.key != spt.key:
@@ -103,33 +103,34 @@ class SplayTree(SelfAdjustingBinarySearchTree):
 
         # push 'spt' up until its becoming 'root.child'
         def bottomUp(spt, root):
+            assert (spt)
             while spt.parent != root:
                 assert (spt.parent)
                 if spt.parent.parent:
-                    if spt == spt.parent.left and spt.parent == spt.parent.parent.left:
-                        rotateRight(spt.parent.parent)
-                        rotateRight(spt.parent)
-                    elif spt == spt.parent.left and spt.parent == spt.parent.parent.right:
-                        rotateRight(spt.parent)
-                        rotateLeft(spt.parent)
-                    elif spt == spt.parent.right and spt.parent == spt.parent.parent.right:
-                        rotateLeft(spt.parent.parent)
-                        rotateLeft(spt.parent)
+                    if spt.parent.left == spt and spt.parent.parent.left == spt.parent:
+                        self._rotateRight(spt.parent.parent)
+                        self._rotateRight(spt.parent)
+                    elif spt.parent.left == spt and spt.parent.parent.right == spt.parent:
+                        self._rotateRight(spt.parent)
+                        self._rotateLeft(spt.parent)
+                    elif spt.parent.right == spt and spt.parent.parent.right == spt.parent:
+                        self._rotateLeft(spt.parent.parent)
+                        self._rotateLeft(spt.parent)
                     else:
-                        assert (spt == spt.parent.right and spt.parent == spt.parent.parent.left)
-                        rotateLeft(spt.parent)
-                        rotateRight(spt.parent)
+                        assert (spt.parent.right == spt and spt.parent.parent.left == spt.parent)
+                        self._rotateLeft(spt.parent)
+                        self._rotateRight(spt.parent)
                 else:
-                    if spt == spt.parent.left:
+                    if spt.parent.left == spt:
                         self._rotateRight(spt.parent)
                     else:
-                        assert (spt == spt.parent.right)
+                        assert (spt.parent.right == spt)
                         self._rotateLeft(spt.parent)
             return spt
 
-        assert (spt)
         root = bottomUp(spt, root)
-        assert (root.key == spt.key)
+        # root = topDown(root, spt)
+        assert (root == spt)
         return root
 
     def insert(self, key, value):
@@ -153,7 +154,7 @@ class SplayTree(SelfAdjustingBinarySearchTree):
                 else:
                     assert (iter.key > prev.key)
                     prev.right = iter
-        self._balance(iter)
+        self.root = self._splay(iter)
 
     def _deleteMax(self, spt):
         if spt:
@@ -191,7 +192,7 @@ class SplayTree(SelfAdjustingBinarySearchTree):
         spt = self._search(self.root, key)
         if spt:
             assert (spt.key == key)
-            self._balance(spt)
+            self.root = self._splay(spt)
             if self.root.left:
                 m = self._getMax(self.root.left)
                 self.root.left = self._deleteMax(self.root.left)
