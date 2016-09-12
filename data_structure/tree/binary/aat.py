@@ -3,11 +3,11 @@
 # AA树可被视为是一种简化版的"右倾"红黑树
 # 每个节点中维护的level综合了AVL树和红黑树的特性
 
-from bst import BalancedBinarySearchTree, BinarySearchTreeTest
+from bst import SelfBalancingBinarySearchTree, BinarySearchTreeTest
 
 
-class AATree(BalancedBinarySearchTree):
-    class Node(BalancedBinarySearchTree.Node):
+class AATree(SelfBalancingBinarySearchTree):
+    class Node(SelfBalancingBinarySearchTree.Node):
         __slots__ = ['level']
 
         def __init__(self, key, value):

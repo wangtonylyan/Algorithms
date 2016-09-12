@@ -9,7 +9,7 @@
 # 思想就是建立被排序的数与其排序后的索引值之间的映射
 
 import random
-from data_structure.heap import MaxHeap
+from data_structure.heap.binary import MaxBinaryHeap
 
 
 class Sort(object):
@@ -115,12 +115,12 @@ class HeapSort(Sort):
         self.funcs.append(self.main_heap)
 
     def main(self, lst):
-        return MaxHeap.heapsort(lst)
+        return MaxBinaryHeap.heapsort(lst)
 
     # 堆排序也可以完全通过堆的封装接口来实现
     def main_heap(self, lst):
         # build heap
-        hp = MaxHeap(lst)
+        hp = MaxBinaryHeap(lst)
         # sort by heap
         for i in range(len(lst) - 1, -1, -1):
             lst[i] = hp.pop()
@@ -234,7 +234,6 @@ class FindClosestPair():
                 i += 1
             else:
                 break
-
         return m
 
     def testcase(self):

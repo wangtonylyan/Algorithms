@@ -3,7 +3,7 @@
 # @reference: <Algorithm_4Ed> P856
 
 
-from data_structure.heap import MinHeap
+from data_structure.heap.binary import MinBinaryHeap
 
 
 class Particle():
@@ -83,7 +83,7 @@ class Collision():
     def simulate(self, limit, hz):
         # reset and restart
         time = 0
-        self.evtQue = MinHeap(key=lambda x: x.time)
+        self.evtQue = MinBinaryHeap(key=lambda x: x.time)
         self.evtQue.push(Event(time, None, None))
         map(lambda x: self.predict(x, time, limit), self.particles)
         # main loop

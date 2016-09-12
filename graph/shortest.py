@@ -3,9 +3,9 @@
 # 针对于连通的有向图
 
 
+from data_structure.heap.binary import MinBinaryHeap
 from graph import DirectedAcyclicGraph
 from sort import TopologicalSort
-from data_structure.heap import MinHeap
 
 
 class ShortestPath(DirectedAcyclicGraph):
@@ -106,7 +106,7 @@ class ShortestPath(DirectedAcyclicGraph):
         vtx = [0 if i != src else 1 for i in range(len(grp))]
         dis = [None if i != src else 0 for i in range(len(grp))]
         pre = [None] * len(grp)
-        hp = MinHeap(key=lambda x: x[1])
+        hp = MinBinaryHeap(key=lambda x: x[1])
         for i, w in grp[src]:
             dis[i] = w
             pre[i] = src

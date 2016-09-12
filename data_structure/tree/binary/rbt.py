@@ -2,11 +2,11 @@
 # data structure: red-black tree
 # 红黑树属于2-3(-4)树的一种变种
 
-from bst import BalancedBinarySearchTree, BinarySearchTreeTest
+from bst import SelfBalancingBinarySearchTree, BinarySearchTreeTest
 
 
-class RedBlackTree(BalancedBinarySearchTree):
-    class Node(BalancedBinarySearchTree.Node):
+class RedBlackTree(SelfBalancingBinarySearchTree):
+    class Node(SelfBalancingBinarySearchTree.Node):
         __slots__ = ['color']
 
         def __init__(self, key, value):

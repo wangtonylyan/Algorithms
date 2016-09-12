@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# data structure: tree
 
 import time, random, platform
 

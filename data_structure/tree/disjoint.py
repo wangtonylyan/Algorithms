@@ -2,7 +2,7 @@
 # 并查集，一种用于表示动态不相交集合(disjoint set)的数据结构
 # 此类问题依赖于高效的集合查询与合并操作
 
-from data_structure.heap import MinHeap
+from data_structure.heap.binary import MinBinaryHeap
 
 
 class DisjointSetList():
@@ -112,7 +112,7 @@ class IsItATree():
 class OfflineMinimum():
     # on-line algorithm: min-heap
     def main_heap(self, seq):
-        hp = MinHeap()
+        hp = MinBinaryHeap()
         ret = []
         for i in seq:
             if i != -1:

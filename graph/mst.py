@@ -4,9 +4,9 @@
 # 针对于连通图，最小生成树属于无向图，最小树形图属于有向图
 
 
-from graph import UndirectedGraph, DirectedGraph
+from data_structure.heap.binary import MinBinaryHeap
 from data_structure.tree.disjoint import DisjointSetForest
-from data_structure.heap import MinHeap
+from graph import UndirectedGraph, DirectedGraph
 
 
 # Kruskal从“边”的角度入手，Prim从“点”的角度入手
@@ -122,7 +122,7 @@ class MinimumSpanningTree(UndirectedGraph):
         vtx = [0 if i != src else 1 for i in range(len(grp))]
         dis = [None if i != src else 0 for i in range(len(grp))]
         pre = [None] * len(grp)
-        hp = MinHeap(key=lambda x: x[1])
+        hp = MinBinaryHeap(key=lambda x: x[1])
         for i, w in grp[src]:
             dis[i] = w
             pre[i] = src

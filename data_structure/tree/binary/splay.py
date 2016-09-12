@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 # data structure: splay tree
-# 伸展树只是一种self-adjusting树，其核心是splay操作
 # Splay operation does rotations along the access path
 # and moves the target node all the way up to the root,
 # which still preserves the symmetric order of the whole tree.
@@ -9,11 +8,11 @@
 # 将a结点splay至根，将b结点伸展至根的右节点，最后再将b节点的左子树整体删除即可
 
 
-from bst import BinarySearchTree, BinarySearchTreeTest
+from bst import SelfAdjustingBinarySearchTree, BinarySearchTreeTest
 
 
-class SplayTree(BinarySearchTree):
-    class Node(BinarySearchTree.Node):
+class SplayTree(SelfAdjustingBinarySearchTree):
+    class Node(SelfAdjustingBinarySearchTree.Node):
         __slots__ = ['parent']
 
         def __init__(self, key, value, parent):
@@ -23,6 +22,39 @@ class SplayTree(BinarySearchTree):
     def __init__(self):
         super(SplayTree, self).__init__()
 
+    def _rotateLeft(self, spt):
+        assert (spt and spt.right)
+        spt = super(SplayTree, self)._rotateLeft(spt)
+        # 以下需要额外地维护父节点指针
+        assert (spt.left)
+        if spt.left.right:
+            spt.left.right.parent = spt.left
+        spt.parent = spt.left.parent
+        spt.left.parent = spt
+        if spt.parent:
+            if spt.parent.left == spt.left:
+                spt.parent.left = spt
+            else:
+                assert (spt.parent.right == spt.left)
+                spt.parent.right = spt
+        return spt
+
+    def _rotateRight(self, spt):
+        assert (spt and spt.left)
+        spt = super(SplayTree, self)._rotateRight(spt)
+        assert (spt.right)
+        if spt.right.left:
+            spt.right.left.parent = spt.right
+        spt.parent = spt.right.parent
+        spt.right.parent = spt
+        if spt.parent:
+            if spt.parent.left == spt.right:
+                spt.parent.left = spt
+            else:
+                assert (spt.parent.right == spt.right)
+                spt.parent.right = spt
+        return spt
+
     # Splay操作有两种实现策略：
     # 1）top down
     # 从树根开始遍历的同时就进行旋转操作，当遍历到目标节点时也就完成了整棵树的伸展
@@ -30,38 +62,7 @@ class SplayTree(BinarySearchTree):
     # 2）bottom up
     # 从树根开始遍历直至找到目标节点，再将目标节点向上旋转直至树根
     # 需要维护access path信息，无论是使用栈还是父节点指针
-    def _splay(self, spt, root):
-        def rotateLeft(spt):
-            assert (spt and spt.right)
-            tmp = spt.right
-            spt.right = tmp.left
-            if spt.right:
-                spt.right.parent = spt
-            if spt.parent:
-                if spt == spt.parent.left:
-                    spt.parent.left = tmp
-                else:
-                    assert (spt == spt.parent.right)
-                    spt.parent.right = tmp
-            tmp.parent = spt.parent
-            tmp.left = spt
-            spt.parent = tmp
-
-        def rotateRight(spt):
-            assert (spt and spt.left)
-            tmp = spt.left
-            spt.left = tmp.right
-            if spt.left:
-                spt.left.parent = spt
-            if spt.parent:
-                if spt == spt.parent.left:
-                    spt.parent.left = tmp
-                else:
-                    assert (spt == spt.parent.right)
-                    spt.parent.right = tmp
-            tmp.parent = spt.parent
-            tmp.right = spt
-            spt.parent = tmp
+    def _splay(self, spt, root=None):
 
         # 当前的数据结构是完全基于bottom up实现的，如下top down版本仅作参考
         # push root, rather than root.child, down until spt
@@ -102,7 +103,6 @@ class SplayTree(BinarySearchTree):
 
         # push 'spt' up until its becoming 'root.child'
         def bottomUp(spt, root):
-            assert (spt)
             while spt.parent != root:
                 assert (spt.parent)
                 if spt.parent.parent:
@@ -127,12 +127,10 @@ class SplayTree(BinarySearchTree):
                         self._rotateLeft(spt.parent)
             return spt
 
-        return bottomUp(spt, root)
-
-    def _balance(self, spt):
         assert (spt)
-        self.root = self._splay(spt, None)
-        assert (self.root.key == spt.key)
+        root = bottomUp(spt, root)
+        assert (root.key == spt.key)
+        return root
 
     def insert(self, key, value):
         prev = None
@@ -209,9 +207,9 @@ class SplayTree(BinarySearchTree):
     def _check(self, spt, left, right):
         if spt:
             if spt.left:
-                assert (spt.left.parent == spt)
+                assert (spt == spt.left.parent)
             if spt.right:
-                assert (spt.right.parent == spt)
+                assert (spt == spt.right.parent)
             if spt == self.root:
                 assert (not spt.parent)
         return super(SplayTree, self)._check(spt, left, right)

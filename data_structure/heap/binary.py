@@ -9,7 +9,7 @@
 import random
 
 
-class Heap(object):
+class BinaryHeap(object):
     def __init__(self, lst, key, cmp):
         assert (isinstance(lst, list) and len(lst) >= 0)
         self.hp = lst[:]
@@ -131,9 +131,9 @@ class Heap(object):
         print 'pass:', self.__class__
 
 
-class MaxHeap(Heap):
+class MaxBinaryHeap(BinaryHeap):
     def __init__(self, lst=[], key=lambda x: x):
-        super(MaxHeap, self).__init__(lst, key, cmp=lambda x, y: x >= y)
+        super(MaxBinaryHeap, self).__init__(lst, key, cmp=lambda x, y: x >= y)
         assert (len(self.hp) == len(lst))
 
     @classmethod
@@ -149,9 +149,9 @@ class MaxHeap(Heap):
         return hp.hp
 
 
-class MinHeap(Heap):
+class MinBinaryHeap(BinaryHeap):
     def __init__(self, lst=[], key=lambda x: x):
-        super(MinHeap, self).__init__(lst, key, cmp=lambda x, y: x <= y)
+        super(MinBinaryHeap, self).__init__(lst, key, cmp=lambda x, y: x <= y)
         assert (len(self.hp) == len(lst))
 
 
@@ -198,7 +198,7 @@ class SortANearlySortedArray():
 
 
 if __name__ == "__main__":
-    MaxHeap().testcase()
-    MinHeap().testcase()
+    MaxBinaryHeap().testcase()
+    MinBinaryHeap().testcase()
     SortANearlySortedArray().testcase()
     print 'done'

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from data_structure.heap import MinHeap
-from data_structure.queue import Queue
 import copy
+from data_structure.heap.binary import MinBinaryHeap
+from data_structure.queue import Queue
 
 
 class HuffmanCode():
@@ -16,7 +16,7 @@ class HuffmanCode():
     def main(self, chst):
         assert (isinstance(chst, dict) and len(chst) > 2)  # makes sense
         # build Huffman tree
-        hp = MinHeap(map(lambda (c, f): self.__class__.Node(f, c), chst.items()), lambda x: x.key)
+        hp = MinBinaryHeap(map(lambda (c, f): self.__class__.Node(f, c), chst.items()), lambda x: x.key)
         while len(hp) > 1:
             left = hp.pop()
             right = hp.pop()

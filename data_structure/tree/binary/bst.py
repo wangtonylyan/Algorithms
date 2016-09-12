@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # data structure: binary search tree
 
-from tree import Tree, TreeTest
+from data_structure.tree.tree import Tree, TreeTest
 
 
 class BinarySearchTree(Tree):
@@ -176,33 +176,34 @@ class BinarySearchTree(Tree):
         return left + right + 1
 
 
-class BalancedBinarySearchTree(BinarySearchTree):
+class SelfAdjustingBinarySearchTree(BinarySearchTree):
     def __init__(self):
-        super(BalancedBinarySearchTree, self).__init__()
+        super(SelfAdjustingBinarySearchTree, self).__init__()
 
-    # The following are two restructuring primitives
-    # for almost all kinds of self-balancing BSTs.
-    # They always hold the symmetric order property,
-    # and can be used to balance an unbalanced BST in composition.
-    # rotate left与rotate right这两个操作是完全对称的，且互为可逆
-    # 例如，对同一个节点先后各执行一次这两个操作，以该节点为根的子树结构不变
-    def _rotateLeft(self, bbst):
-        if bbst and bbst.right:
-            ret = bbst.right
-            bbst.right = ret.left
-            ret.left = bbst
-            bbst = ret
-        return bbst
+    # rotate left与rotate right这两个操作是完全对称且互为可逆的
+    # always holds the symmetric order property
+    def _rotateLeft(self, bst):
+        if bst and bst.right:
+            tmp = bst.right
+            bst.right = tmp.left
+            tmp.left = bst
+            bst = tmp
+        return bst
 
-    def _rotateRight(self, bbst):
-        if bbst and bbst.left:
-            ret = bbst.left
-            bbst.left = ret.right
-            ret.right = bbst
-            bbst = ret
-        return bbst
+    def _rotateRight(self, bst):
+        if bst and bst.left:
+            tmp = bst.left
+            bst.left = tmp.right
+            tmp.right = bst
+            bst = tmp
+        return bst
 
-    def _balance(self, bbst):
+
+class SelfBalancingBinarySearchTree(SelfAdjustingBinarySearchTree):
+    def __init__(self):
+        super(SelfBalancingBinarySearchTree, self).__init__()
+
+    def _balance(self, bst):
         assert (False)
 
 

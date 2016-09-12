@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 # data structure: AVL (Georgy Adelson-Velsky and Evgenii Landis) tree
 
-from bst import BalancedBinarySearchTree, BinarySearchTreeTest
+from bst import SelfBalancingBinarySearchTree, BinarySearchTreeTest
 
 
-class AVLTree(BalancedBinarySearchTree):
-    class Node(BalancedBinarySearchTree.Node):
+class AVLTree(SelfBalancingBinarySearchTree):
+    class Node(SelfBalancingBinarySearchTree.Node):
         __slots__ = ['factor']
 
         def __init__(self, key, value):

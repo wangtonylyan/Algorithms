@@ -12,12 +12,12 @@
 # 树堆的设计思想就是：randomized BST是趋向于平衡的
 
 
-from bst import BalancedBinarySearchTree, BinarySearchTreeTest
 import random
+from bst import SelfBalancingBinarySearchTree, BinarySearchTreeTest
 
 
-class Treap(BalancedBinarySearchTree):
-    class Node(BalancedBinarySearchTree.Node):
+class Treap(SelfBalancingBinarySearchTree):
+    class Node(SelfBalancingBinarySearchTree.Node):
         __slots__ = ['priority']
 
         def __init__(self, key, value, priority):
