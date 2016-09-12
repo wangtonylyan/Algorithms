@@ -41,7 +41,7 @@ class Treap(SelfBalancingBinarySearchTree):
 
     def insert(self, key, value):
         def recur(trp, key, value):
-            if trp == None:
+            if not trp:
                 priority = random.randint(0, self.total - 1)
                 while self.prioritySet[priority]:
                     # 不能直接搜索prioritySet数组，并使用下一个未被标识的数
@@ -59,25 +59,26 @@ class Treap(SelfBalancingBinarySearchTree):
                 trp.value = value
             return trp
 
+        assert (key is not None and value is not None)
         self.root = recur(self.root, key, value)
 
     # delete的过程可被视为是与insert互逆的：在top-down阶段将目标节点旋转至叶子节点，再直接删除
     def delete(self, key):
         def recur(trp, key):
-            if trp == None:
+            if not trp:
                 return trp  # deletion fails
             if key < trp.key:
                 trp.left = recur(trp.left, key)
             elif key > trp.key:
                 trp.right = recur(trp.right, key)
             else:  # == Heap.sink
-                if trp.left == None and trp.right == None:
+                if not trp.left and not trp.right:
                     self.prioritySet[trp.priority] = 0
                     trp = None  # deletion
-                elif trp.left == None:
+                elif not trp.left:
                     trp = self._rotateLeft(trp)
                     trp.left = recur(trp.left, key)
-                elif trp.right == None:
+                elif not trp.right:
                     trp = self._rotateRight(trp)
                     trp.right = recur(trp.right, key)
                 else:
@@ -116,7 +117,7 @@ class Treap(SelfBalancingBinarySearchTree):
                 assert (trp.priority < trp.left.priority)
             if trp.right:
                 assert (trp.priority < trp.right.priority)
-            if trp == self.root:
+            if trp is self.root:
                 assert (left + right + 1 == sum(self.prioritySet))
         return super(Treap, self)._check(trp, left, right)
 

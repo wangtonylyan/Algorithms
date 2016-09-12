@@ -77,7 +77,7 @@ class AATree(SelfBalancingBinarySearchTree):
 
     def insert(self, key, value):
         def recur(aat, key, value):
-            if aat == None:
+            if not aat:
                 return self.__class__.Node(key, value)
             if key < aat.key:
                 aat.left = recur(aat.left, key, value)
@@ -89,6 +89,7 @@ class AATree(SelfBalancingBinarySearchTree):
                 aat.value = value
             return aat
 
+        assert (key is not None and value is not None)
         self.root = recur(self.root, key, value)
 
     def _deleteMax(self, aat):
@@ -111,7 +112,7 @@ class AATree(SelfBalancingBinarySearchTree):
 
     def delete(self, key):
         def _recur(aat, key):
-            if aat == None:
+            if not aat:
                 return aat
             if key < aat.key:
                 aat.left = _recur(aat.left, key)
@@ -123,7 +124,7 @@ class AATree(SelfBalancingBinarySearchTree):
                 if aat.right:
                     m = self._getMin(aat.right)
                     aat.right = self._deleteMin(aat.right)
-                    assert (not self._search(aat.right, m.key))
+                    assert (self._search(aat.right, m.key) is None)
                     aat.key = m.key
                     aat.value = m.value
                     aat = self._balance(aat)
@@ -147,7 +148,7 @@ class AATree(SelfBalancingBinarySearchTree):
                 if aat.right.right:
                     # level of a right grandchild is strictly less than that of its grandparent
                     assert (aat.right.right.level < aat.level)
-            if aat.left == None and aat.right == None:
+            if not aat.left and not aat.right:
                 # level of a leaf node is one
                 assert (aat.level == 1)
             if aat.level > 1:

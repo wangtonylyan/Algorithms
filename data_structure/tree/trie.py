@@ -16,49 +16,48 @@ class TrieTree(Tree, String):
 
     def __init__(self):
         super(TrieTree, self).__init__()
-        self.root = None
 
     def __len__(self):
         def recur(trie):
-            if trie == None:
+            if not trie:
                 return 0
-            return sum(recur(t) if t else 0 for t in trie.key) + (1 if trie.value else 0)
+            return sum(map(recur, trie.key)) + (1 if trie.value is not None else 0)
 
         return recur(self.root)
 
     def search(self, key):
         trie = self.root
         for c in key:
-            if trie == None:
+            if not trie:
                 break
             trie = trie.key[self.ord(c)]
-        if trie == None or trie.value == None:  # 这两个条件都表示该字符串不存在
+        if not trie or trie.value is None:  # 这两个条件都表示该字符串不存在
             return None
         return trie.value
 
     def insert(self, key, value):
-        assert (len(key) > 0 and value != None)
-        if self.root == None:
+        assert (isinstance(key, str) and len(key) > 0 and value is not None)
+        if not self.root:
             self.root = self.__class__.Node()
         trie = self.root
         for c in key:
-            if trie.key[self.ord(c)] == None:
+            if not trie.key[self.ord(c)]:
                 trie.key[self.ord(c)] = self.__class__.Node()
             trie = trie.key[self.ord(c)]
         trie.value = value
-        assert (self.root.value == None)
+        assert (self.root.value is None)
         return
 
     def delete(self, key):
         def recur(trie, ind):
-            if trie == None:
+            if not trie:
                 return None
             if ind == len(key):
-                assert (trie.value != None)
+                assert (trie.value is not None)
                 trie.value = None  # find it
             else:
                 trie.key[self.ord(key[ind])] = recur(trie.key[self.ord(key[ind])], ind + 1)
-            if trie.value == None and all(i == None for i in trie.key):
+            if trie.value is None and all(not i for i in trie.key):
                 return None  # delete the 'trie' subtree
             return trie
 
@@ -66,24 +65,24 @@ class TrieTree(Tree, String):
 
     def check(self):
         def recur(trie):
-            if trie == None:
+            if not trie:
                 return 0
             cnt = 0
             flg = True
             for t in trie.key:
-                if t != None:
+                if t:
                     assert (isinstance(t, self.__class__.Node))
                     cnt += recur(t)
                     flg = False
             if flg:
-                assert (trie.value)
+                assert (trie.value is not None)
                 assert (cnt == 0)
-            if trie.value:
+            if trie.value is not None:
                 cnt += 1
             return cnt
 
         assert (recur(self.root) == len(self))
-        assert (self.root == None or self.root.value == None)
+        assert (not self.root or self.root.value is None)
 
 
 class TrieTreeTest(TreeTest, String):

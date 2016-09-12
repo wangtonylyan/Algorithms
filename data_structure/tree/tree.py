@@ -15,6 +15,7 @@ class Tree(object):
 
     def __init__(self):
         super(Tree, self).__init__()
+        self.root = None
 
     def __len__(self):
         assert (False)
@@ -104,7 +105,7 @@ class TreeTest(object):
                     cost += (end_t - start_t) * 1000
                 if self.check:
                     tree.check()
-                assert (tree.search(m.key) == None)
+                assert (tree.search(m.key) is None)
                 cnt -= 1
                 assert (cnt == len(tree))
             assert (cnt == len(tree) == 0)
@@ -129,7 +130,7 @@ class TreeTest(object):
                 cost += (end_t - start_t) * 1000
             if self.check:
                 tree.check()
-            assert (tree.search(i) == None)
+            assert (tree.search(i) is None)
             cnt -= 1
             assert (cnt == len(tree))
         assert (cnt == len(tree) == 0)

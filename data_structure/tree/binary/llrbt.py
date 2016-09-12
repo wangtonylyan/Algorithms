@@ -60,7 +60,7 @@ class LeftLeaningRedBlackTree(RedBlackTree):
 
         # @invariant: rbt node isn't in (as a part of) a 4-node
         def recur(rbt, key, value):
-            if rbt == None:
+            if not rbt:
                 return self.__class__.Node(key, value)  # due to invariant, a new node can be inserted directly
             # 1) top-down: eliminate 4-node in order to meet the needs of next recursion
             # 2-3 tree: naturally without 4-node
@@ -78,6 +78,7 @@ class LeftLeaningRedBlackTree(RedBlackTree):
             rbt = _balance(rbt)
             return rbt
 
+        assert (key is not None and value is not None)
         self.root = recur(self.root, key, value)
         if self.root.color:
             assert (not (self.root.left and self.root.left.color and self.root.right and self.root.right.color))
@@ -88,7 +89,7 @@ class LeftLeaningRedBlackTree(RedBlackTree):
     # @what: turn rbt.left node into a 3- or 4- node, regardless of its leaning characteristic
     def _makeLeftRed(self, rbt):
         assert (rbt.color or (rbt.left and rbt.left.color) or (rbt.right and rbt.right.color))
-        if rbt.left == None:
+        if not rbt.left:
             return rbt
         if rbt.left.color or (rbt.left.left and rbt.left.left.color) \
                 or (rbt.left.right and rbt.left.right.color):
@@ -107,7 +108,7 @@ class LeftLeaningRedBlackTree(RedBlackTree):
 
     def _makeRightRed(self, rbt):
         assert (rbt.color or (rbt.left and rbt.left.color) or (rbt.right and rbt.right.color))
-        if rbt.right == None:
+        if not rbt.right:
             return rbt
         if rbt.right.color or (rbt.right.left and rbt.right.left.color) \
                 or (rbt.right.right and rbt.right.right.color):

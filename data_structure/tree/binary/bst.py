@@ -15,18 +15,18 @@ class BinarySearchTree(Tree):
 
     def __init__(self):
         super(BinarySearchTree, self).__init__()
-        self.root = None
 
     def __len__(self):
         return self._len(self.root)
 
     def _len(self, bst):
-        if bst == None:
+        if not bst:
             return 0
         return self._len(bst.left) + self._len(bst.right) + 1
 
     def search(self, key):
         bst = self._search(self.root, key)
+        assert (not bst or bst.value is not None)
         return bst.value if bst else None
 
     def _search(self, bst, key):
@@ -57,7 +57,7 @@ class BinarySearchTree(Tree):
 
     def preorder(self):
         def recur(bst):
-            if bst == None:
+            if not bst:
                 return []
             return [bst] + recur(bst.left) + recur(bst.right)
 
@@ -65,7 +65,7 @@ class BinarySearchTree(Tree):
 
     def inorder(self):
         def recur(bst):
-            if bst == None:
+            if not bst:
                 return []
             return recur(bst.left) + [bst] + recur(bst.right)
 
@@ -73,7 +73,7 @@ class BinarySearchTree(Tree):
 
     def postorder(self):
         def recur(bst):
-            if bst == None:
+            if not bst:
                 return []
             return recur(bst.left) + recur(bst.right) + [bst]
 
@@ -81,7 +81,7 @@ class BinarySearchTree(Tree):
 
     def insert(self, key, value):
         def recur(bst, key, value):
-            if bst == None:
+            if not bst:
                 return self.__class__.Node(key, value)
             if key < bst.key:
                 bst.left = recur(bst.left, key, value)
@@ -91,26 +91,27 @@ class BinarySearchTree(Tree):
                 bst.value = value
             return bst
 
+        assert (key is not None and value is not None)
         self.root = recur(self.root, key, value)
 
     def delete(self, key):
         def recur(bst, key):
-            if bst == None:
+            if not bst:
                 return None
             if key < bst.key:
                 bst.left = recur(bst.left, key)
             elif key > bst.key:
                 bst.right = recur(bst.right, key)
             else:
-                if bst.left == None:
+                if not bst.left:
                     bst = bst.right
-                elif bst.right == None:
+                elif not bst.right:
                     bst = bst.left
                 else:
-                    if bst.left.right == None:
+                    if not bst.left.right:
                         bst.left.right = bst.right
                         bst = bst.left
-                    elif bst.right.left == None:
+                    elif not bst.right.left:
                         bst.right.left = bst.left
                         bst = bst.right
                     else:
@@ -163,7 +164,7 @@ class BinarySearchTree(Tree):
         recur(self.root)
 
     def _check(self, bst, left, right):
-        if bst == None:
+        if not bst:
             return 0
         # check symmetric order property
         if bst.left:
@@ -171,7 +172,7 @@ class BinarySearchTree(Tree):
         if bst.right:
             assert (bst.right.key > bst.key)
         # check size consistency
-        if bst == self.root:
+        if bst is self.root:
             assert (self._len(bst) == left + right + 1)
         return left + right + 1
 

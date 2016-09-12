@@ -75,7 +75,7 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
     def insert(self, key, value):
         # @invariant: rbt subtree is a red-black tree
         def recur(rbt, key, value):
-            if rbt == None:  # termination of recursion
+            if not rbt:  # termination of recursion
                 return self.__class__.Node(key, value)  # insertion
             # 1) top-down
             pass  # naturally no 4-node
@@ -90,6 +90,7 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
             rbt = self._balance(rbt)
             return rbt
 
+        assert (key is not None and value is not None)
         self.root = recur(self.root, key, value)
         if self.root.color:
             assert (not (self.root.left and self.root.left.color and self.root.right and self.root.right.color))
@@ -106,7 +107,7 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
     # @when: before traversing the rbt.left subtree
     def _makeLeftRed(self, rbt):
         assert (rbt.color or (rbt.left and rbt.left.color) or (rbt.right and rbt.right.color))
-        if rbt.left == None:
+        if not rbt.left:
             return rbt  # rbt.left node doesn't exist
         if rbt.left.color or (rbt.left.left and rbt.left.left.color) \
                 or (rbt.left.right and rbt.left.right.color):
@@ -114,8 +115,8 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
         if rbt.color:
             rbt = self._flipColor(rbt)  # move red from rbt node to rbt.left and rbt.right node
             # if rbt.right subtree is no longer a red-black tree
-            if rbt.right and ((rbt.right.left and rbt.right.left.color) \
-                                      or (rbt.right.right and rbt.right.right.color)):
+            if rbt.right and ((rbt.right.left and rbt.right.left.color)
+                              or (rbt.right.right and rbt.right.right.color)):
                 if rbt.right.left and rbt.right.left.color:
                     rbt.right = self._rotateRight(rbt.right)
                 rbt = self._rotateLeft(rbt)
@@ -123,22 +124,22 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
                 assert (rbt.left.left.color)  # color of the original rbt.left node is already red
         else:  # if rbt.right.color
             rbt = self._rotateLeft(rbt)  # move red from rbt.right node to rbt.left node
-        assert (rbt.left.color or (rbt.left.left and rbt.left.left.color) \
+        assert (rbt.left.color or (rbt.left.left and rbt.left.left.color)
                 or (rbt.left.right or rbt.left.right.color))
         return rbt
 
     # it's completely symmetric to _makeLeftRed()
     def _makeRightRed(self, rbt):
         assert (rbt.color or (rbt.left and rbt.left.color) or (rbt.right and rbt.right.color))
-        if rbt.right == None:
+        if not rbt.right:
             return rbt
         if rbt.right.color or (rbt.right.left and rbt.right.left.color) \
                 or (rbt.right.right and rbt.right.right.color):
             return rbt
         if rbt.color:
             rbt = self._flipColor(rbt)
-            if rbt.left and ((rbt.left.left and rbt.left.left.color) \
-                                     or (rbt.left.right and rbt.left.right.color)):
+            if rbt.left and ((rbt.left.left and rbt.left.left.color)
+                             or (rbt.left.right and rbt.left.right.color)):
                 if rbt.left.right and rbt.left.right.color:
                     rbt.left = self._rotateLeft(rbt.left)
                 rbt = self._rotateRight(rbt)
@@ -146,7 +147,7 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
                 assert (rbt.right.right.color)
         else:
             rbt = self._rotateRight(rbt)
-        assert (rbt.right.color or (rbt.right.left and rbt.right.left.color) \
+        assert (rbt.right.color or (rbt.right.left and rbt.right.left.color)
                 or (rbt.right.right and rbt.right.right.color))
         return rbt
 
@@ -168,7 +169,7 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
         self._deletePattern(self._delete, key)
 
     def _delete(self, rbt, key):
-        if rbt == None:  # termination of recursion
+        if not rbt:  # termination of recursion
             return rbt  # deletion failed
         assert (rbt.color or (rbt.left and rbt.left.color) or (rbt.right and rbt.right.color))
         if key < rbt.key:
@@ -248,7 +249,7 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
 
     # @return: black-height
     def _check(self, rbt, left, right):
-        if rbt == None:
+        if not rbt:
             return 0
         if rbt.left:
             assert (rbt.left.key < rbt.key)
@@ -256,7 +257,7 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
             assert (rbt.right.key > rbt.key)
         assert (left == right)  # left and right subtree hold the same black-height
         assert (not (rbt.left and rbt.left.color and rbt.right and rbt.right.color))
-        if rbt == self.root:
+        if rbt is self.root:
             assert (not (self.root and self.root.color))  # not necessary for a relaxed red-black tree
         if rbt.color:
             assert (not (rbt.left and rbt.left.color) and not (rbt.right and rbt.right.color))
