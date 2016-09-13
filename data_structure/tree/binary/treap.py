@@ -94,16 +94,18 @@ class Treap(SelfBalancingBinarySearchTree):
         self.root = recur(self.root, key)
 
     def deleteMax(self):
-        # self.delete(self.getMax().key) # @premise: self.delete() doesn't rely on self.deleteMax/Min()
-        m = self.getMax()
-        super(Treap, self).deleteMax()
-        self.prioritySet[m.priority] = 0
+        trp = self._getMax(self.root)
+        if trp:
+            super(Treap, self).deleteMax()
+            assert (self.prioritySet[trp.priority] == 1)
+            self.prioritySet[trp.priority] = 0
 
     def deleteMin(self):
-        # self.delete(self.getMin().key)
-        m = self.getMin()
-        super(Treap, self).deleteMin()
-        self.prioritySet[m.priority] = 0
+        trp = self._getMin(self.root)
+        if trp:
+            super(Treap, self).deleteMin()
+            assert (self.prioritySet[trp.priority] == 1)
+            self.prioritySet[trp.priority] = 0
 
     def clean(self):
         assert (len(self.prioritySet) == self.total)

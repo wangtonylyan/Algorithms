@@ -95,6 +95,7 @@ class TrieTreeTest(TreeTest, String):
         for case in cases:
             s = case[0]
             self.dic[s] = reduce(lambda v, c: v + ord(c), s, 0)
+        print '=' * 50
         print "sample size:\t", len(self.dic)
 
     def deleteMaxMin(self):

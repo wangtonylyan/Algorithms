@@ -40,7 +40,9 @@ class BinarySearchTree(Tree):
         return bst
 
     def getMax(self):
-        return self._getMax(self.root)
+        bst = self._getMax(self.root)
+        assert (not bst or bst.value is not None)
+        return bst.value if bst else None
 
     def _getMax(self, bst):
         while bst and bst.right:
@@ -48,7 +50,9 @@ class BinarySearchTree(Tree):
         return bst
 
     def getMin(self):
-        return self._getMin(self.root)
+        bst = self._getMin(self.root)
+        assert (not bst or bst.value is not None)
+        return bst.value if bst else None
 
     def _getMin(self, bst):
         while bst and bst.left:

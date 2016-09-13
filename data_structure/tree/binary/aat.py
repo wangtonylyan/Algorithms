@@ -111,14 +111,14 @@ class AATree(SelfBalancingBinarySearchTree):
         return aat
 
     def delete(self, key):
-        def _recur(aat, key):
+        def recur(aat, key):
             if not aat:
                 return aat
             if key < aat.key:
-                aat.left = _recur(aat.left, key)
+                aat.left = recur(aat.left, key)
                 aat = self._balance(aat)
             elif key > aat.key:
-                aat.right = _recur(aat.right, key)
+                aat.right = recur(aat.right, key)
                 aat = self._balance(aat)
             else:
                 if aat.right:
@@ -135,7 +135,7 @@ class AATree(SelfBalancingBinarySearchTree):
                     aat = None
             return aat
 
-        self.root = _recur(self.root, key)
+        self.root = recur(self.root, key)
 
     def _check(self, aat, left, right):
         if aat:

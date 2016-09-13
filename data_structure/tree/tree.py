@@ -59,6 +59,7 @@ class TreeTest(object):
             for i in range(num):
                 r = random.randint(0, 100000)
                 self.dic[r] = r + 1
+            print '=' * 50
             print "sample size:\t", len(self.dic)
         self.check = check
         if timer:
@@ -96,7 +97,7 @@ class TreeTest(object):
             cost = 0.0
             cnt = len(tree)
             while cnt > 0:
-                m = getFunc()
+                m = getFunc(tree.root)
                 if callable(self.timer):
                     start_t = self.timer()
                 delFunc()
@@ -112,9 +113,9 @@ class TreeTest(object):
             print 'deleteMaxMin:\t', cost
 
         tree = self.insert()
-        test(tree, tree.getMax, tree.deleteMax)
+        test(tree, tree._getMax, tree.deleteMax)
         tree = self.insert()
-        test(tree, tree.getMin, tree.deleteMin)
+        test(tree, tree._getMin, tree.deleteMin)
 
     def delete(self):
         tree = self.insert()
