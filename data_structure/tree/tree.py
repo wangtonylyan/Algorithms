@@ -26,7 +26,13 @@ class Tree(object):
     def getMax(self, *args):
         assert (False)
 
+    def _getMax(self, tree, *args):
+        assert (False)
+
     def getMin(self, *args):
+        assert (False)
+
+    def _getMin(self, tree, *args):
         assert (False)
 
     def insert(self, *args):
