@@ -451,6 +451,78 @@ def testmatch():
     BM().testcase()
 
 
+def testsplay():
+    from data_structure.tree.binary.bst import SelfBalancingBinarySearchTree, BinarySearchTreeTest
+
+    class Splay(SelfBalancingBinarySearchTree):
+        def __init__(self):
+            super(Splay, self).__init__()
+
+        def splay(self, key):
+            mid = self.__class__.Node(None, None)
+            left = right = mid
+            spt = self.root
+            while spt.key != key:
+                if key < spt.key:
+                    if not spt.left:
+                        break
+                    if key < spt.left.key:
+                        spt = self._rotateRight(spt)
+                        if not spt.left:
+                            break
+                    right.left = spt
+                    right = right.left
+                    spt = spt.left
+                else:
+                    assert (key > spt.key)
+                    if not spt.right:
+                        break
+                    if key > spt.right.key:
+                        spt = self._rotateLeft(spt)
+                        if not spt.right:
+                            break
+                    left.right = spt
+                    left = left.right
+                    spt = spt.right
+            left.right = spt.left
+            right.left = spt.right
+            spt.left = mid.right
+            spt.right = mid.left
+            return spt
+
+        def insert(self, key, value):
+            if not self.root:
+                self.root = self.__class__.Node(key, value)
+            else:
+                self.root = self.splay(key)
+                if self.root.key == key:
+                    self.root.value = value
+                else:
+                    spt = self.__class__.Node(key, value)
+                    if self.root.key > key:
+                        spt.left = self.root.left
+                        self.root.left = None
+                        spt.right = self.root
+                    else:
+                        spt.right = self.root.right
+                        self.root.right = None
+                        spt.left = self.root
+                    self.root = spt
+
+        def delete(self, key):
+            if self.root:
+                self.root = self.splay(key)
+                if not self.root.left:
+                    self.root = self.root.right
+                else:
+                    spt = self.root.right
+                    self.root = self.root.left
+                    self.root = self.splay(key)
+                    self.root.right = spt
+
+    BinarySearchTreeTest(Splay, 1000).delete()
+
+
 if __name__ == '__main__':
     # testsortint()
     # testsortstr()
@@ -458,4 +530,5 @@ if __name__ == '__main__':
     # testunionfindset()
     # testgraph()
     # testmatch()
+    # testsplay()
     print 'done'

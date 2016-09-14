@@ -201,6 +201,8 @@ class SelfAdjustingBinarySearchTree(BinarySearchTree):
         return bst
 
 
+# (自)平衡树大致分为两类：height-balanced和weight-balanced
+# 前者关注的是树的高度，后者关注的是树的重量(即树中节点的个数)
 class SelfBalancingBinarySearchTree(SelfAdjustingBinarySearchTree):
     def __init__(self):
         super(SelfBalancingBinarySearchTree, self).__init__()

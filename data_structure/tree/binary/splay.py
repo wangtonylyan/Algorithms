@@ -276,6 +276,9 @@ class SplayTreeTopDown(SplayTree):
         # 将'spt'节点作为树根，即完成对于该节点的伸展
         spt.left = root.right
         spt.right = root.left
+        # 'spt.key'与'key'的大小关系不确定，但'spt.left'和'spt.right'的构成则是完全根据key来划分的
+        assert (not spt.left or spt.left.key < key)
+        assert (not spt.right or spt.right.key > key)
         return spt
 
     def search(self, key):
@@ -293,24 +296,25 @@ class SplayTreeTopDown(SplayTree):
         assert (False)
 
     def insert(self, key, value):
+        assert (key is not None and value is not None)
         if not self.root:
             self.root = self.__class__.Node(key, value)
         else:
             self.root = self._splay(key)
-            if key < self.root.key:
-                node = self.__class__.Node(key, value)
-                node.left = self.root.left
-                self.root.left = None
-                node.right = self.root
-                self.root = node
-            elif key > self.root.key:
-                node = self.__class__.Node(key, value)
-                node.right = self.root.right
-                self.root.right = None
-                node.left = self.root
-                self.root = node
-            else:
+            if self.root.key == key:
                 self.root.value = value
+            else:
+                spt = self.__class__.Node(key, value)
+                if self.root.key > key:
+                    spt.left = self.root.left
+                    self.root.left = None
+                    spt.right = self.root
+                else:
+                    assert (self.root.key < key)
+                    spt.right = self.root.right
+                    self.root.right = None
+                    spt.left = self.root
+                self.root = spt
 
     def delete(self, key):
         if self.root:
@@ -322,9 +326,6 @@ class SplayTreeTopDown(SplayTree):
                     spt = self.root.right
                     self.root = self.root.left
                     self.root = self._splay(key)
-                    # 由于'key'要大于此时的'self.root'树中的所有节点
-                    # 所以伸展过程中会始终沿着右子树遍历(并不断地向左旋转)
-                    # 最终得到的伸展树将不具有右子树
                     assert (not self.root.right)
                     self.root.right = spt
 
