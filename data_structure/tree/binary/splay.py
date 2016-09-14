@@ -24,13 +24,13 @@ class SplayTree(SelfAdjustingBinarySearchTree):
     # 2) bottom-up
     # 从树根开始遍历直至找到目标节点，再将目标节点向上旋转直至树根
     # 需要维护access path信息，无论是使用栈还是父节点指针
-    def _splay(self, *args):  # interface
+    def _splay(self, *args):
         assert (False)
 
-    def _deleteMax(self, spt):  # not accessible
+    def split(self, *args):
         assert (False)
 
-    def _deleteMin(self, spt):  # not accessible
+    def join(self, *args):
         assert (False)
 
 
@@ -81,10 +81,10 @@ class SplayTreeBottomUp(SplayTree):
                 spt.parent.right = spt
         return spt
 
-    def _splay(self, spt):
+    def _splay(self, spt, root):
         assert (spt)
-        while spt.parent:
-            if not spt.parent.parent:
+        while spt.parent is not root:
+            if not spt.parent.parent or spt.parent.parent is root:
                 if spt.parent.left is spt:
                     self._rotateRight(spt.parent)
                 else:
@@ -107,7 +107,7 @@ class SplayTreeBottomUp(SplayTree):
                     assert (spt.parent.parent.right is spt.parent)
                     self._rotateLeft(spt.parent.parent)
                     self._rotateLeft(spt.parent)
-        assert (not spt.parent)
+        assert (spt.parent is root)
         return spt
 
     def _searchPattern(self, func, *args):
@@ -115,7 +115,7 @@ class SplayTreeBottomUp(SplayTree):
         spt = func(self.root, *args)
         assert (not spt or spt.value is not None)
         if spt:
-            self.root = self._splay(spt)
+            self.root = self._splay(spt, self.root.parent)
             return spt.value
         return None
 
@@ -151,13 +151,15 @@ class SplayTreeBottomUp(SplayTree):
                     assert (spt.key > pre.key)
                     assert (not pre.right)
                     pre.right = spt
-        self.root = self._splay(spt)
+            else:
+                self.root = spt
+        self.root = self._splay(spt, self.root.parent)
 
     def delete(self, key):
         spt = self._search(self.root, key)
         if spt:
             assert (spt.key == key)
-            self.root = self._splay(spt)
+            self.root = self._splay(spt, self.root.parent)
             if not self.root.left:
                 self.root = self.root.right
             elif not self.root.right:
@@ -178,37 +180,51 @@ class SplayTreeBottomUp(SplayTree):
             if self.root:
                 self.root.parent = None
 
-    def deleteMax(self):
-        if self.root:
-            if self.root.right:
-                spt = self.root
-                while spt.right.right:
-                    spt = spt.right
-                spt.right = spt.right.left
-                if spt.right:
-                    spt.right.parent = spt
-                self.root = self._splay(spt)
-            elif self.root.left:
-                self.root.left.parent = None
-                self.root = self.root.left
+    def _deleteMax(self, spt):
+        if spt:
+            if spt.right:
+                it = spt
+                while it.right.right:
+                    it = it.right
+                it.right = it.right.left
+                if it.right:
+                    it.right.parent = it
+                spt = self._splay(it, spt.parent)
+            elif spt.left:
+                spt.left.parent = spt.parent
+                if spt.parent:
+                    if spt.parent.left is spt:
+                        spt.parent.left = spt.left
+                    else:
+                        assert (spt.parent.right is spt)
+                        spt.parent.right = spt.left
+                spt = spt.left
             else:
-                self.root = None
+                spt = None
+        return spt
 
-    def deleteMin(self):
-        if self.root:
-            if self.root.left:
-                spt = self.root
-                while spt.left.left:
-                    spt = spt.left
-                spt.left = spt.left.right
-                if spt.left:
-                    spt.left.parent = spt
-                self.root = self._splay(spt)
-            elif self.root.right:
-                self.root.right.parent = None
-                self.root = self.root.right
+    def _deleteMin(self, spt):
+        if spt:
+            if spt.left:
+                it = spt
+                while it.left.left:
+                    it = it.left
+                it.left = it.left.right
+                if it.left:
+                    it.left.parent = it
+                spt = self._splay(it, spt.parent)
+            elif spt.right:
+                spt.right.parent = spt.parent
+                if spt.parent:
+                    if spt.parent.left is spt:
+                        spt.parent.left = spt.right
+                    else:
+                        assert (spt.parent.right is spt)
+                        spt.parent.right = spt.right
+                spt = spt.right
             else:
-                self.root = None
+                spt = None
+        return spt
 
     def _check(self, spt, left, right):
         if spt:
@@ -225,21 +241,21 @@ class SplayTreeTopDown(SplayTree):
     def __init__(self):
         super(SplayTreeTopDown, self).__init__()
 
-    def _splay(self, key):
-        assert (self.root)
+    def _splay(self, spt, key):
+        assert (spt and key is not None)
         # 1) 沿着access path将整棵树分解成左(left)、中(spt)、右(right)三棵子树
         # 其中'left'/'right'连接了access path左/右侧的所有子树，即键值小/大于目标节点的所有子节点
         # [left]  [right]
         #  /.        .\
         #   /.      .\
         #    /.    .\
-        # 上图中，点表示link阶段新增的边，即'left.right'和'right.left'
+        # 上图呈现了'left'和'right'子树的形态，其中
+        # 点表示link阶段新增的边，即'left.right'和'right.left'
         # 线段表示原本树中已有的边，即access path左右两侧的子树
         # 2) 通过单次rotate操作不断地将局部zig-zig形状的access path调整为zig-zag形状
         # 以期降低'left'和'right'子树的高度，避免整棵树随伸展而退化
         root = self.__class__.Node(None, None)
         left = right = root
-        spt = self.root
         while spt.key != key:
             if key < spt.key:
                 if not spt.left:
@@ -276,18 +292,22 @@ class SplayTreeTopDown(SplayTree):
         # 将'spt'节点作为树根，即完成对于该节点的伸展
         spt.left = root.right
         spt.right = root.left
-        # 'spt.key'与'key'的大小关系不确定，但'spt.left'和'spt.right'的构成则是完全根据key来划分的
+        # 'spt.key'与'key'的大小关系不确定，但'spt.left'和'spt.right'的构成则是完全根据'key'来划分的
         assert (not spt.left or spt.left.key < key)
         assert (not spt.right or spt.right.key > key)
         return spt
 
     def search(self, key):
-        if self.root:
-            self.root = self._splay(key)
+        self.root = self._search(self.root, key)
+        if self.root and self.root.key == key:
             assert (self.root.value is not None)
-            if self.root.key == key:
-                return self.root.value
+            return self.root.value
         return None
+
+    def _search(self, spt, key):
+        if spt:
+            spt = self._splay(spt, key)
+        return spt
 
     def getMax(self):  # not implemented
         assert (False)
@@ -300,7 +320,7 @@ class SplayTreeTopDown(SplayTree):
         if not self.root:
             self.root = self.__class__.Node(key, value)
         else:
-            self.root = self._splay(key)
+            self.root = self._splay(self.root, key)
             if self.root.key == key:
                 self.root.value = value
             else:
@@ -318,16 +338,15 @@ class SplayTreeTopDown(SplayTree):
 
     def delete(self, key):
         if self.root:
-            self.root = self._splay(key)
+            self.root = self._splay(self.root, key)
             if self.root.key == key:
                 if not self.root.left:
                     self.root = self.root.right
                 else:
-                    spt = self.root.right
+                    self.root.left = self._splay(self.root.left, key)
+                    assert (not self.root.left.right)
+                    self.root.left.right = self.root.right
                     self.root = self.root.left
-                    self.root = self._splay(key)
-                    assert (not self.root.right)
-                    self.root.right = spt
 
     def deleteMax(self):  # not implemented
         assert (False)
