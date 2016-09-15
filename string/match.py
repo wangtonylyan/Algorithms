@@ -118,10 +118,11 @@ class KnuthMorrisPratt(StringMatch):
                 i += 1
                 j += 1
                 jmp[i] = j
-            elif j == 0:
-                i += 1
-            else:
+            elif j > 0:
                 j = jmp[j - 1]
+            else:
+                assert (j == 0)
+                i += 1
         return jmp
 
         # 以下构建'jmp'的方式更为直观
@@ -201,7 +202,7 @@ class BoyerMoore(StringMatch):
         bad = [[] for _ in range(self.alphabet)]  # [0,-1], index
         for i in range(len(pat) - 1, -1, -1):
             # all occurrences of pat[i], rightmost first
-            bad[ord(pat[i]) - ord('a')].append(i)
+            bad[self.ord(pat[i])].append(i)
         return bad
 
     def _preprocess_goodSuffix(self, pat):
@@ -243,7 +244,7 @@ class BoyerMoore(StringMatch):
             else:
                 assert (txt[i + j] != pat[j])
                 # use the "bad character shift rule"
-                bad = bads[ord(txt[i + j]) - ord('a')]
+                bad = bads[self.ord(txt[i + j])]
                 k = 0  # closest to the left of j
                 while k < len(bad) and bad[k] > j:
                     k += 1
@@ -259,7 +260,7 @@ class BoyerMoore(StringMatch):
                 else:  # optional else
                     gsShift = len(pat)
                 # make the maximum shift
-                i += max(bcShift, gsShift, 1)
+                i += max(bcShift, gsShift)
         return ret
 
 
