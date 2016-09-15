@@ -2,13 +2,11 @@
 # data structure: splay tree
 # 伸展树的特点就是每一次对于树的访问后都要进行一次伸展操作
 # 目的是将最近被访问的节点置于更接近树根的位置，以便提高平均访问效率
-# Splay operation does rotations along the access path
-# and moves the target node all the way up to the root,
-# which still preserves the symmetric order of the whole tree.
 # 利用splay操作有时可以完成一些其他BST无法做到的行为
 # 例如需要删除某个区间(a,b)内所有节点，区间树就很难完成，但对于伸展树而言就很简单
 # 将a结点splay至根，将b结点伸展至根的右节点，最后再将b节点的左子树整体删除即可
-
+# In 2000, Danny Sleator and Robert Tarjan won the ACM Kanellakis Theory and
+# Practice Award for their papers on splay trees and amortized analysis.
 
 from bst import SelfAdjustingBinarySearchTree, BinarySearchTreeTest
 
@@ -18,13 +16,17 @@ class SplayTree(SelfAdjustingBinarySearchTree):
         super(SplayTree, self).__init__()
         self._search = self._splay
 
-    # splay操作有两种实现策略：
-    # 1) top-down
+    # 1) splay操作有两种实现策略：
+    # (a) top-down
     # 从树根开始遍历的同时就进行旋转操作，当遍历到目标节点时也就完成了整棵树的伸展
     # 若目标节点不存在，则与目标节点的key较接近的某个叶子节点将成为新的树根
-    # 2) bottom-up
+    # (b) bottom-up
     # 从树根开始遍历直至找到目标节点，再将目标节点向上旋转直至树根
     # 需要维护access path信息，无论是使用栈/递归还是父节点指针
+    # 2) 由原始论文中的描述，"将目标节点伸展至树根"的思想并不是伸展树所开创的
+    # 但该树的与众不同之处就在于，其旋转是成双成对的(以降低平均的时间复杂度)：
+    # 即根据zig-zig或zig-zag(而不是单个zig)来决定对于目标节点的伸展方式
+    # 3) 如下所示，编程实现中，对于zig-zag形状的讨论常被蕴含于整个循环或递归逻辑中，而无需单独处理
     def _splay(self, spt, key):
         assert (False)
         return spt
@@ -111,8 +113,7 @@ class SplayTreeTopDown(SplayTree):
         # 上图呈现了'left'和'right'子树的形态，其中
         # 点表示link阶段新增的边，即'left.right'和'right.left'
         # 线段表示原本树中已有的边，即access path左右两侧的子树
-        # 2) 通过单次rotate操作不断地将局部zig-zig形状的access path调整为zig-zag形状
-        # 以期降低'left'和'right'子树的高度，避免整棵树随伸展而退化
+        # 2) 消除沿access path出现的zig-zig形状，而zig-zag形状则被自然地分解至了'left'和'right'子树中
         root = self.__class__.Node(None, None)
         left = right = root
         while spt.key != key:
@@ -202,25 +203,27 @@ class SplayTreeBottomUp(SplayTree):
                 spt = self._rotateRight(spt)
                 if spt.left:
                     spt = self._rotateRight(spt)
-            elif key > spt.left.key:  # zig-zag
-                spt.left.right = self._splay(spt.left.right, key)
-                if spt.left.right:
-                    spt.left = self._rotateLeft(spt.left)
-                spt = self._rotateRight(spt)
+            # elif key > spt.left.key:  # zig-zag
+            #    spt.left.right = self._splay(spt.left.right, key)
+            #    if spt.left.right:
+            #        spt.left = self._rotateLeft(spt.left)
+            #    spt = self._rotateRight(spt)
             else:
+                spt.left = self._splay(spt.left, key)
                 spt = self._rotateRight(spt)
         elif key > spt.key and spt.right:
-            if key < spt.right.key:  # zig-zag
-                spt.right.left = self._splay(spt.right.left, key)
-                if spt.right.left:
-                    spt.right = self._rotateRight(spt.right)
-                spt = self._rotateLeft(spt)
-            elif key > spt.right.key:  # zig-zig
+            if key > spt.right.key:  # zig-zig
                 spt.right.right = self._splay(spt.right.right, key)
                 spt = self._rotateLeft(spt)
                 if spt.right:
                     spt = self._rotateLeft(spt)
+            # elif key < spt.right.key:  # zig-zag
+            #    spt.right.left = self._splay(spt.right.left, key)
+            #    if spt.right.left:
+            #        spt.right = self._rotateRight(spt.right)
+            #    spt = self._rotateLeft(spt)
             else:
+                spt.right = self._splay(spt.right, key)
                 spt = self._rotateLeft(spt)
         assert (not spt.left or spt.left.key < key)
         assert (not spt.right or spt.right.key > key)
