@@ -26,13 +26,7 @@ class Tree(object):
     def getMax(self, *args):
         assert (False)
 
-    def _getMax(self, tree, *args):
-        assert (False)
-
     def getMin(self, *args):
-        assert (False)
-
-    def _getMin(self, tree, *args):
         assert (False)
 
     def insert(self, *args):
@@ -103,7 +97,8 @@ class TreeTest(object):
             cost = 0.0
             cnt = len(tree)
             while cnt > 0:
-                m = getFunc(tree.root)
+                m = getFunc()
+                assert (isinstance(m, tuple) and len(m) == 2)
                 if callable(self.timer):
                     start_t = self.timer()
                 delFunc()
@@ -112,16 +107,16 @@ class TreeTest(object):
                     cost += (end_t - start_t) * 1000
                 if self.check:
                     tree.check()
-                assert (tree.search(m.key) is None)
+                assert (tree.search(m[0]) is None)
                 cnt -= 1
                 assert (cnt == len(tree))
             assert (cnt == len(tree) == 0)
             print 'deleteMaxMin:\t', cost
 
         tree = self.insert()
-        test(tree, tree._getMax, tree.deleteMax)
+        test(tree, tree.getMax, tree.deleteMax)
         tree = self.insert()
-        test(tree, tree._getMin, tree.deleteMin)
+        test(tree, tree.getMin, tree.deleteMin)
 
     def delete(self):
         tree = self.insert()

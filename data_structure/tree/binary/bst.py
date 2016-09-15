@@ -26,7 +26,7 @@ class BinarySearchTree(Tree):
 
     def search(self, key):
         bst = self._search(self.root, key)
-        assert (not bst or bst.value is not None)
+        assert (not bst or (bst.key == key and bst.value is not None))
         return bst.value if bst else None
 
     def _search(self, bst, key):
@@ -41,8 +41,8 @@ class BinarySearchTree(Tree):
 
     def getMax(self):
         bst = self._getMax(self.root)
-        assert (not bst or bst.value is not None)
-        return bst.value if bst else None
+        assert (not bst or (bst.key is not None and bst.value is not None))
+        return (bst.key, bst.value) if bst else None
 
     def _getMax(self, bst):
         while bst and bst.right:
@@ -51,8 +51,8 @@ class BinarySearchTree(Tree):
 
     def getMin(self):
         bst = self._getMin(self.root)
-        assert (not bst or bst.value is not None)
-        return bst.value if bst else None
+        assert (not bst or (bst.key is not None and bst.value is not None))
+        return (bst.key, bst.value) if bst else None
 
     def _getMin(self, bst):
         while bst and bst.left:

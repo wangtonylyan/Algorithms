@@ -92,24 +92,6 @@ class AATree(SelfBalancingBinarySearchTree):
         assert (key is not None and value is not None)
         self.root = recur(self.root, key, value)
 
-    def _deleteMax(self, aat):
-        if aat:
-            if aat.right:
-                aat.right = self._deleteMax(aat.right)
-                aat = self._balance(aat)
-            else:
-                aat = aat.left
-        return aat
-
-    def _deleteMin(self, aat):
-        if aat:
-            if aat.left:
-                aat.left = self._deleteMin(aat.left)
-                aat = self._balance(aat)
-            else:
-                aat = aat.right
-        return aat
-
     def delete(self, key):
         def recur(aat, key):
             if not aat:
@@ -136,6 +118,24 @@ class AATree(SelfBalancingBinarySearchTree):
             return aat
 
         self.root = recur(self.root, key)
+
+    def _deleteMax(self, aat):
+        if aat:
+            if aat.right:
+                aat.right = self._deleteMax(aat.right)
+                aat = self._balance(aat)
+            else:
+                aat = aat.left
+        return aat
+
+    def _deleteMin(self, aat):
+        if aat:
+            if aat.left:
+                aat.left = self._deleteMin(aat.left)
+                aat = self._balance(aat)
+            else:
+                aat = aat.right
+        return aat
 
     def _check(self, aat, left, right):
         if aat:

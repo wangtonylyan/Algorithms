@@ -16,225 +16,83 @@ from bst import SelfAdjustingBinarySearchTree, BinarySearchTreeTest
 class SplayTree(SelfAdjustingBinarySearchTree):
     def __init__(self):
         super(SplayTree, self).__init__()
+        self._search = self._splay
 
-    # Splay操作有两种实现策略：
+    # splay操作有两种实现策略：
     # 1) top-down
     # 从树根开始遍历的同时就进行旋转操作，当遍历到目标节点时也就完成了整棵树的伸展
     # 若目标节点不存在，则与目标节点的key较接近的某个叶子节点将成为新的树根
     # 2) bottom-up
     # 从树根开始遍历直至找到目标节点，再将目标节点向上旋转直至树根
-    # 需要维护access path信息，无论是使用栈还是父节点指针
-    def _splay(self, *args):
+    # 需要维护access path信息，无论是使用栈/递归还是父节点指针
+    def _splay(self, spt, key):
         assert (False)
-
-    def split(self, *args):
-        assert (False)
-
-    def join(self, *args):
-        assert (False)
-
-
-class SplayTreeBottomUp(SplayTree):
-    class Node(SplayTree.Node):
-        __slots__ = ['parent']
-
-        def __init__(self, key, value, parent):
-            super(SplayTreeBottomUp.Node, self).__init__(key, value)
-            # bottom-up阶段依赖于子节点至父节点的路径信息，一般有以下两种获取方式
-            # 1) 在每次的top-down阶段中，使用临时栈来存储整个access path
-            # 2) 每个节点中都维护一个父节点指针，但会增加维护该指针的复杂度
-            self.parent = parent
-
-    def __init__(self):
-        super(SplayTreeBottomUp, self).__init__()
-
-    def _rotateLeft(self, spt):
-        assert (spt and spt.right)
-        spt = super(SplayTreeBottomUp, self)._rotateLeft(spt)
-        assert (spt.left)
-        # 以下需要额外地维护父节点指针，于是一次旋转操作就牵涉到了树中的三个层次
-        if spt.left.right:
-            spt.left.right.parent = spt.left
-        spt.parent = spt.left.parent
-        spt.left.parent = spt
-        if spt.parent:
-            if spt.parent.left is spt.left:
-                spt.parent.left = spt
-            else:
-                assert (spt.parent.right is spt.left)
-                spt.parent.right = spt
         return spt
-
-    def _rotateRight(self, spt):
-        assert (spt and spt.left)
-        spt = super(SplayTreeBottomUp, self)._rotateRight(spt)
-        assert (spt.right)
-        if spt.right.left:
-            spt.right.left.parent = spt.right
-        spt.parent = spt.right.parent
-        spt.right.parent = spt
-        if spt.parent:
-            if spt.parent.left is spt.right:
-                spt.parent.left = spt
-            else:
-                assert (spt.parent.right is spt.right)
-                spt.parent.right = spt
-        return spt
-
-    def _splay(self, spt, root):
-        assert (spt)
-        while spt.parent is not root:
-            if not spt.parent.parent or spt.parent.parent is root:
-                if spt.parent.left is spt:
-                    self._rotateRight(spt.parent)
-                else:
-                    assert (spt.parent.right is spt)
-                    self._rotateLeft(spt.parent)
-            elif spt.parent.left is spt:
-                if spt.parent.parent.left is spt.parent:  # zig-zig
-                    self._rotateRight(spt.parent.parent)
-                    self._rotateRight(spt.parent)
-                else:  # zig-zag
-                    assert (spt.parent.parent.right is spt.parent)
-                    self._rotateRight(spt.parent)
-                    self._rotateLeft(spt.parent)
-            else:
-                assert (spt.parent.right is spt)
-                if spt.parent.parent.left is spt.parent:  # zig-zag
-                    self._rotateLeft(spt.parent)
-                    self._rotateRight(spt.parent)
-                else:  # zig-zig
-                    assert (spt.parent.parent.right is spt.parent)
-                    self._rotateLeft(spt.parent.parent)
-                    self._rotateLeft(spt.parent)
-        assert (spt.parent is root)
-        return spt
-
-    def _searchPattern(self, func, *args):
-        assert (callable(func))
-        spt = func(self.root, *args)
-        assert (not spt or spt.value is not None)
-        if spt:
-            self.root = self._splay(spt, self.root.parent)
-            return spt.value
-        return None
 
     def search(self, key):
-        return self._searchPattern(self._search, key)
+        self.root = self._search(self.root, key)
+        assert (not self.root or (self.root.key is not None and
+                                  self.root.value is not None))
+        return self.root.value if self.root and self.root.key == key else None
 
     def getMax(self):
-        return self._searchPattern(self._getMax)
+        self.root = self._getMax(self.root)
+        assert (not self.root or (self.root.key is not None and
+                                  self.root.value is not None))
+        return (self.root.key, self.root.value) if self.root else None
 
     def getMin(self):
-        return self._searchPattern(self._getMin)
+        self.root = self._getMin(self.root)
+        assert (not self.root or (self.root.key is not None and
+                                  self.root.value is not None))
+        return (self.root.key, self.root.value) if self.root else None
 
     def insert(self, key, value):
-        pre = None
-        spt = self.root
-        while spt:
-            if key < spt.key:
-                pre = spt
-                spt = spt.left
-            elif key > spt.key:
-                pre = spt
-                spt = spt.right
+        assert (key is not None and value is not None)
+        if not self.root:
+            self.root = self.__class__.Node(key, value)
+        else:
+            self.root = self._splay(self.root, key)
+            if self.root.key == key:
+                self.root.value = value
             else:
-                spt.value = value
-                break
-        if not spt:
-            spt = self.__class__.Node(key, value, pre)
-            if pre:
-                if spt.key < pre.key:
-                    assert (not pre.left)
-                    pre.left = spt
+                spt = self.__class__.Node(key, value)
+                if self.root.key > key:
+                    spt.left = self.root.left
+                    self.root.left = None
+                    spt.right = self.root
                 else:
-                    assert (spt.key > pre.key)
-                    assert (not pre.right)
-                    pre.right = spt
-            else:
+                    assert (self.root.key < key)
+                    spt.right = self.root.right
+                    self.root.right = None
+                    spt.left = self.root
                 self.root = spt
-        self.root = self._splay(spt, self.root.parent)
 
     def delete(self, key):
-        spt = self._search(self.root, key)
-        if spt:
-            assert (spt.key == key)
-            self.root = self._splay(spt, self.root.parent)
-            if not self.root.left:
-                self.root = self.root.right
-            elif not self.root.right:
-                self.root = self.root.left
-            else:
-                m = self._getMax(self.root.left)
-                self.root.key = m.key
-                self.root.value = m.value
-                assert (not m.right)
-                if m.parent.left is m:
-                    assert (m.parent is self.root)
-                    m.parent.left = m.left
+        if self.root:
+            self.root = self._splay(self.root, key)
+            if self.root.key == key:
+                if not self.root.left:
+                    self.root = self.root.right
                 else:
-                    assert (m.parent.right is m)
-                    m.parent.right = m.left
-                if m.left:
-                    m.left.parent = m.parent
-            if self.root:
-                self.root.parent = None
+                    self.root.left = self._splay(self.root.left, key)
+                    assert (not self.root.left.right)
+                    self.root.left.right = self.root.right
+                    self.root = self.root.left
 
     def _deleteMax(self, spt):
-        if spt:
-            if spt.right:
-                it = spt
-                while it.right.right:
-                    it = it.right
-                it.right = it.right.left
-                if it.right:
-                    it.right.parent = it
-                spt = self._splay(it, spt.parent)
-            elif spt.left:
-                spt.left.parent = spt.parent
-                if spt.parent:
-                    if spt.parent.left is spt:
-                        spt.parent.left = spt.left
-                    else:
-                        assert (spt.parent.right is spt)
-                        spt.parent.right = spt.left
-                spt = spt.left
-            else:
-                spt = None
-        return spt
+        if not spt:
+            return spt
+        spt = self._getMax(spt)
+        assert (not spt.right)
+        return spt.left
 
     def _deleteMin(self, spt):
-        if spt:
-            if spt.left:
-                it = spt
-                while it.left.left:
-                    it = it.left
-                it.left = it.left.right
-                if it.left:
-                    it.left.parent = it
-                spt = self._splay(it, spt.parent)
-            elif spt.right:
-                spt.right.parent = spt.parent
-                if spt.parent:
-                    if spt.parent.left is spt:
-                        spt.parent.left = spt.right
-                    else:
-                        assert (spt.parent.right is spt)
-                        spt.parent.right = spt.right
-                spt = spt.right
-            else:
-                spt = None
-        return spt
-
-    def _check(self, spt, left, right):
-        if spt:
-            if spt.left:
-                assert (spt is spt.left.parent)
-            if spt.right:
-                assert (spt is spt.right.parent)
-            if spt is self.root:
-                assert (not spt.parent)
-        return super(SplayTreeBottomUp, self)._check(spt, left, right)
+        if not spt:
+            return spt
+        spt = self._getMin(spt)
+        assert (not spt.left)
+        return spt.right
 
 
 class SplayTreeTopDown(SplayTree):
@@ -242,7 +100,8 @@ class SplayTreeTopDown(SplayTree):
         super(SplayTreeTopDown, self).__init__()
 
     def _splay(self, spt, key):
-        assert (spt and key is not None)
+        if not spt:
+            return spt
         # 1) 沿着access path将整棵树分解成左(left)、中(spt)、右(right)三棵子树
         # 其中'left'/'right'连接了access path左/右侧的所有子树，即键值小/大于目标节点的所有子节点
         # [left]  [right]
@@ -297,65 +156,94 @@ class SplayTreeTopDown(SplayTree):
         assert (not spt.right or spt.right.key > key)
         return spt
 
-    def search(self, key):
-        self.root = self._search(self.root, key)
-        if self.root and self.root.key == key:
-            assert (self.root.value is not None)
-            return self.root.value
-        return None
-
-    def _search(self, spt, key):
+    def _getMax(self, spt):
         if spt:
-            spt = self._splay(spt, key)
+            root = self.__class__.Node(None, None)
+            left = root
+            while spt.right:
+                if spt.right.right:
+                    spt = self._rotateLeft(spt)
+                spt = self._rotateLeft(spt)
+                if spt.right:
+                    left.right = spt
+                    left = left.right
+                    spt = spt.right
+            left.right = spt.left
+            spt.left = root.right
         return spt
 
-    def getMax(self):  # not implemented
-        assert (False)
+    def _getMin(self, spt):
+        if spt:
+            root = self.__class__.Node(None, None)
+            right = root
+            while spt.left:
+                if spt.left.left:
+                    spt = self._rotateRight(spt)
+                spt = self._rotateRight(spt)
+                if spt.left:
+                    right.left = spt
+                    right = right.left
+                    spt = spt.left
+            right.left = spt.right
+            spt.right = root.left
+        return spt
 
-    def getMin(self):  # not implemented
-        assert (False)
 
-    def insert(self, key, value):
-        assert (key is not None and value is not None)
-        if not self.root:
-            self.root = self.__class__.Node(key, value)
-        else:
-            self.root = self._splay(self.root, key)
-            if self.root.key == key:
-                self.root.value = value
+class SplayTreeBottomUp(SplayTree):
+    def __init__(self):
+        super(SplayTreeBottomUp, self).__init__()
+
+    def _splay(self, spt, key):
+        if not spt:
+            return spt
+        if key < spt.key and spt.left:
+            if key < spt.left.key:  # zig-zig
+                spt.left.left = self._splay(spt.left.left, key)
+                spt = self._rotateRight(spt)
+                if spt.left:
+                    spt = self._rotateRight(spt)
+            elif key > spt.left.key:  # zig-zag
+                spt.left.right = self._splay(spt.left.right, key)
+                if spt.left.right:
+                    spt.left = self._rotateLeft(spt.left)
+                spt = self._rotateRight(spt)
             else:
-                spt = self.__class__.Node(key, value)
-                if self.root.key > key:
-                    spt.left = self.root.left
-                    self.root.left = None
-                    spt.right = self.root
-                else:
-                    assert (self.root.key < key)
-                    spt.right = self.root.right
-                    self.root.right = None
-                    spt.left = self.root
-                self.root = spt
+                spt = self._rotateRight(spt)
+        elif key > spt.key and spt.right:
+            if key < spt.right.key:  # zig-zag
+                spt.right.left = self._splay(spt.right.left, key)
+                if spt.right.left:
+                    spt.right = self._rotateRight(spt.right)
+                spt = self._rotateLeft(spt)
+            elif key > spt.right.key:  # zig-zig
+                spt.right.right = self._splay(spt.right.right, key)
+                spt = self._rotateLeft(spt)
+                if spt.right:
+                    spt = self._rotateLeft(spt)
+            else:
+                spt = self._rotateLeft(spt)
+        assert (not spt.left or spt.left.key < key)
+        assert (not spt.right or spt.right.key > key)
+        return spt
 
-    def delete(self, key):
-        if self.root:
-            self.root = self._splay(self.root, key)
-            if self.root.key == key:
-                if not self.root.left:
-                    self.root = self.root.right
-                else:
-                    self.root.left = self._splay(self.root.left, key)
-                    assert (not self.root.left.right)
-                    self.root.left.right = self.root.right
-                    self.root = self.root.left
+    def _getMax(self, spt):
+        if spt and spt.right:
+            spt.right.right = self._getMax(spt.right.right)
+            spt = self._rotateLeft(spt)
+            if spt.right:
+                spt = self._rotateLeft(spt)
+        return spt
 
-    def deleteMax(self):  # not implemented
-        assert (False)
-
-    def deleteMin(self):  # not implemented
-        assert (False)
+    def _getMin(self, spt):
+        if spt and spt.left:
+            spt.left.left = self._getMin(spt.left.left)
+            spt = self._rotateRight(spt)
+            if spt.left:
+                spt = self._rotateRight(spt)
+        return spt
 
 
 if __name__ == '__main__':
+    BinarySearchTreeTest(SplayTreeTopDown, 1000).testcase()
     BinarySearchTreeTest(SplayTreeBottomUp, 1000).testcase()
-    BinarySearchTreeTest(SplayTreeTopDown, 2000).delete()
     print 'done'
