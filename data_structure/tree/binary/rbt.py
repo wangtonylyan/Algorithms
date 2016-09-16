@@ -252,9 +252,9 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
         if not rbt:
             return 0
         if rbt.left:
-            assert (rbt.left.key < rbt.key)
+            assert (rbt.key > rbt.left.key)
         if rbt.right:
-            assert (rbt.right.key > rbt.key)
+            assert (rbt.key < rbt.right.key)
         assert (left == right)  # left and right subtree hold the same black-height
         assert (not (rbt.left and rbt.left.color and rbt.right and rbt.right.color))
         if rbt is self.root:
