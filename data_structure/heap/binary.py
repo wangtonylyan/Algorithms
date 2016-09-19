@@ -65,7 +65,7 @@ class BinaryHeap(object):
         # 其实，建堆过程本身就是一种排序
 
         # a.1) 将节点i的值插入至其子节点的两棵子堆中
-        for i in range((len(self.hp) - 1) >> 1, -1, -1):
+        for i in range((len(self.hp) >> 1) - 1, -1, -1):
             self._sink(i, len(self.hp))
 
         # a.2) 将节点i的值插入至其索引之前所有节点所构成的整棵堆中
