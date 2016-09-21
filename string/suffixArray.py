@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from string.string import String
+from string import String
 
 
 class SuffixArray(String):

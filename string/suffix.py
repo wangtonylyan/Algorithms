@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from data_structure.suffixArray import SuffixArray
+from suffixArray import SuffixArray
+
+suffixFunc = SuffixArray().main_nlogn
 
 
 class Main():
     def pattern_search(self, txt, pat):
-        sfx = SuffixArray().main_nlogn(txt)
+        sfx = suffixFunc(txt)
         low, high = 0, len(sfx) - 1
         while low <= high:
             mid = low + (high - low) / 2
@@ -21,7 +23,7 @@ class Main():
 
     def minimum_lexicographic_rotation(self, str):
         concat = str + str
-        sfx = SuffixArray().main_nlogn(concat)
+        sfx = suffixFunc(concat)
         for s in sfx:
             if len(concat) - s >= len(str):
                 return concat[s:s + len(str)]
