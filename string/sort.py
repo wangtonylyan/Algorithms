@@ -17,49 +17,49 @@ class StringSort(String):
             self.main_MSD,
         ]
 
-    def main_LSD(self, lst):
-        aux = [None] * len(lst)
-        for w in range(max(map(len, lst)) - 1, -1, -1):
+    def main_LSD(self, str):
+        aux = [None] * len(str)
+        for w in range(max(map(len, str)) - 1, -1, -1):
             cnt = [0] * (self.alphabet + 2)
-            for i in lst:
+            for i in str:
                 if w < len(i):
                     cnt[self.ord(i[w]) + 2] += 1
                 else:
                     cnt[1] += 1
             for i in range(len(cnt) - 1):
                 cnt[i + 1] += cnt[i]
-            for i in lst:
+            for i in str:
                 if w < len(i):
                     aux[cnt[self.ord(i[w]) + 1]] = i
                     cnt[self.ord(i[w]) + 1] += 1
                 else:
                     aux[cnt[0]] = i
                     cnt[0] += 1
-            lst, aux = aux, lst
-        return lst
+            str, aux = aux, str
+        return str
 
-    def main_MSD(self, lst):
+    def main_MSD(self, str):
         def recur(low, high, wid):
-            if high - low < 2 or wid >= max(map(len, lst[low:high])):
+            if high - low < 2 or wid >= max(map(len, str[low:high])):
                 return
             cnt = [0] * (self.alphabet + 2)
-            for i in lst[low:high]:
+            for i in str[low:high]:
                 cnt[self.ord(i[wid]) + 2 if wid < len(i) else 1] += 1
             for i in range(len(cnt) - 1):
                 cnt[i + 1] += cnt[i]
             aux = [None] * (high - low)
-            for i in lst[low:high]:
+            for i in str[low:high]:
                 aux[cnt[self.ord(i[wid]) + 1 if wid < len(i) else 0]] = i
                 cnt[self.ord(i[wid]) + 1 if wid < len(i) else 0] += 1
-            lst[low:high] = aux
+            str[low:high] = aux
 
-            assert (max(map(len, lst[low:low + cnt[0]])) <= wid if cnt[0] > 0 else True)
+            assert (max(map(len, str[low:low + cnt[0]])) <= wid if cnt[0] > 0 else True)
             assert (cnt[-1] == high - low)
             for i in range(len(cnt) - 1):
                 recur(low + cnt[i], low + cnt[i + 1], wid + 1)
 
-        recur(0, len(lst), 0)
-        return lst
+        recur(0, len(str), 0)
+        return str
 
     def testcase(self):
         def test(case):
