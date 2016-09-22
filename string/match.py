@@ -5,12 +5,13 @@
 
 import random, re
 from string import String
+from suffix import EnhancedSuffixArray
 
 
 class StringMatch(String):
     def __init__(self):
         super(StringMatch, self).__init__()
-        self.funcs = [self.main_bruteForce]
+        self.funcs = [self.main_bruteForce, self.main]
 
     def main_bruteForce(self, txt, pat):
         # search
@@ -23,41 +24,8 @@ class StringMatch(String):
                 ret.append(i)
         return ret
 
-    def _preprocess_bruteForce(self, pat):
-        tab = [0] * len(pat)  # (0,-1], length
-        for i in range(1, len(pat)):
-            j = 0
-            while j < len(pat) - i and pat[i + j] == pat[j]:
-                j += 1
-            tab[i] = j
-        return tab
-
-    def _preprocess_fundamental(self, pat):
-        tab = [0] * len(pat)  # (0,-1], length
-        low, high = 0, 0  # [low,high) is a prefix of pat
-        # @invariant: variable high is the farthest index to the right
-        # 目的是为了在从左至右的遍历顺序下，尽可能多地预知右边仍未被访问到的字符
-        # 简而言之high越右，tab可复用的几率就越高
-        for i in range(1, len(pat)):
-            assert (low < i and low <= high <= len(pat))
-            if i < high:
-                assert (pat[i:high] == pat[i - low:high - low])
-                assert (high == len(pat) or pat[high] != pat[high - low])
-                if high - i > tab[i - low]:
-                    assert (pat[i:i + tab[i - low]] == pat[i - low:i - low + tab[i - low]] == pat[:tab[i - low]])
-                    assert (pat[i + tab[i - low]] == pat[i - low + tab[i - low]] != pat[tab[i - low]])
-                    tab[i] = tab[i - low]
-                    continue
-                else:
-                    j = high - i
-            else:
-                j = 0
-
-            while j < len(pat) - i and pat[i + j] == pat[j]:
-                j += 1
-            tab[i] = j
-            low, high = i, i + tab[i]
-        return tab
+    def main(self, txt, pat):
+        assert (False)
 
     def _gencase(self, total=500):
         cases = [
@@ -86,21 +54,58 @@ class StringMatch(String):
 
     def testcase(self):
         def test(case):
-            assert (self._preprocess_bruteForce(case[0]) == self._preprocess_fundamental(case[0]))
-            assert (self._preprocess_bruteForce(case[1]) == self._preprocess_fundamental(case[1]))
-
             assert (len(self.funcs) > 0)
             ret = self.funcs[0](case[0], case[1])  # the brute-force algorithm
-            assert (len(ret) > 0)  # necessary only for current cases
+            assert (len(ret) > 0)  # necessary only for current generated cases
             assert (all(f(case[0], case[1]) == ret for f in self.funcs[1:]))
 
         self._testcase(test, self._gencase())
 
 
-class KnuthMorrisPratt(StringMatch):
+class ZAlgorithm(StringMatch):
+    def __init__(self):
+        super(ZAlgorithm, self).__init__()
+
+    def _preprocess_fundamental(self, pat):
+        tab = [0] * len(pat)  # (0,-1], length
+        low, high = 0, 0  # [low,high) is a prefix of pat
+        # @invariant: variable high is the farthest index to the right
+        # 目的是为了在从左至右的遍历顺序下，尽可能多地预知右边仍未被访问到的字符
+        # 简而言之high越右，tab可复用的几率就越高
+        for i in range(1, len(pat)):
+            assert (low < i and low <= high <= len(pat))
+            if i < high:
+                assert (pat[i:high] == pat[i - low:high - low])
+                assert (high == len(pat) or pat[high] != pat[high - low])
+                if high - i > tab[i - low]:
+                    assert (pat[i:i + tab[i - low]] == pat[i - low:i - low + tab[i - low]] == pat[:tab[i - low]])
+                    assert (pat[i + tab[i - low]] == pat[i - low + tab[i - low]] != pat[tab[i - low]])
+                    tab[i] = tab[i - low]
+                    continue
+                else:
+                    j = high - i
+            else:
+                j = 0
+
+            while j < len(pat) - i and pat[i + j] == pat[j]:
+                j += 1
+            tab[i] = j
+            low, high = i, i + tab[i]
+        return tab
+
+    def main(self, txt, pat):
+        concat = pat + '$' + txt
+        tab = self._preprocess_fundamental(concat)
+        ret = []
+        for i in range(len(pat) + 1, len(tab)):
+            if tab[i] == len(pat):
+                ret.append(i - (len(pat) + 1))
+        return ret
+
+
+class KnuthMorrisPratt(ZAlgorithm):
     def __init__(self):
         super(KnuthMorrisPratt, self).__init__()
-        self.funcs.append(self.main)
 
     def _preprocess_jmp_fundamental(self, pat):
         tab = self._preprocess_fundamental(pat)  # (0,-1], length
@@ -163,10 +168,9 @@ class KnuthMorrisPratt(StringMatch):
         return ret
 
 
-class BoyerMoore(StringMatch):
+class BoyerMoore(ZAlgorithm):
     def __init__(self):
         super(BoyerMoore, self).__init__()
-        self.funcs.append(self.main)
 
     def main_bruteForce(self, txt, pat):
         # search
@@ -280,7 +284,6 @@ class BoyerMoore(StringMatch):
 class RabinKarp(StringMatch):
     def __init__(self):
         super(RabinKarp, self).__init__()
-        self.funcs.append(self.main)
         self.prime = 6999997
 
     def _hash(self, str, strLen):
@@ -300,17 +303,59 @@ class RabinKarp(StringMatch):
             ret = (self.alphabet * (ret - ord(str[i - 1]) * factor) + ord(str[i + strLen - 1])) % self.prime
             yield ret
 
-    def main(self, str, pat):
+    def main(self, txt, pat):
         # 1) preprocess
         pHash = self._hash(pat, len(pat)).next()
-        sHashFunc = self._hash(str, len(pat))
+        sHashFunc = self._hash(txt, len(pat))
         # 2) search
         ret = []
-        for i in range(0, len(str) - len(pat) + 1):
+        for i in range(0, len(txt) - len(pat) + 1):
             if pHash == sHashFunc.next():  # spurious hit
-                if str[i:i + len(pat)] == pat:
+                if txt[i:i + len(pat)] == pat:
                     ret.append(i)
         return ret
+
+
+class SuffixArrayBased(StringMatch, EnhancedSuffixArray):
+    def __init__(self):
+        super(SuffixArrayBased, self).__init__()
+
+    # binary search, O(mlogn)
+    def main_1(self, txt, pat):
+        sfx = self.main_prefixDoubling(txt)
+        low, high = 0, len(sfx) - 1
+        while low <= high:
+            mid = low + (high - low) / 2
+            # 比较的是pat与sfx的前缀
+            if sfx[mid] + len(pat) < len(txt):
+                ret = cmp(pat, txt[sfx[mid]:sfx[mid] + len(pat)])
+            else:
+                ret = cmp(pat, txt[sfx[mid]:])
+            if ret < 0:
+                high = mid - 1
+            elif ret > 0:
+                low = mid + 1
+            else:
+                return sfx[mid]
+        return None
+
+    # binary search, O(m+logn)
+    def main_2(self, txt, pat):
+        # sfx, lcp = self.main_sfx_lcp_ManberMyers(txt)
+        sfx = self.main_prefixDoubling(txt)
+        lcp = self.main_lcp_Kasai(txt, sfx)
+
+    def testcase(self):
+        def test(case):
+            ret1 = self.main_1(case[0], case[1])
+            # ret2 = self.main_2(case[0], case[1])
+            assert (0 <= ret1 < len(case[0]) and ret1 + len(case[1]) <= len(case[0]))
+            # assert (0 <= ret2 < len(case[0]) and ret2 + len(case[1]) <= len(case[0]))
+            assert (case[0][ret1:ret1 + len(case[1])]
+                    # == case[0][ret2:ret2 + len(case[1])]
+                    == case[1])
+
+        self._testcase(test, self._gencase(total=300))
 
 
 class PatternWithWildcard():
@@ -354,8 +399,11 @@ class PatternWithWildcard():
 
 
 if __name__ == '__main__':
+    ZAlgorithm().testcase()
     KnuthMorrisPratt().testcase()
     BoyerMoore().testcase()
     RabinKarp().testcase()
+    SuffixArrayBased().testcase()
+
     PatternWithWildcard().testcase()
     print 'done'
