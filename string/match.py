@@ -59,16 +59,7 @@ class StringMatch(String):
             low, high = i, i + tab[i]
         return tab
 
-    def testcase(self):
-        def test(case):
-            assert (self._preprocess_bruteForce(case[0]) == self._preprocess_fundamental(case[0]))
-            assert (self._preprocess_bruteForce(case[1]) == self._preprocess_fundamental(case[1]))
-
-            assert (len(self.funcs) > 0)
-            ret = self.funcs[0](case[0], case[1])  # the brute-force algorithm
-            assert (len(ret) > 0)  # only for current cases
-            assert (all(f(case[0], case[1]) == ret for f in self.funcs[1:]))
-
+    def _gencase(self, total=500):
         cases = [
             ('abcabceabcde', 'abcd'),
             ('aaababaabc', 'abc'),
@@ -81,9 +72,9 @@ class StringMatch(String):
             ('zbzzbzczbczzz', 'z'),
         ]
 
-        for i in range(500):
+        for i in range(total):
             s = ''
-            for j in range(500):
+            for j in range(total):
                 s += chr(random.randint(ord('a'), ord('d')))
             patlen = random.randint(1, 50)
             start = random.randint(0, len(s) - patlen)
@@ -91,8 +82,19 @@ class StringMatch(String):
             p = s[start:start + patlen]
             assert (len(s) >= len(p) and s.find(p) != -1)
             cases.append((s, p))
+        return cases
 
-        self._testcase(test, cases)
+    def testcase(self):
+        def test(case):
+            assert (self._preprocess_bruteForce(case[0]) == self._preprocess_fundamental(case[0]))
+            assert (self._preprocess_bruteForce(case[1]) == self._preprocess_fundamental(case[1]))
+
+            assert (len(self.funcs) > 0)
+            ret = self.funcs[0](case[0], case[1])  # the brute-force algorithm
+            assert (len(ret) > 0)  # necessary only for current cases
+            assert (all(f(case[0], case[1]) == ret for f in self.funcs[1:]))
+
+        self._testcase(test, self._gencase())
 
 
 class KnuthMorrisPratt(StringMatch):
