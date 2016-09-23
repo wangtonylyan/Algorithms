@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# data structure: trie tree (aka. digital tree, prefix tree, or radix tree)
+# data structure: trie tree
 # 字典树，典型的"空间换时间"的设计，多适用于字符串相关问题
 # The term "trie" comes from retrieval, which is sometimes pronounced "try" to avoid confusion with "tree".
 
