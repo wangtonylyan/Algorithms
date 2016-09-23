@@ -2,6 +2,7 @@
 
 
 from string import String
+from suffix import SuffixArray
 
 
 # 可重叠
@@ -42,6 +43,23 @@ class LongestRepeatedSubsequence(String):
         self._testcase(test, self._gencase())
 
 
+class MinimumLexicographicRotation():
+    def __init__(self):
+        self.suffixArrayFunc = SuffixArray().main_prefixDoubling
+
+    def main(self, str):
+        concat = str + str
+        sfx = self.suffixArrayFunc(concat)
+        for s in sfx:
+            if len(concat) - s >= len(str):
+                return concat[s:s + len(str)]
+
+    def testcase(self):
+        assert (self.main('alabala') == 'aalabal')
+        print 'pass:', self.__class__
+
+
 if __name__ == '__main__':
     LongestRepeatedSubsequence().testcase()
+    MinimumLexicographicRotation().testcase()
     print 'done'
