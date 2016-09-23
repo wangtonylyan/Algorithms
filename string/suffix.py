@@ -37,6 +37,7 @@ class SuffixArray(String):
         # inv: index->rank
         inv = [None] * len(str)  # inverse of 'sfx'
         sfx.sort(cmp=cmp)  # rely on its stability
+        gap <<= 1
         while gap < len(str):
             # rank0
             pre = sfx[0].rank0

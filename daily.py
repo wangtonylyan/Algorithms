@@ -451,6 +451,73 @@ def testmatch():
     BM().testcase()
 
 
+def testsuffix():
+    from string.suffix import SuffixArray
+
+    class SuffixArray(SuffixArray):
+        def __init__(self):
+            super(SuffixArray, self).__init__()
+
+        def main_prefixDoubling(self, str):
+            class Node():
+                def __init__(self, index, rank0, rank1):
+                    self.index = index
+                    self.rank0 = rank0
+                    self.rank1 = rank1
+
+            def cmp(x, y):
+                assert (isinstance(x, Node) and isinstance(y, Node))
+                if x.rank0 < y.rank0 or (x.rank0 == y.rank0 and x.rank1 < y.rank1):
+                    return -1
+                return 1
+
+            gap = 1
+            sfx = [Node(i, self.ord(str[i]), self.ord(str[i + gap]) if i + gap < len(str) else -1)
+                   for i in range(len(str))]
+            inv = [None] * len(str)
+            sfx.sort(cmp=cmp)
+            gap <<= 1
+            while gap < len(str):
+                pre = sfx[0].rank0
+                sfx[0].rank0 = 0
+                inv[sfx[0].index] = 0
+                for i in range(1, len(str)):
+                    if sfx[i].rank0 == pre and sfx[i].rank1 == sfx[i - 1].rank1:
+                        pre = sfx[i].rank0
+                        sfx[i].rank0 = sfx[i - 1].rank0
+                    else:
+                        pre = sfx[i].rank0
+                        sfx[i].rank0 = sfx[i - 1].rank0 + 1
+                    inv[sfx[i].index] = i
+                for i in range(len(str)):
+                    if sfx[i].index + gap < len(str):
+                        sfx[i].rank1 = sfx[inv[sfx[i].index + gap]].rank0
+                    else:
+                        sfx[i].rank1 = -1
+                sfx.sort(cmp=cmp)
+                gap <<= 1
+
+            for i in range(len(str)):
+                inv[sfx[i].index] = i
+            lcp = [None] * len(str)
+            k = 0
+            for i in range(len(str)):
+                if inv[i] == len(str) - 1:
+                    k = 0
+                    lcp[len(str) - 1] = 0
+                    continue
+                j = sfx[inv[i] + 1].index
+                while i + k < len(str) and j + k < len(str) and str[i + k] == str[j + k]:
+                    k += 1
+                lcp[inv[i]] = k
+                if k > 0:
+                    k -= 1
+
+            return [s.index for s in sfx]
+
+    SuffixArray().testcase()
+
+
 def testsplay():
     from data_structure.tree.binary.bst import SelfBalancingBinarySearchTree, BinarySearchTreeTest
 
@@ -458,10 +525,10 @@ def testsplay():
         def __init__(self):
             super(Splay, self).__init__()
 
-        def splay(self, key):
-            mid = self.__class__.Node(None, None)
-            left = right = mid
-            spt = self.root
+        def splay(self, spt, key):
+            assert (spt)
+            root = self.__class__.Node(None, None)
+            left = right = root
             while spt.key != key:
                 if key < spt.key:
                     if not spt.left:
@@ -474,7 +541,6 @@ def testsplay():
                     right = right.left
                     spt = spt.left
                 else:
-                    assert (key > spt.key)
                     if not spt.right:
                         break
                     if key > spt.right.key:
@@ -486,39 +552,41 @@ def testsplay():
                     spt = spt.right
             left.right = spt.left
             right.left = spt.right
-            spt.left = mid.right
-            spt.right = mid.left
+            spt.left = root.right
+            spt.right = root.left
+            assert (not spt.left or spt.left.key < spt.key)
+            assert (not spt.right or spt.right.key > spt.key)
             return spt
 
         def insert(self, key, value):
             if not self.root:
                 self.root = self.__class__.Node(key, value)
             else:
-                self.root = self.splay(key)
+                self.root = self.splay(self.root, key)
                 if self.root.key == key:
                     self.root.value = value
                 else:
-                    spt = self.__class__.Node(key, value)
-                    if self.root.key > key:
-                        spt.left = self.root.left
+                    node = self.__class__.Node(key, value)
+                    if key < self.root.key:
+                        node.right = self.root
+                        node.left = self.root.left
                         self.root.left = None
-                        spt.right = self.root
                     else:
-                        spt.right = self.root.right
+                        node.left = self.root
+                        node.right = self.root.right
                         self.root.right = None
-                        spt.left = self.root
-                    self.root = spt
+                    self.root = node
 
         def delete(self, key):
             if self.root:
-                self.root = self.splay(key)
+                self.root = self.splay(self.root, key)
                 if not self.root.left:
                     self.root = self.root.right
                 else:
-                    spt = self.root.right
+                    self.root.left = self.splay(self.root.left, key)
+                    assert (self.root.left.right is None)
+                    self.root.left.right = self.root.right
                     self.root = self.root.left
-                    self.root = self.splay(key)
-                    self.root.right = spt
 
     BinarySearchTreeTest(Splay, 1000).delete()
 
@@ -530,5 +598,6 @@ if __name__ == '__main__':
     # testunionfindset()
     # testgraph()
     # testmatch()
+    # testsuffix()
     # testsplay()
     print 'done'
