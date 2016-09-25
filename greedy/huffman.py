@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# 只有叶子节点才存储有效信息，中间结点不存储任何信息
+# 这样就保证了任意一个字符的编码不会是其他字符编码的前缀
 
 import copy
 from data_structure.heap.binary import MinBinaryHeap
@@ -25,18 +27,18 @@ class HuffmanCode():
         # check tree and prepare for code generation
         assert (len(hp) == 1)
         node = hp.pop()
-        assert (node.key == sum(map(lambda x: x[1], chst.items())) and node.value == None)
+        assert (node.key == sum(map(lambda x: x[1], chst.items())) and node.value is None)
         node.key = None
         # generate Huffman code by traversing Huffman tree
         que = Queue()
         que.push(node)
         while len(que) > 0:
             node = que.pop()
-            if node.value != None:
+            if node.value is not None:
                 assert (isinstance(node.key, str) and isinstance(node.value, str))
                 chst[node.value] = node.key
-                assert (node.left == None and node.right == None)
-            elif node.key == None:  # node is root
+                assert (node.left is None and node.right is None)
+            elif node.key is None:  # node is root
                 if node.left:
                     node.left.key = '0'
                     que.push(node.left)
