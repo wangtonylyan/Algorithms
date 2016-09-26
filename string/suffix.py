@@ -7,16 +7,18 @@ class SuffixArray(String):
     def __init__(self):
         super(SuffixArray, self).__init__()
 
-    # O(n^2logn)
-    def main_bruteForce(self, str):
+    # @algorithm: brute force
+    # @complexity: O(n^2logn)
+    def main_1(self, str):
         sfx = [None] * len(str)
         for i in range(len(str)):
             sfx[i] = (str[i:], i)
         sfx.sort(key=lambda x: x[0])
         return [s[1] for s in sfx]
 
-    # O(nlogn)
-    def main_prefixDoubling(self, str):
+    # @algorithm: prefix doubling
+    # @complexity: O(nlogn)
+    def main_2(self, str):
         class Suffix():
             def __init__(self, index, rank0, rank1):
                 self.index = index
@@ -61,14 +63,19 @@ class SuffixArray(String):
             gap <<= 1
         return [s.index for s in sfx]
 
-    # O(n)
-    def main_skew(self, str):
-        # not implemented
-        pass
+    # @algorithm: skew, aka. DC3
+    # @complexity: O(n)
+    def main_3(self, str):
+        pass  # not implemented
+
+    # @algorithm: SA-IS
+    # @complexity: O(n)
+    def main_4(self, str):
+        pass  # not implemented
 
     def testcase(self):
         def test(case):
-            assert (self.main_bruteForce(case[0]) == self.main_prefixDoubling(case[0]))
+            assert (self.main_1(case[0]) == self.main_2(case[0]))
 
         self._testcase(test, self._gencase(each=1, total=500))
 
@@ -77,7 +84,8 @@ class EnhancedSuffixArray(SuffixArray):
     def __init__(self):
         super(EnhancedSuffixArray, self).__init__()
 
-    # longest common prefix, O(n)
+    # @property: longest common prefix
+    # @complexity: O(n)
     def main_lcp_Kasai(self, str, sfx):
         lcp = [None] * len(str)
         inv = [None] * len(str)
@@ -86,8 +94,8 @@ class EnhancedSuffixArray(SuffixArray):
         k = 0
         for i in range(len(str)):
             if inv[i] == len(str) - 1:
-                lcp[inv[i]] = 0
                 k = 0
+                lcp[inv[i]] = k
                 continue
             j = sfx[inv[i] + 1]
             while i + k < len(str) and j + k < len(str) and str[i + k] == str[j + k]:
@@ -97,10 +105,10 @@ class EnhancedSuffixArray(SuffixArray):
                 k -= 1
         return lcp
 
-    # compute longest common prefix during constructing suffix array
-    def main_sfx_lcp_ManberMyers(self, str):
-        # not implemented
-        pass
+    # @property: longest common prefix, along with suffix array
+    # @complexity: O(nlogn)
+    def main_lcp_ManberMyers_with_sfx(self, str):
+        pass  # not implemented
 
 
 class SuffixTree(String):

@@ -346,16 +346,19 @@ def testmatch():
     class KMP(StringMatch):
         def __init__(self):
             super(KMP, self).__init__()
-            self.funcs.append(self.main)
 
         def main(self, txt, pat):
             jmp = [0] * len(pat)
-            for i in range(len(pat) - 1):
-                j = jmp[i]
-                while j > 0 and pat[j] != pat[i + 1]:
-                    j = jmp[j - 1]
+            i, j = 0, jmp[0]
+            while i < len(pat) - 1:
                 if pat[j] == pat[i + 1]:
-                    jmp[i + 1] = j + 1
+                    i += 1
+                    j += 1
+                    jmp[i] = j
+                elif j > 0:
+                    j = jmp[j - 1]
+                else:
+                    i += 1
             ret = []
             i, j = 0, 0
             while i < len(txt) - len(pat) + 1:
@@ -373,7 +376,6 @@ def testmatch():
     class BM(StringMatch):
         def __init__(self):
             super(BM, self).__init__()
-            self.funcs.append(self.main)
 
         def main(self, txt, pat):
             def preprocess(pat):
@@ -411,18 +413,25 @@ def testmatch():
                 tab[i] = len(pat) - 1 - j
                 low, high = i - tab[i], i
             assert (tab == preprocess(pat[::-1])[::-1])
+
             bad = [[] for _ in range(self.alphabet)]
             for i in range(len(pat) - 1, -1, -1):
-                bad[ord(pat[i]) - ord('a')].append(i)
+                bad[self.ord(pat[i])].append(i)
+
             sfx = [-1] * len(pat)
             for i in range(len(pat) - 1):
                 if tab[i] > 0:
                     sfx[len(pat) - tab[i]] = i
+
             pfx = [-1] * len(pat)
             if tab[0] == 1:
                 pfx[len(pat) - 1] = 0
             for i in range(1, len(pat) - 1):
-                pfx[len(pat) - (i + 1)] = i if tab[i] == i + 1 else pfx[len(pat) - i]
+                if tab[i] == i + 1:
+                    pfx[len(pat) - (i + 1)] = i
+                else:
+                    pfx[len(pat) - (i + 1)] = pfx[len(pat) - i]
+
             ret = []
             i = 0
             while i < len(txt) - len(pat) + 1:
@@ -431,20 +440,22 @@ def testmatch():
                     j -= 1
                 if j == -1:
                     ret.append(i)
-                    i += len(pat) - 1 - pfx[1] if len(pfx) > 1 else 1
+                    i += len(pat) - 1 - pfx[1] if len(pat) > 1 else 1
                 else:
-                    bd = bad[ord(txt[i + j]) - ord('a')]
+                    bd = bad[self.ord(txt[i + j])]
                     k = 0
                     while k < len(bd) and bd[k] > j:
                         k += 1
                     st1 = j - bd[k] if k < len(bd) else j + 1
+
                     if j == len(pat) - 1:
                         st2 = 1
                     elif sfx[j + 1] >= 0:
                         st2 = len(pat) - 1 - sfx[j + 1]
                     else:
                         st2 = len(pat) - 1 - pfx[j + 1]
-                    i += max(st1, st2, 1)
+
+                    i += max(st1, st2)
             return ret
 
     KMP().testcase()
@@ -452,11 +463,11 @@ def testmatch():
 
 
 def testsuffix():
-    from string.suffix import SuffixArray
+    from string.suffix import EnhancedSuffixArray
 
-    class SuffixArray(SuffixArray):
+    class EnhancedSuffixArray(EnhancedSuffixArray):
         def __init__(self):
-            super(SuffixArray, self).__init__()
+            super(EnhancedSuffixArray, self).__init__()
 
         def main_prefixDoubling(self, str):
             class Node():
@@ -466,7 +477,6 @@ def testsuffix():
                     self.rank1 = rank1
 
             def cmp(x, y):
-                assert (isinstance(x, Node) and isinstance(y, Node))
                 if x.rank0 < y.rank0 or (x.rank0 == y.rank0 and x.rank1 < y.rank1):
                     return -1
                 return 1
@@ -497,55 +507,56 @@ def testsuffix():
                 sfx.sort(cmp=cmp)
                 gap <<= 1
 
-            for i in range(len(str)):
-                inv[sfx[i].index] = i
+            sfx = [s.index for s in sfx]
             lcp = [None] * len(str)
+            for i in range(len(str)):
+                inv[sfx[i]] = i
             k = 0
             for i in range(len(str)):
                 if inv[i] == len(str) - 1:
                     k = 0
                     lcp[len(str) - 1] = 0
                     continue
-                j = sfx[inv[i] + 1].index
+                j = sfx[inv[i] + 1]
                 while i + k < len(str) and j + k < len(str) and str[i + k] == str[j + k]:
                     k += 1
                 lcp[inv[i]] = k
                 if k > 0:
                     k -= 1
+            assert (lcp == self.main_lcp_Kasai(str, sfx))
+            return sfx
 
-            return [s.index for s in sfx]
-
-    SuffixArray().testcase()
+    EnhancedSuffixArray().testcase()
 
 
 def testsplay():
     from data_structure.tree.binary.bst import SelfBalancingBinarySearchTree, BinarySearchTreeTest
 
-    class Splay(SelfBalancingBinarySearchTree):
+    class SplayTree(SelfBalancingBinarySearchTree):
         def __init__(self):
-            super(Splay, self).__init__()
+            super(SplayTree, self).__init__()
 
         def splay(self, spt, key):
-            assert (spt)
+            assert (spt is not None and key is not None)
             root = self.__class__.Node(None, None)
             left = right = root
             while spt.key != key:
                 if key < spt.key:
-                    if not spt.left:
+                    if spt.left is None:
                         break
                     if key < spt.left.key:
                         spt = self._rotateRight(spt)
-                        if not spt.left:
+                        if spt.left is None:
                             break
                     right.left = spt
                     right = right.left
                     spt = spt.left
                 else:
-                    if not spt.right:
+                    if spt.right is None:
                         break
                     if key > spt.right.key:
                         spt = self._rotateLeft(spt)
-                        if not spt.right:
+                        if spt.right is None:
                             break
                     left.right = spt
                     left = left.right
@@ -554,8 +565,8 @@ def testsplay():
             right.left = spt.right
             spt.left = root.right
             spt.right = root.left
-            assert (not spt.left or spt.left.key < spt.key)
-            assert (not spt.right or spt.right.key > spt.key)
+            assert (spt.left is None or spt.left.key < key)
+            assert (spt.right is None or spt.right.key > key)
             return spt
 
         def insert(self, key, value):
@@ -588,15 +599,17 @@ def testsplay():
                     self.root.left.right = self.root.right
                     self.root = self.root.left
 
-    BinarySearchTreeTest(Splay, 1000).delete()
+    BinarySearchTreeTest(SplayTree, 1000).delete()
 
 
 if __name__ == '__main__':
     # testsortint()
     # testsortstr()
     # testdynamic()
+
     # testunionfindset()
     # testgraph()
+
     # testmatch()
     # testsuffix()
     # testsplay()
