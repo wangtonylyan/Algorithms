@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# problem: range minimum query (RMQ)
-# The RMQ comprises all variations of the problem of finding the smallest element
+# problem: range minimum/maximum query (RMQ)
+# The RMQ comprises all variations of the problem of finding the smallest/biggest element
 # in a contiguous subsequence of a list of items taken from a totally ordered set (usually numbers).
 # This is one of the most extensively-studied problems in computer science,
 # and many algorithms are known, each of which is appropriate for a specific variation.
