@@ -3,12 +3,13 @@
 # solution: brute force, Rabin-Karp, KMP
 # 返回值是所有匹配子字符串的偏移量
 
-import random, re
-from string import String
+import random
+import re
+from base.string import String, StringTest
 from suffix import EnhancedSuffixArray
 
 
-class StringMatch(String):
+class StringMatch(String, StringTest):
     def __init__(self):
         super(StringMatch, self).__init__()
         self.funcs = [self.main_bruteForce, self.main]
@@ -316,13 +317,16 @@ class RabinKarp(StringMatch):
         return ret
 
 
-class SuffixArrayBased(StringMatch, EnhancedSuffixArray):
+class SuffixArrayBased(StringMatch):
     def __init__(self):
         super(SuffixArrayBased, self).__init__()
+        obj = EnhancedSuffixArray()
+        self.sfxFunc = obj.main_2
+        self.lcpFunc = obj.main_lcp_Kasai
 
     # binary search, O(mlogn)
     def main_1(self, txt, pat):
-        sfx = self.main_prefixDoubling(txt)
+        sfx = self.sfxFunc(txt)
         low, high = 0, len(sfx) - 1
         while low <= high:
             mid = low + (high - low) / 2
@@ -341,9 +345,8 @@ class SuffixArrayBased(StringMatch, EnhancedSuffixArray):
 
     # binary search, O(m+logn)
     def main_2(self, txt, pat):
-        # sfx, lcp = self.main_sfx_lcp_ManberMyers(txt)
-        sfx = self.main_prefixDoubling(txt)
-        lcp = self.main_lcp_Kasai(txt, sfx)
+        sfx = self.sfxFunc(txt)
+        lcp = self.lcpFunc(txt, sfx)
 
     def testcase(self):
         def test(case):

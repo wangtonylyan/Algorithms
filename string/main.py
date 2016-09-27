@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 
-from string import String
+from base.string import StringTest
 from suffix import SuffixArray
 
 
 # 可重叠
-class LongestRepeatedSubsequence(String):
+class LongestRepeatedSubsequence(StringTest):
     def __init__(self):
         super(LongestRepeatedSubsequence, self).__init__()
 
@@ -45,11 +45,11 @@ class LongestRepeatedSubsequence(String):
 
 class MinimumLexicographicRotation():
     def __init__(self):
-        self.suffixArrayFunc = SuffixArray().main_prefixDoubling
+        self.sfxFunc = SuffixArray().main_2
 
     def main(self, str):
         concat = str + str
-        sfx = self.suffixArrayFunc(concat)
+        sfx = self.sfxFunc(concat)
         for s in sfx:
             if len(concat) - s >= len(str):
                 return concat[s:s + len(str)]

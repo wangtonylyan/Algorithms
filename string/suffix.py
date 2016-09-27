@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+# data structure: suffix array
 
-from string import String
+from base.string import String, StringTest
 
 
-class SuffixArray(String):
+class SuffixArray(String, StringTest):
     def __init__(self):
         super(SuffixArray, self).__init__()
 
@@ -104,16 +105,6 @@ class EnhancedSuffixArray(SuffixArray):
             if k > 0:
                 k -= 1
         return lcp
-
-    # @property: longest common prefix, along with suffix array
-    # @complexity: O(nlogn)
-    def main_lcp_ManberMyers_with_sfx(self, str):
-        pass  # not implemented
-
-
-class SuffixTree(String):
-    def __init__(self):
-        super(SuffixTree, self).__init__()
 
 
 if __name__ == '__main__':

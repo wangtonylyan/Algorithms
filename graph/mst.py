@@ -6,7 +6,7 @@
 
 from data_structure.disjoint import DisjointSetForest
 from data_structure.heap.binary import MinBinaryHeap
-from graph import UndirectedGraph, DirectedGraph
+from base.graph import UndirectedGraphTest, DirectedGraphTest
 
 
 # Kruskal从“边”的角度入手，Prim从“点”的角度入手
@@ -19,7 +19,7 @@ from graph import UndirectedGraph, DirectedGraph
 # 2) cycle property
 # Let C be any cycle in G, and let edge e = (v, w) be the most expensive edge belonging to C.
 # Then e does not belong to any minimum spanning tree of G.
-class MinimumSpanningTree(UndirectedGraph):
+class MinimumSpanningTree(UndirectedGraphTest):
     def __init__(self):
         super(MinimumSpanningTree, self).__init__(True)
         self.funcs = [self.main_Boruvka,
@@ -156,7 +156,7 @@ class MinimumSpanningTree(UndirectedGraph):
         self._testcase(test, self._gencase())
 
 
-class MinimumSpanningArborescence(DirectedGraph):
+class MinimumSpanningArborescence(DirectedGraphTest):
     def __init__(self):
         super(MinimumSpanningArborescence, self).__init__(True)
 

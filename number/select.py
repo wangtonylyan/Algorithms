@@ -2,11 +2,19 @@
 # problem: find the k-th smallest element in a collection
 # solution: sort-based selection
 
-import random
+from base.number import NumberTest
 
 
-class Select():
-    # @solution: bubble-based selection
+class Select(NumberTest):
+    def __init__(self):
+        super(Select, self).__init__()
+        self.funcs = [
+            self.main_bubble, self.main_quick,
+            self.main_min_heap, self.main_max_heap,
+            # self.main_best,
+        ]
+
+    # @algorithm: bubble-based
     def main_bubble(self, lst, k):
         for i in range(k + 1):
             for j in range(len(lst) - 1, i, -1):
@@ -14,7 +22,7 @@ class Select():
                     lst[j], lst[j - 1] = lst[j - 1], lst[j]
         return lst[k]
 
-    # @solution: quick-based selection
+    # @algorithm: quick-based
     # O(n) in best case, O(n^2) in worst case
     def main_quick(self, lst, k):
         def _partition(low, high):
@@ -39,7 +47,7 @@ class Select():
         assert (flag == k)
         return lst[flag]
 
-    # @solution: minimum-heap-based selection
+    # @algorithm: minimum-heap-based
     def main_min_heap(self, lst, k):
         def _sink(low, high):
             it = low << 1 | 1
@@ -60,7 +68,7 @@ class Select():
             _sink(0, high)
         return lst[0]
 
-    # @solution: maximum-heap-based selection
+    # @algorithm: maximum-heap-based
     def main_max_heap(self, lst, k):
         def _sink(low, high):
             it = low << 1 | 1
@@ -85,16 +93,14 @@ class Select():
         pass
 
     def testcase(self):
-        def test(func):
-            for _ in range(20):
-                lst = [i for i in range(random.randint(5, 50))]
-                for i in range(len(lst)):
-                    random.shuffle(lst)
-                    assert (func(lst[:], i) == i)
-            print 'pass:', func
+        def test(case):
+            cpy = case[:]
+            cpy.sort()
+            for i in range(len(case)):
+                ret = cpy[i]
+                assert (all(x == ret for x in map(lambda f: f(case[:], i), self.funcs)))
 
-        map(test, [self.main_bubble, self.main_quick,
-                   self.main_min_heap, self.main_max_heap])
+        self._testcase(test, self._gencase(each=1, total=500))
 
 
 if __name__ == "__main__":

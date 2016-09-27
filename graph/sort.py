@@ -3,10 +3,10 @@
 # topological ordering: for every directed edge uv, vertex u must come before vertex v
 # This ordering only exists for a dag.
 
-from graph import DirectedAcyclicGraph
+from base.graph import DirectedAcyclicGraphTest
 
 
-class TopologicalSort(DirectedAcyclicGraph):
+class TopologicalSort(DirectedAcyclicGraphTest):
     def __init__(self):
         super(TopologicalSort, self).__init__(False)
 

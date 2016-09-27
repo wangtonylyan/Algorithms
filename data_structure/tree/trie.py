@@ -4,8 +4,8 @@
 # The term "trie" comes from retrieval, which is sometimes pronounced "try" to avoid confusion with "tree".
 
 
-from tree import Tree, TreeTest
-from string.string import String
+from base.tree import Tree, TreeTest
+from base.string import String, StringTest
 
 
 class TrieTree(Tree, String):
@@ -85,7 +85,7 @@ class TrieTree(Tree, String):
         assert (not self.root or self.root.value is None)
 
 
-class TrieTreeTest(TreeTest, String):
+class TrieTreeTest(TreeTest, StringTest):
     def __init__(self, num):
         assert (num > 0)
         TreeTest.__init__(self, TrieTree, 0, True, True)

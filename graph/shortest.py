@@ -4,11 +4,11 @@
 
 
 from data_structure.heap.binary import MinBinaryHeap
-from graph import DirectedAcyclicGraph
+from base.graph import DirectedAcyclicGraphTest
 from sort import TopologicalSort
 
 
-class ShortestPath(DirectedAcyclicGraph):
+class ShortestPath(DirectedAcyclicGraphTest):
     def __init__(self):
         super(ShortestPath, self).__init__(True)
 

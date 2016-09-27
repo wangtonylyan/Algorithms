@@ -153,7 +153,7 @@ lib_directed_wgrp = lib_directed_acyclic_wgrp + [
 
 def dec_check_cases(func):
     def f(self, *args):
-        assert (isinstance(self, AbstractGraph))
+        assert (isinstance(self, GraphTest))
         assert (0 <= self.rpst < len(GraphRepresentationType))
         assert (isinstance(self.wgt, bool))
         assert (isinstance(self.drct, bool))
@@ -242,24 +242,26 @@ def dec_check_cases(func):
     return f
 
 
-# interface
-class AbstractGraph(object):
-    def testcase(self):
+class AbstractGraphTest(object):
+    def __init__(self):
+        pass
+
+    def testcase(self, *args):
         assert (False)
 
-    def _testcase(self, test, cases):
+    def _testcase(self, *args):
         assert (False)
 
-    def _gencase(self):
+    def _gencase(self, *args):
         assert (False)
 
 
-class Graph(AbstractGraph):
+class GraphTest(AbstractGraphTest):
     def __init__(self, rpst, wgt, drct):
         assert (0 <= rpst < len(GraphRepresentationType))
         assert (isinstance(wgt, bool))
         assert (isinstance(drct, bool))
-        super(Graph, self).__init__()
+        super(GraphTest, self).__init__()
         self.rpst = rpst  # representation/structure
         self.wgt = wgt  # weight
         self.drct = drct  # direction
@@ -362,44 +364,44 @@ class Graph(AbstractGraph):
         return ret
 
 
-class UndirectedGraph(Graph):
+class UndirectedGraphTest(GraphTest):
     def __init__(self, wgt, rpst=GraphRepresentationType.LIST):
         assert (isinstance(wgt, bool))
         assert (0 <= rpst < len(GraphRepresentationType))
-        super(UndirectedGraph, self).__init__(rpst, wgt, False)
+        super(UndirectedGraphTest, self).__init__(rpst, wgt, False)
         if self.wgt:
             self.grps = lib_undirected_wgrp
         else:
             self.grps = lib_undirected_ugrp
 
 
-class UndirectedAcyclicGraph(UndirectedGraph):
+class UndirectedAcyclicGraphTest(UndirectedGraphTest):
     def __init__(self, wgt, rpst=GraphRepresentationType.LIST):
         assert (isinstance(wgt, bool))
         assert (0 <= rpst < len(GraphRepresentationType))
-        super(UndirectedAcyclicGraph, self).__init__(wgt, rpst)
+        super(UndirectedAcyclicGraphTest, self).__init__(wgt, rpst)
         if self.wgt:
             self.grps = lib_undirected_acyclic_wgrp
         else:
             self.grps = lib_undirected_acyclic_ugrp
 
 
-class DirectedGraph(Graph):
+class DirectedGraphTest(GraphTest):
     def __init__(self, wgt, rpst=GraphRepresentationType.LIST):
         assert (isinstance(wgt, bool))
         assert (0 <= rpst < len(GraphRepresentationType))
-        super(DirectedGraph, self).__init__(rpst, wgt, True)
+        super(DirectedGraphTest, self).__init__(rpst, wgt, True)
         if self.wgt:
             self.grps = lib_directed_wgrp
         else:
             self.grps = lib_directed_ugrp
 
 
-class DirectedAcyclicGraph(DirectedGraph):
+class DirectedAcyclicGraphTest(DirectedGraphTest):
     def __init__(self, wgt, rpst=GraphRepresentationType.LIST):
         assert (isinstance(wgt, bool))
         assert (0 <= rpst < len(GraphRepresentationType))
-        super(DirectedAcyclicGraph, self).__init__(wgt, rpst)
+        super(DirectedAcyclicGraphTest, self).__init__(wgt, rpst)
         if self.wgt:
             self.grps = lib_directed_acyclic_wgrp
         else:
@@ -416,5 +418,5 @@ if __name__ == '__main__':
                 len(cls(True, GraphRepresentationType.DICT)._gencase()))
 
 
-    map(main, [UndirectedGraph, UndirectedAcyclicGraph, DirectedGraph, DirectedAcyclicGraph])
+    map(main, [UndirectedGraphTest, UndirectedAcyclicGraphTest, DirectedGraphTest, DirectedAcyclicGraphTest])
     print 'done'

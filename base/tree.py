@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-# data structure: tree
 
-import time, random, platform
+import time
+import random
+import platform
 
 
-# interface
+# abstract class
 class Tree(object):
     class Node(object):
         __slots__ = ['key', 'value']

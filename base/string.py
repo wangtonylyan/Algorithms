@@ -7,6 +7,8 @@ class String(object):
     alphabet = ord('z') - ord('a') + 1  # 256  # number of legal characters by ASCII, [0,255]
     ord = lambda self, x: ord(x) - ord('a')
 
+
+class StringTest(object):
     def _gencase(self, fixed=False, maxLen=40, each=50, total=100):
         cases = []
         for _ in range(total):
@@ -24,10 +26,10 @@ class String(object):
 
 
 if __name__ == '__main__':
-    cases = String()._gencase()
+    cases = StringTest()._gencase()
     for case in cases:
+        print case
         assert (isinstance(case, list) and len(case) > 0)
         assert (all(isinstance(i, str) and len(i) > 0 for i in case))
-        print case
     print len(cases)
     print 'done'

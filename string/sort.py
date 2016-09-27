@@ -6,10 +6,10 @@
 # 较短字符串的LSD被''填充，而较短数字的MSD被0填充
 
 
-from string import String
+from base.string import String, StringTest
 
 
-class StringSort(String):
+class StringSort(String, StringTest):
     def __init__(self):
         super(StringSort, self).__init__()
         self.funcs = [

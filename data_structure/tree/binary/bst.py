@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # data structure: binary search tree
 
-from data_structure.tree.tree import Tree, TreeTest
+from base.tree import Tree, TreeTest
 
 
 class BinarySearchTree(Tree):

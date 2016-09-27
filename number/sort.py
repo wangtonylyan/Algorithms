@@ -8,30 +8,23 @@
 # counting, radix, bucket
 # 思想就是建立被排序的数与其排序后的索引值之间的映射
 
-import random
+from base.number import NumberTest
 from data_structure.heap.binary import MaxBinaryHeap
 
 
-class Sort(object):
+class Sort(NumberTest):
     def __init__(self):
+        super(Sort, self).__init__()
         self.funcs = []
 
     def testcase(self):
-        def test(sort):
-            assert (sort([1]) == [1])
-            assert (sort([1, 2]) == [1, 2])
-            assert (sort([2, 1]) == [1, 2])
-            for _ in range(50):
-                num = random.randint(10, 50)
-                lst = [i for i in range(num)]
-                for _ in range(num):
-                    random.shuffle(lst)
-                    ret = sort(lst[:])  # pass by reference, so need to copy
-                    lst.sort()
-                    assert (ret == lst)
-            print 'pass:', sort
+        def test(cases):
+            for case in cases:
+                ret = case[:]
+                ret.sort()
+                assert (all(x == ret for x in map(lambda f: f(case[:]), self.funcs)))
 
-        map(test, self.funcs)
+        self._testcase(test, self._gencase(maxLen=100, each=1, total=500))
 
 
 class SelectionSort(Sort):
@@ -249,5 +242,6 @@ if __name__ == '__main__':
     CountingSort().testcase()
     RadixSort().testcase()
     BucketSort().testcase()
+
     FindClosestPair().testcase()
     print 'done'

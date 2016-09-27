@@ -3,7 +3,7 @@
 
 
 import copy
-from graph import AbstractGraph, UndirectedGraph, DirectedGraph
+from base.graph import AbstractGraphTest, UndirectedGraphTest, DirectedGraphTest
 from data_structure.queue import Queue
 from data_structure.stack import Stack
 
@@ -25,9 +25,9 @@ def dec_search_source_wrapper(func):
     return f
 
 
-class GraphSearch_List(AbstractGraph):
+class GraphSearch_List(AbstractGraphTest):
     def __init__(self):
-        AbstractGraph.__init__(self)
+        AbstractGraphTest.__init__(self)
         self.funcs = [
             self.bfs_iter,
             self.bfs_iter_2,
@@ -145,21 +145,21 @@ class GraphSearch_List(AbstractGraph):
         self._testcase(test, self._gencase())
 
 
-class UndirectedGraphSearch_List(GraphSearch_List, UndirectedGraph):
+class UndirectedGraphSearch_List(GraphSearch_List, UndirectedGraphTest):
     def __init__(self):
         GraphSearch_List.__init__(self)
-        UndirectedGraph.__init__(self, False)
+        UndirectedGraphTest.__init__(self, False)
 
 
-class DirectedGraphSearch_List(GraphSearch_List, DirectedGraph):
+class DirectedGraphSearch_List(GraphSearch_List, DirectedGraphTest):
     def __init__(self):
         GraphSearch_List.__init__(self)
-        DirectedGraph.__init__(self, False)
+        DirectedGraphTest.__init__(self, False)
 
 
 # @problem: 获取所有节点距离某个源点的深度/层次
 # @problem: bipartite graph，实现：对不同层次的节点进行染色
-class VertexDepth(UndirectedGraph):
+class VertexDepth(UndirectedGraphTest):
     def __init__(self):
         super(VertexDepth, self).__init__(False)
 
@@ -250,17 +250,18 @@ class LakeCounting():
         return num
 
     def testcase(self):
-        case = [[1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
-                [0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1],
-                [0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-                [0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-                [0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0],
-                [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0],
-                [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
-                [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0],
-                ]
+        case = [
+            [1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+            [0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1],
+            [0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+            [0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+            [0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0],
+            [1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0],
+            [0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0],
+        ]
 
         for f in self.funcs:
             assert (f(copy.deepcopy(case)) == 3)
@@ -270,6 +271,7 @@ class LakeCounting():
 if __name__ == '__main__':
     UndirectedGraphSearch_List().testcase()
     DirectedGraphSearch_List().testcase()
+
     VertexDepth().testcase()
     LakeCounting().testcase()
     print 'done'
