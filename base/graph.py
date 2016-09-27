@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import copy
+from base import Test
 
 
 class Enum(tuple):
@@ -242,21 +243,7 @@ def dec_check_cases(func):
     return f
 
 
-class AbstractGraphTest(object):
-    def __init__(self):
-        pass
-
-    def testcase(self, *args):
-        assert (False)
-
-    def _testcase(self, *args):
-        assert (False)
-
-    def _gencase(self, *args):
-        assert (False)
-
-
-class GraphTest(AbstractGraphTest):
+class GraphTest(Test):
     def __init__(self, rpst, wgt, drct):
         assert (0 <= rpst < len(GraphRepresentationType))
         assert (isinstance(wgt, bool))

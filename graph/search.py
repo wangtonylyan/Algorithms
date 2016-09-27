@@ -3,7 +3,7 @@
 
 
 import copy
-from base.graph import AbstractGraphTest, UndirectedGraphTest, DirectedGraphTest
+from base.graph import UndirectedGraphTest, DirectedGraphTest
 from data_structure.queue import Queue
 from data_structure.stack import Stack
 
@@ -25,9 +25,8 @@ def dec_search_source_wrapper(func):
     return f
 
 
-class GraphSearch_List(AbstractGraphTest):
+class AbstractGraphSearch_List():
     def __init__(self):
-        AbstractGraphTest.__init__(self)
         self.funcs = [
             self.bfs_iter,
             self.bfs_iter_2,
@@ -145,15 +144,15 @@ class GraphSearch_List(AbstractGraphTest):
         self._testcase(test, self._gencase())
 
 
-class UndirectedGraphSearch_List(GraphSearch_List, UndirectedGraphTest):
+class UndirectedGraphSearch_List(AbstractGraphSearch_List, UndirectedGraphTest):
     def __init__(self):
-        GraphSearch_List.__init__(self)
+        AbstractGraphSearch_List.__init__(self)
         UndirectedGraphTest.__init__(self, False)
 
 
-class DirectedGraphSearch_List(GraphSearch_List, DirectedGraphTest):
+class DirectedGraphSearch_List(AbstractGraphSearch_List, DirectedGraphTest):
     def __init__(self):
-        GraphSearch_List.__init__(self)
+        AbstractGraphSearch_List.__init__(self)
         DirectedGraphTest.__init__(self, False)
 
 

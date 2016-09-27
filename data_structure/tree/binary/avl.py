@@ -10,7 +10,7 @@ class AVLTree(SelfBalancingBinarySearchTree):
 
         def __init__(self, key, value):
             super(AVLTree.Node, self).__init__(key, value)
-            self.factor = 0
+            self.factor = 0  # balance factor
 
     def __init__(self):
         super(AVLTree, self).__init__()

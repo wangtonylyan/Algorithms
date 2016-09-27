@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from sort import Sort
+from number.sort import Sort
 
 
 class QuickSort(Sort):

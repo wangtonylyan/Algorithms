@@ -8,7 +8,7 @@ from base.tree import Tree, TreeTest
 from base.string import String, StringTest
 
 
-class TrieTree(Tree, String):
+class TrieTree(String, Tree):
     class Node(Tree.Node):
         def __init__(self):  # initialized as a void node
             # key is a character as the index of 'self.key' array
@@ -85,7 +85,7 @@ class TrieTree(Tree, String):
         assert (not self.root or self.root.value is None)
 
 
-class TrieTreeTest(TreeTest, StringTest):
+class TrieTreeTest(StringTest, TreeTest):
     def __init__(self, num):
         assert (num > 0)
         TreeTest.__init__(self, TrieTree, 0, True, True)

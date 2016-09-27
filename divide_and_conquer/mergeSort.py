@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import random
-from sort import Sort
+from number.sort import Sort
 
 
 class MergeSort(Sort):

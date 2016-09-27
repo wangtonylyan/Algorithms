@@ -6,12 +6,13 @@
 # 2) 堆的所有逻辑都是基于两个核心的操作：float()和sink()
 # 最大/最小堆在实现上的区别也仅在于此
 
-import random
+from base.number import NumberTest
 
 
 class BinaryHeap(object):
     def __init__(self, lst, key, cmp):
         assert (isinstance(lst, list) and len(lst) >= 0)
+        super(BinaryHeap, self).__init__()
         self.hp = lst[:]
         self.key = key
         self.cmp = cmp
@@ -96,39 +97,13 @@ class BinaryHeap(object):
                 return True
         return False
 
-    def _check(self):
+    def check(self):
         assert (isinstance(self.hp, list))
         for i in range(len(self.hp) >> 1):
             if i << 1 | 1 < len(self.hp):
                 assert (self.cmp(self.key(self.hp[i]), self.key(self.hp[i << 1 | 1])))
             if (i + 1) << 1 < len(self.hp):
                 assert (self.cmp(self.key(self.hp[i]), self.key(self.hp[(i + 1) << 1])))
-
-    def testcase(self):
-        for num in range(1, 100):
-            lst = [i for i in range(num)]
-
-            random.shuffle(lst)
-            hp = self.__class__(lst)
-            hp._check()
-            for i in range(num):
-                hp.pop()
-                hp._check()
-            assert (len(hp) == 0)
-
-            random.shuffle(lst)
-            hp = self.__class__([])
-            hp._check()
-            for v in lst:
-                hp.push(v)
-                hp._check()
-            assert (len(hp) == num)
-            for i in range(num):
-                hp.pop()
-                hp._check()
-            assert (len(hp) == 0)
-
-        print 'pass:', self.__class__
 
 
 class MaxBinaryHeap(BinaryHeap):
@@ -153,6 +128,33 @@ class MinBinaryHeap(BinaryHeap):
     def __init__(self, lst=[], key=lambda x: x):
         super(MinBinaryHeap, self).__init__(lst, key, cmp=lambda x, y: x <= y)
         assert (len(self.hp) == len(lst))
+
+
+class BinaryHeapTest(NumberTest):
+    def __init__(self, clsobj):
+        assert (issubclass(clsobj, BinaryHeap))
+        super(BinaryHeapTest, self).__init__()
+        self.cls = clsobj
+
+    def testcase(self):
+        def test(cases):
+            for case in cases:
+                hp = self.cls(case)
+                hp.check()
+                assert (len(hp) == len(case))
+
+                for i in case:
+                    hp.replace(i, i + 1)
+                    hp.check()
+                assert (len(hp) == len(case))
+
+                for i in range(len(case)):
+                    hp.pop()
+                    hp.check()
+                assert (len(hp) == 0)
+
+        map(test, self._gencase(maxLen=100, each=1, total=200))
+        print 'pass:', self.cls
 
 
 # @problem:
@@ -198,7 +200,8 @@ class SortANearlySortedArray():
 
 
 if __name__ == "__main__":
-    MaxBinaryHeap().testcase()
-    MinBinaryHeap().testcase()
+    BinaryHeapTest(MaxBinaryHeap).testcase()
+    BinaryHeapTest(MinBinaryHeap).testcase()
+
     SortANearlySortedArray().testcase()
     print 'done'

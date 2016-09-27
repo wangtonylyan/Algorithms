@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 
 import random
+from base import Test
 
 
 class Number(object):
     alphabet = 10000  # [0, 10000]
 
 
-class NumberTest(object):
+class NumberTest(Test):
+    def __init__(self):
+        super(NumberTest, self).__init__()
+
     def _gencase(self, fixed=False, maxLen=50, each=50, total=100, dup=True):
         cases = []
         for _ in range(total):

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import random
+from base import Test
 
 
 class String(object):
@@ -8,7 +9,10 @@ class String(object):
     ord = lambda self, x: ord(x) - ord('a')
 
 
-class StringTest(object):
+class StringTest(Test):
+    def __init__(self):
+        super(StringTest, self).__init__()
+
     def _gencase(self, fixed=False, maxLen=40, each=50, total=100):
         cases = []
         for _ in range(total):

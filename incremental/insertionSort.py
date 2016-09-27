@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from sort import Sort
+from number.sort import Sort
 
 
 # 插入排序非常适用于输入域增量式地动态变化

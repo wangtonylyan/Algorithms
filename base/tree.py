@@ -3,6 +3,7 @@
 import time
 import random
 import platform
+from base import Test
 
 
 # abstract class
@@ -49,10 +50,10 @@ class Tree(object):
         assert (False)
 
 
-class TreeTest(object):
+class TreeTest(Test):
     def __init__(self, clsobj, num, check, timer):
-        super(TreeTest, self).__init__()
         assert (issubclass(clsobj, Tree))
+        super(TreeTest, self).__init__()
         self.tcls = clsobj
         self.dic = {}
         assert (0 <= num < 100000)
