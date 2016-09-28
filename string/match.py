@@ -83,6 +83,10 @@ class ZAlgorithm(StringMatch):
                     assert (pat[i + tab[i - low]] == pat[i - low + tab[i - low]] != pat[tab[i - low]])
                     tab[i] = tab[i - low]
                     continue
+                elif high - i < tab[i - low]:  # optional elif
+                    assert (high == len(pat) or pat[high] != pat[high - i])
+                    tab[i] = high - i
+                    continue
                 else:
                     j = high - i
             else:
