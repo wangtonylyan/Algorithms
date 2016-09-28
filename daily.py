@@ -465,11 +465,11 @@ def testmatch():
 def testsuffix():
     from string.suffix import EnhancedSuffixArray
 
-    class EnhancedSuffixArray(EnhancedSuffixArray):
+    class ESA(EnhancedSuffixArray):
         def __init__(self):
-            super(EnhancedSuffixArray, self).__init__()
+            super(ESA, self).__init__()
 
-        def main_prefixDoubling(self, str):
+        def main_2(self, str):
             class Node():
                 def __init__(self, index, rank0, rank1):
                     self.index = index
@@ -526,7 +526,7 @@ def testsuffix():
             assert (lcp == self.main_lcp_Kasai(str, sfx))
             return sfx
 
-    EnhancedSuffixArray().testcase()
+    ESA().testcase()
 
 
 def testsplay():

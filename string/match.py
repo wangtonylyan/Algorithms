@@ -36,7 +36,7 @@ class StringMatch(String, StringTest):
             ('aaaaaaaaaa', 'aaaa'),
             ('abcabceababcabcabcd', 'abcabcd'),
             ('eabcabcabc', 'eabcabcabc'),
-            ('baabraaabraaabraaa', 'aabraaabra'),
+            ('baabcaaabcaaabcaaa', 'aabcaaabca'),
             ('aabaabcaxaabaabcy', 'aabaa'),
             ('zbzzbzczbczzz', 'z'),
         ]
@@ -45,7 +45,8 @@ class StringMatch(String, StringTest):
             s = ''
             for j in range(total):
                 s += chr(random.randint(ord('a'), ord('d')))
-            patlen = random.randint(1, 50)
+            patlen = random.randint(1, 20)
+            assert (patlen < len(s))
             start = random.randint(0, len(s) - patlen)
             assert (start + patlen <= len(s))
             p = s[start:start + patlen]
@@ -57,7 +58,7 @@ class StringMatch(String, StringTest):
         def test(case):
             assert (len(self.funcs) > 0)
             ret = self.funcs[0](case[0], case[1])  # the brute-force algorithm
-            assert (len(ret) > 0)  # necessary only for current generated cases
+            assert (len(ret) > 0)  # necessary only for current test cases
             assert (all(f(case[0], case[1]) == ret for f in self.funcs[1:]))
 
         self._testcase(test, self._gencase())
