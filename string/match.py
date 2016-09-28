@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# problem: string matching, string searching
-# solution: brute force, Rabin-Karp, KMP
+# problem: string matching/searching
+# solution: brute force, KMP, BM, Rabin-Karp
 # 返回值是所有匹配子字符串的偏移量
 
 import random
@@ -69,10 +69,10 @@ class ZAlgorithm(StringMatch):
 
     def _preprocess_fundamental(self, pat):
         tab = [0] * len(pat)  # (0,-1], length
-        low, high = 0, 0  # [low,high) is a prefix of pat
-        # @invariant: variable high is the farthest index to the right
+        low, high = 0, 0  # [low,high) is a prefix of 'pat'
+        # @invariant: variable 'high' is the farthest index to the right
         # 目的是为了在从左至右的遍历顺序下，尽可能多地预知右边仍未被访问到的字符
-        # 简而言之high越右，tab可复用的几率就越高
+        # 简而言之'high'越大，对于'tab'中已有数据的可利用率就越高
         for i in range(1, len(pat)):
             assert (low < i and low <= high <= len(pat))
             if i < high:
@@ -159,7 +159,7 @@ class KnuthMorrisPratt(ZAlgorithm):
         # jmp = self._preprocess_jmp_realtime(pat)  # best
         # 2) search
         ret = []
-        i, j = 0, 0
+        i, j = 0, jmp[0]
         while i < len(txt) - len(pat) + 1:
             while j < len(pat) and txt[i + j] == pat[j]:
                 j += 1
@@ -204,7 +204,7 @@ class BoyerMoore(ZAlgorithm):
 
             while j >= len(pat) - 1 - i and pat[i - (len(pat) - 1 - j)] == pat[j]:
                 j -= 1
-            tab[i] = len(pat) - 1 - j  # mismatch at j
+            tab[i] = len(pat) - 1 - j  # mismatch at 'j'
             low, high = i - tab[i], i
         assert (tab == self._preprocess_fundamental(pat[::-1])[::-1])
         return tab
@@ -212,15 +212,14 @@ class BoyerMoore(ZAlgorithm):
     def _preprocess_badCharacter(self, pat):
         bad = [[] for _ in range(self.alphabet)]  # [0,-1], index
         for i in range(len(pat) - 1, -1, -1):
-            # all occurrences of pat[i], rightmost first
+            # all occurrences of 'pat[i]', rightmost first
             bad[self.ord(pat[i])].append(i)
         return bad
 
     def _preprocess_goodSuffix(self, pat):
         tab = self._preprocess_fundamental_reversed(pat)  # [0,-1), length
-        # sfx和pfx两个数组的缺省值都是-1的原因：
-        # 只要不存在前缀和后缀，则整个pat就可移动至所有当前已比较过的str字符的右边
-        # 且基于索引值的描述方式中，0是有意义的
+        # 'sfx'和'pfx'数组中的缺省值为-1表示不存在符合条件的前后缀
+        # 此时整个'pat'可移至当前已比较过的所有'txt'字符的右边
         sfx = [-1] * len(pat)  # (0,-1], index
         for i in range(len(pat) - 1):
             assert (i < tab[i] or pat[i - tab[i]] != pat[len(pat) - 1 - tab[i]])
@@ -237,7 +236,7 @@ class BoyerMoore(ZAlgorithm):
     def main(self, txt, pat):
         # 1) preprocess
         # 预处理表描述内容的方式有两种：索引值或长度值，两者没有本质上的区别，可以相互转换
-        # 但其在生成和搜索过程中处理的方式会略有不同，此算法在实现上的主要区别就在于此
+        # 但其在生成和搜索过程中处理的方式会略有不同，此算法不同实现上的主要区别就在于此
         # 当前实现统一基于索引值，在pfxs的处理上可能会增加一些计算量
         bads = self._preprocess_badCharacter(pat)
         sfxs, pfxs = self._preprocess_goodSuffix(pat)
@@ -248,25 +247,25 @@ class BoyerMoore(ZAlgorithm):
             j = len(pat) - 1
             while j >= 0 and txt[i + j] == pat[j]:
                 j -= 1
-            if j == -1:  # find the occurrence of pat in txt
+            if j == -1:  # find the occurrence of 'pat' in 'txt'
                 ret.append(i)
-                # pfxs[0]没有意义，pfxs[1]则是最长前缀(缺省值-1也是适用的)
+                # pfxs[0]没有意义，pfxs[1]则是最长前缀(同样适用于缺省值-1)
                 i += len(pat) - 1 - pfxs[1] if len(pfxs) > 1 else 1
             else:
                 assert (txt[i + j] != pat[j])
-                # use the "bad character shift rule"
+                # bad character shift rule
                 bad = bads[self.ord(txt[i + j])]
-                k = 0  # closest to the left of j
+                k = 0  # closest to the left of 'j'
                 while k < len(bad) and bad[k] > j:
                     k += 1
                 assert (k == len(bad) or bad[k] != j)
                 bcShift = j - bad[k] if k < len(bad) else j + 1
-                # use the "good suffix shift rule"
+                # good suffix shift rule
                 if j == len(pat) - 1:
                     gsShift = 1
                 elif sfxs[j + 1] >= 0:
                     gsShift = len(pat) - 1 - sfxs[j + 1]
-                elif pfxs[j + 1] >= 0:  # else
+                elif pfxs[j + 1] >= 0:  # else:
                     gsShift = len(pat) - 1 - pfxs[j + 1]
                 else:  # optional else
                     gsShift = len(pat)
