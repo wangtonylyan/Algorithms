@@ -21,6 +21,8 @@ class SuffixArray(String, StringTest):
     # @complexity: O(nlogn)
     def main_2(self, str):
         class Suffix():
+            __slots__ = ['index', 'rank0', 'rank1']
+
             def __init__(self, index, rank0, rank1):
                 self.index = index
                 self.rank0 = rank0
