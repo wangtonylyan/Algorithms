@@ -16,6 +16,7 @@ class RangeMinimumQuery(NumberTest):
             self.main_bruteForce,
             self.main_dynamic,
             self.main_blockDecomposition,
+            self.main_sparseTable,
         ]
 
     def main_bruteForce(self, lst):
@@ -60,17 +61,29 @@ class RangeMinimumQuery(NumberTest):
 
     def main_sparseTable(self, lst):
         # 1) preprocess: O(nlogn)
-        tab = [[None] * (math.sqrt(len(lst))) for _ in range(len(lst))]
+        tab = [[None] * (int(math.log(len(lst), 2)) + 1) for _ in range(len(lst))]  # tab[i][j] == min([i:i+(1<<j)])
         for i in range(len(lst)):
-            j = 0
-            while i + (1 << j) - 1 <= len(lst):
-                tab[i][j] = min(tab[i][j - 1], tab[i + (1 << (j - 1)) - 1][j - 1])
-                j += 1
+            tab[i][0] = lst[i]
+        j = 1
+        while 1 << j <= len(lst):
+            i = 0
+            while i + (1 << j) <= len(lst):
+                tab[i][j] = min(tab[i + (1 << (j - 1))][j - 1], tab[i][j - 1])
+                i += 1
+            while i + (1 << (j - 1)) < len(lst):
+                tab[i][j] = min(tab[i + (1 << (j - 1))][j - 1], tab[i][j - 1])
+                i += 1
+            while i < len(lst):
+                tab[i][j] = tab[i][j - 1]
+                i += 1
+            j += 1
         # 2) query: O(1)
         low, high = yield
         while True:
             assert (0 <= low < high <= len(lst))
-            low, high = yield
+            k = int(math.log(high - low, 2))
+            # 两个查询区间[low:low+(1<<k)]与[high-(1<<k):high]必定部分重叠
+            low, high = yield min(tab[low][k], tab[high - (1 << k)][k])
 
     def testcase(self):
         def test(cases):
