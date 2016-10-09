@@ -23,25 +23,25 @@ class ShortestPath(DirectedAcyclicGraphTest):
         # worst: n->n-1->...->1
         for _ in range(len(grp) - 1):
             for i in range(len(grp)):
-                if dis[i] != None:
+                if dis[i] is not None:
                     for j, w in grp[i]:
-                        if dis[j] == None or dis[j] > dis[i] + w:
+                        if dis[j] is None or dis[j] > dis[i] + w:
                             dis[j] = dis[i] + w
                             pre[j] = i
         # 3) check
         for i in range(len(grp)):
-            if dis[i] != None:
+            if dis[i] is not None:
                 for j, w in grp[i]:
-                    if dis[j] == None or dis[j] > dis[i] + w:  # if there exists negative-weight cycle
+                    if dis[j] is None or dis[j] > dis[i] + w:  # if there exists negative-weight cycle
                         return None
         # 4) build shortest-path tree
         return dis, pre
 
         for n in range(len(grp)):
             for i in range(len(grp)):
-                if dis[i] != None:
+                if dis[i] is not None:
                     for j, w in grp[i]:
-                        if dis[j] == None or dis[j] > dis[i] + w:
+                        if dis[j] is None or dis[j] > dis[i] + w:
                             if n == len(grp) - 1:  # the last iteration is used to check
                                 return None
                             dis[j] = dis[i] + w
@@ -52,9 +52,8 @@ class ShortestPath(DirectedAcyclicGraphTest):
     # 仅适用于无环的有向图，O(V+E)
     def main_dag(self, grp, src):
         # 1) sort
-        unwgt = map(lambda x: map(lambda y: y[0], x), grp)
-        seq = TopologicalSort().main_Kahn(unwgt)
-        if seq == None:
+        seq = TopologicalSort().main_Kahn(map(lambda x: map(lambda y: y[0], x), grp))
+        if seq is None:
             return None  # this algorithm doesn't work
         assert (len(seq) == len(grp))
         # 2) initialize
@@ -62,15 +61,15 @@ class ShortestPath(DirectedAcyclicGraphTest):
         pre = [None] * len(grp)
         # 3) calculate
         for i in seq:
-            if dis[i] != None:
+            if dis[i] is not None:
                 for j, w in grp[i]:
-                    if dis[j] == None or dis[j] > dis[i] + w:
+                    if dis[j] is None or dis[j] > dis[i] + w:
                         dis[j] = dis[i] + w
                         pre[j] = i
         # 4) build shortest-path tree
         return dis, pre
 
-    # weighted directed graph with nonnegative-weight edges，仅适用于权值非负的有向图
+    # weighted directed graph with non-negative-weight edges，仅适用于权值非负的有向图
     # Dijkstra与Prim的区别在于：
     # 1) dis数组中维护的是某点与源点之间的最短距离，而不是连接该点的边的最小权值
     # 2) 有向图中以任意点为起始点，未必可以到达其他所有点，即最短路径树未必包含了所有连通的点
@@ -82,20 +81,20 @@ class ShortestPath(DirectedAcyclicGraphTest):
         for i, w in grp[src]:
             dis[i] = w
             pre[i] = src
-        # 2) calculate by selecting vertices
+        # 2) calculate by greedily selecting vertexes from list
         for _ in range(len(grp) - 1):  # the 'src' vertex has been selected
             m = None
             for i in range(len(grp)):
-                if vtx[i] == 0 and dis[i] != None:
+                if vtx[i] == 0 and dis[i] is not None:
                     assert (vtx[pre[i]] == 1)
-                    if m == None or dis[m] > dis[i]:
+                    if m is None or dis[m] > dis[i]:
                         m = i
-            if m == None:
+            if m is None:
                 break
-            assert (m != None and vtx[m] == 0 and vtx[pre[m]] == 1)
+            assert (m is not None and vtx[m] == 0 and vtx[pre[m]] == 1)
             vtx[m] = 1
             for i, w in grp[m]:
-                if vtx[i] == 0 and (dis[i] == None or dis[i] > dis[m] + w):
+                if vtx[i] == 0 and (dis[i] is None or dis[i] > dis[m] + w):
                     dis[i] = dis[m] + w
                     pre[i] = m
         # 3) build shortest-path tree
@@ -111,15 +110,15 @@ class ShortestPath(DirectedAcyclicGraphTest):
             dis[i] = w
             pre[i] = src
             hp.push((i, dis[i]))
-        # 2) calculate by selecting vertices
+        # 2) calculate by greedily selecting vertexes from heap
         while len(hp) > 0:
             i, w = hp.pop()
-            assert (w >= dis[i])
+            assert (dis[i] is not None and w >= dis[i])
             if w > dis[i] or vtx[i] != 0:
                 continue
             vtx[i] = 1
             for j, v in grp[i]:
-                if vtx[j] == 0 and (dis[j] == None or dis[j] > dis[i] + v):
+                if vtx[j] == 0 and (dis[j] is None or dis[j] > dis[i] + v):
                     dis[j] = dis[i] + v
                     pre[j] = i
                     hp.push((j, dis[j]))

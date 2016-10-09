@@ -11,27 +11,27 @@ class TopologicalSort(DirectedAcyclicGraphTest):
         super(TopologicalSort, self).__init__(False)
 
     def main_Kahn(self, grp):
-        vtx = [0] * len(grp)  # in-degree
+        dgr = [0] * len(grp)  # in-degree
         for i in range(len(grp)):
             for j in grp[i]:
-                vtx[j] += 1
+                dgr[j] += 1
         # 保存入度为0的节点的容器
         # 由于仅当一个节点的入度首次为0时，该节点才会被存入此容器
         # 即意味着在其前的节点都已经确定了拓扑顺序
         # 因此该算法不依赖于此容器的具体类型，包括set、queue、stack等
         # 采用不同的容器类型会导致最终得到的拓扑顺序不唯一
         # 换言之，对于任意时刻该容器中的所有节点，彼此之间不存在唯一的拓扑顺序
-        indg = set()
+        vtx = set()
         for i in range(len(grp)):
-            if vtx[i] == 0:
-                indg.add(i)
+            if dgr[i] == 0:
+                vtx.add(i)
         sort = []
-        while len(indg) > 0:
-            i = indg.pop()  # 将入度已为0的节点i从图中删除
+        while len(vtx) > 0:
+            i = vtx.pop()  # 将入度已为0的节点i从图中删除
             for j in grp[i]:  # 方式是删除所有以节点i为起始点的有向边
-                vtx[j] -= 1
-                if vtx[j] == 0:
-                    indg.add(j)
+                dgr[j] -= 1
+                if dgr[j] == 0:
+                    vtx.add(j)
             sort.append(i)
         return sort if len(sort) == len(grp) else None
 

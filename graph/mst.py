@@ -22,10 +22,12 @@ from base.graph import UndirectedGraphTest, DirectedGraphTest
 class MinimumSpanningTree(UndirectedGraphTest):
     def __init__(self):
         super(MinimumSpanningTree, self).__init__(True)
-        self.funcs = [self.main_Boruvka,
-                      self.main_Kruskal,
-                      self.main_Prim_1,
-                      self.main_Prim_2]
+        self.funcs = [
+            self.main_Boruvka,
+            self.main_Kruskal,
+            self.main_Prim_1,
+            self.main_Prim_2,
+        ]
 
     def main_Boruvka(self, grp, src=None):
         def union(sets, n1, n2):
@@ -78,7 +80,7 @@ class MinimumSpanningTree(UndirectedGraphTest):
                     edge.append(((m, n), w))
         assert (len(edge) == sum(map(len, grp)) / 2)
         edge.sort(key=lambda x: x[1])
-        # 2) build MST by selecting edges
+        # 2) build MST by greedily selecting edges
         mst = []
         ds = DisjointSetForest(len(grp))
         for (i, j), w in edge:
@@ -96,21 +98,21 @@ class MinimumSpanningTree(UndirectedGraphTest):
         for i, w in grp[src]:
             dis[i] = w
             pre[i] = src
-        # 2) build MST by selecting vertices，从'dis!=None'的点集中进行贪婪选择
+        # 2) build MST by greedily selecting vertexes from list
         mst = []
         for _ in range(len(grp) - 1):  # the 'src' vertex has been selected
             m = None
             for i in range(len(grp)):
-                if vtx[i] == 0 and dis[i] != None:  # 从树外的节点开始搜索
+                if vtx[i] == 0 and dis[i] is not None:  # 从树外的节点开始搜索
                     assert (vtx[pre[i]] == 1)
-                    if m == None or dis[m] > dis[i]:
+                    if m is None or dis[m] > dis[i]:
                         m = i
-            assert (m != None and vtx[m] == 0 and vtx[pre[m]] == 1)
+            assert (m is not None and vtx[m] == 0 and vtx[pre[m]] == 1)
             mst.append(((m, pre[m]), dis[m]))
             vtx[m] = 1
             # update 'dis' array by incremental approach
             for i, w in grp[m]:
-                if vtx[i] == 0 and (dis[i] == None or dis[i] > w):
+                if vtx[i] == 0 and (dis[i] is None or dis[i] > w):
                     dis[i] = w
                     pre[i] = m
         assert (len(mst) == len(grp) - 1)
@@ -127,17 +129,17 @@ class MinimumSpanningTree(UndirectedGraphTest):
             dis[i] = w
             pre[i] = src
             hp.push((i, dis[i]))
-        # 2) build MST by selecting vertices from 'hp'
+        # 2) build MST by greedily selecting vertexes from heap
         mst = []
         while len(hp) > 0:
             i, w = hp.pop()
-            assert (w >= dis[i])
+            assert (dis[i] is not None and w >= dis[i])
             if w > dis[i] or vtx[i] != 0:
                 continue
             mst.append(((i, pre[i]), dis[i]))
             vtx[i] = 1
             for j, v in grp[i]:
-                if vtx[j] == 0 and (dis[j] == None or dis[j] > v):
+                if vtx[j] == 0 and (dis[j] is None or dis[j] > v):
                     dis[j] = v
                     pre[j] = i
                     hp.push((j, dis[j]))

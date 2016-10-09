@@ -202,39 +202,34 @@ def testgraph():
         def f1(grp, src):
             dis = [None] * len(grp)
             dis[src] = 0
-
-            for _ in range(len(grp) - 1):
+            for _ in range(len(grp)):
                 for i in range(len(grp)):
                     if dis[i] != None:
                         for j, w in grp[i]:
                             if dis[j] == None or dis[j] > dis[i] + w:
+                                if _ == len(grp) - 1:
+                                    return None
                                 dis[j] = dis[i] + w
-
-            for i in range(len(grp)):
-                if dis[i] != None:
-                    for j, w in grp[i]:
-                        if dis[j] == None or dis[j] > dis[i] + w:
-                            return None
             return sum(dis)
 
         def f2(grp, src):
             def sort(grp):
-                vtx = [0] * len(grp)
+                dgr = [0] * len(grp)
                 for i in range(len(grp)):
                     for j, w in grp[i]:
-                        vtx[j] += 1
+                        dgr[j] += 1
                 st = set()
                 for i in range(len(grp)):
-                    if vtx[i] == 0:
+                    if dgr[i] == 0:
                         st.add(i)
                 ret = []
                 while len(st) > 0:
                     i = st.pop()
                     for j, w in grp[i]:
-                        vtx[j] -= 1
-                        if vtx[j] == 0:
+                        dgr[j] -= 1
+                        if dgr[j] == 0:
                             st.add(j)
-                    ret = [i] + ret
+                    ret.append(i)
                 return ret if len(ret) == len(grp) else None
 
             seq = sort(grp)
@@ -242,37 +237,43 @@ def testgraph():
                 return None
             dis = [None] * len(grp)
             dis[src] = 0
-            for i in range(len(grp)):
-                if dis[i] != None:
+            for i in seq:
+                if dis[i] is not None:
                     for j, w in grp[i]:
-                        if dis[j] == None or dis[j] > dis[i] + w:
+                        if dis[j] is None or dis[j] > dis[i] + w:
                             dis[j] = dis[i] + w
             return sum(dis)
 
         def f3(grp, src):
             def sort(grp):
-                ret = []
                 vtx = [0] * len(grp)
                 for i in range(len(grp)):
+                    for j, w in grp[i]:
+                        vtx[j] += 1
+                stk = []
+                for i in range(len(grp)):
                     if vtx[i] == 0:
-                        stk = [i]
                         vtx[i] = 1
-                        while len(stk) > 0:
-                            i = stk[-1]
-                            if vtx[i] == 1:
-                                vtx[i] = 2
-                                for j, w in grp[i]:
-                                    if vtx[j] == 0:
-                                        vtx[j] = 1
-                                        stk.append(j)
-                                        vtx[i] = 1
-                                        break
-                                    elif j in stk:
-                                        return None
-                            else:
-                                assert (vtx[i] == 2)
-                                stk.pop()
-                                ret = [i] + ret
+                        stk.append(i)
+                    else:
+                        vtx[i] = 0
+                ret = []
+                while len(stk) > 0:
+                    i = stk[-1]
+                    if vtx[i] == 1:
+                        vtx[i] = 2
+                        for j, w in grp[i]:
+                            if vtx[j] == 0:
+                                vtx[j] = 1
+                                stk.append(j)
+                                vtx[i] = 1
+                                break
+                            elif j in stk:
+                                return None
+                    else:
+                        assert (vtx[i] == 2)
+                        stk.pop()
+                        ret = [i] + ret
                 return ret if len(ret) == len(grp) else None
 
             seq = sort(grp)
@@ -280,32 +281,34 @@ def testgraph():
                 return None
             dis = [None] * len(grp)
             dis[src] = 0
-            for i in range(len(grp)):
-                if dis[i] != None:
+            for i in seq:
+                if dis[i] is not None:
                     for j, w in grp[i]:
-                        if dis[j] == None or dis[j] > dis[i] + w:
+                        if dis[j] is None or dis[j] > dis[i] + w:
                             dis[j] = dis[i] + w
             return sum(dis)
 
         def f4(grp, src):
             vtx = [0] * len(grp)
-            dis = [None] * len(grp)
             vtx[src] = 1
+            dis = [None] * len(grp)
             dis[src] = 0
             hp = MinBinaryHeap(key=lambda x: x[1])
             for i, w in grp[src]:
                 dis[i] = w
                 hp.push((i, dis[i]))
+            ret = []
             while len(hp) > 0:
                 i, w = hp.pop()
-                if vtx[i] == 1 or dis[i] < w:
+                if vtx[i] == 1 or w > dis[i]:
                     continue
                 vtx[i] = 1
                 for j, v in grp[i]:
-                    if vtx[j] == 0 and (dis[j] == None or dis[j] > dis[i] + v):
+                    if vtx[j] == 0 and (dis[j] is None or dis[j] > dis[i] + v):
                         dis[j] = dis[i] + v
                         hp.push((j, dis[j]))
-            return sum(dis)
+                ret.append(w)
+            return sum(ret)
 
         ret = f1(grp, src)
         assert (ret == f4(grp, src) == f2(grp, src) == f3(grp, src))
