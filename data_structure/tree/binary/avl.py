@@ -15,7 +15,25 @@ class AVLTree(SelfBalancingBinarySearchTree):
     def __init__(self):
         super(AVLTree, self).__init__()
 
+    def _rotateLeft(self, avl):
+        avl = super(AVLTree, self)._rotateLeft(avl)
+        avl.factor -= 1
+        avl.right.factor += 1
+        return avl
+
+    def _rotateRight(self, avl):
+        avl = super(AVLTree, self)._rotateRight(avl)
+        avl.factor += 1
+        avl.left.factor -= 1
+        return avl
+
+    def _balance(self, avl):
+        assert (avl)
+        return avl
+
     def _check(self, avl, left, right):
+        if avl:
+            assert (avl.factor in [-1, 0, 1])
         return super(AVLTree, self)._check(avl, left, right)
 
 

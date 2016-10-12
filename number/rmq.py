@@ -7,6 +7,7 @@
 
 import math
 from base.number import NumberTest
+from data_structure.tree.segment import SegmentTree
 
 
 class RangeMinimumQuery(NumberTest):
@@ -17,6 +18,7 @@ class RangeMinimumQuery(NumberTest):
             self.main_dynamic,
             self.main_blockDecomposition,
             self.main_sparseTable,
+            self.main_segmentTree,
         ]
 
     def main_bruteForce(self, lst):
@@ -25,7 +27,6 @@ class RangeMinimumQuery(NumberTest):
         # 2) query: O(n)
         low, high = yield
         while True:
-            assert (0 <= low < high <= len(lst))
             low, high = yield min(lst[low:high])
 
     def main_dynamic(self, lst):
@@ -34,11 +35,10 @@ class RangeMinimumQuery(NumberTest):
         for i in range(len(lst)):
             tab[i][i] = lst[i]
             for j in range(i + 1, len(lst)):
-                tab[i][j] = lst[j] if lst[j] < tab[i][j - 1] else tab[i][j - 1]
+                tab[i][j] = min(tab[i][j - 1], lst[j])
         # 2) query: O(1)
         low, high = yield
         while True:
-            assert (0 <= low < high <= len(lst))
             low, high = yield tab[low][high]
 
     def main_blockDecomposition(self, lst):
@@ -46,11 +46,10 @@ class RangeMinimumQuery(NumberTest):
         blk = int(len(lst) ** 0.5)
         tab = []
         for i in range(0, len(lst), blk):
-            tab.append(min(lst[i:i + blk]) if i + blk < len(lst) else min(lst[i:len(lst)]))
+            tab.append(min(lst[i:i + blk]) if i + blk < len(lst) else min(lst[i:]))
         # 2) query: O(n^0.5)
         low, high = yield
         while True:
-            assert (0 <= low < high <= len(lst))
             left, right = low / blk + 1, high / blk  # boundary of 'tab'
             if left < right:
                 m = tab[left:right] + lst[low:low + left * blk] + lst[right * blk:high]
@@ -68,22 +67,35 @@ class RangeMinimumQuery(NumberTest):
         while 1 << j <= len(lst):
             i = 0
             while i + (1 << j) <= len(lst):
-                tab[i][j] = min(tab[i + (1 << (j - 1))][j - 1], tab[i][j - 1])
-                i += 1
-            while i + (1 << (j - 1)) < len(lst):
-                tab[i][j] = min(tab[i + (1 << (j - 1))][j - 1], tab[i][j - 1])
-                i += 1
-            while i < len(lst):
-                tab[i][j] = tab[i][j - 1]
+                tab[i][j] = min(tab[i][j - 1], tab[i + (1 << (j - 1))][j - 1])
                 i += 1
             j += 1
         # 2) query: O(1)
         low, high = yield
         while True:
-            assert (0 <= low < high <= len(lst))
             k = int(math.log(high - low, 2))
-            # 两个查询区间[low:low+(1<<k)]与[high-(1<<k):high]必定部分重叠
+            assert (2 ** k <= high - low < 2 ** (k + 1))
+            assert (low + (1 << k) > high - (1 << k))
             low, high = yield min(tab[low][k], tab[high - (1 << k)][k])
+
+    def main_segmentTree(self, lst):
+        def func(x, y):
+            if x is not None and y is not None:
+                ret = min(x, y)
+            elif x is not None:
+                ret = x
+            elif y is not None:
+                ret = y
+            else:
+                ret = None
+            return ret
+
+        # 1) preprocess: O(n)
+        sgt = SegmentTree(lst, func, func)
+        # 2) query: O(logn)
+        low, high = yield
+        while True:
+            low, high = yield sgt.search(low, high)
 
     def testcase(self):
         def test(cases):

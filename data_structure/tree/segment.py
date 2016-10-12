@@ -1,82 +1,103 @@
 # -*- coding: utf-8 -*-
 # data structure: segment tree
-# Segment tree is, in principle, a static structure,
-# i.e. its structure cannot be modified once it is built.
-# 1）整棵线段树的构建是基于一个连续的区间
-# 2）所有叶子节点的数量就是构建这棵树的区间的长度
-# 3）中间节点所表示的区间通常都是通过二分法得到的
-# 这样就保证了树的高度与区间的长度之间的关系是对数级
-# 4）线段树的静态结构意味着每次查询所遍历的路径几乎是相似的
-# 通过在每个节点中维护额外的信息，来应对不同的实际问题
-# 通常叶子节点维护的是真实信息，中间节点维护的是统计信息
-# 以便从上至下搜索时的遍历决策
-# 这充分展现了其作为查找树的初衷（并非只关乎如何调整结构）
+# 1) 线段树的构建是基于一个连续区间的
+# 其叶子节点的数量就是该区间的长度
+# 其中间节点所表示的区间的选取通常都是基于二分法的
+# 这样就保证了整棵树的高度与区间的长度之间的对数级关系
+# 2) 线段树是一种静态的数据结构
+# 因此每次查询所遍历的路径几乎是相同的，这样就延伸出了许多设计
+# 如在每个节点中都维护一些额外的信息，以便于指导或加速后续的搜索流程
+# 这也充分展现了其作为查找树的初衷，并非只关乎如何调整自身的结构
 
-from binary import bst
+
+from base.tree import Tree, TreeTest
+from base.number import Number, NumberTest
+from base.interval import Interval
+import math
 
 
 # 根据实际问题对于query返回值的不同需求
 # 线段树有以下几种不同的实现和维护策略：
-# 1）返回值存储并维护于叶子节点中
+# 1) 返回值存储并维护于叶子节点中
 # 需要从树根完整地遍历至（若干个）叶子节点
 # 可以在bottom-up阶段重新维护中间节点的统计信息
 # e.g. HDU_1166,HDU_1394,HDU_1754,HDU_2795
-# 2）返回值为遍历路径上的统计信息
+# 2) 返回值为遍历路径上的统计信息
 # 更新操作可以采用延迟/懒惰标记，在今后更深入的遍历中更新子节点
 # (a) 若该统计信息已维护于当前树中的某个中间节点
 # 则只需访问至该中间节点就足以获取到所需的完整信息
 # (b) 若统计信息并不存于中间节点，只能在遍历的同时进行实时统计
 # http://blog.csdn.net/metalseed/article/details/8039326
-class SegmentTree(bst.BinarySearchTree):
-    class Node:
-        def __init__(self, low, high, value=0):
-            assert (low <= high)
-            self.low = low
-            self.high = high
-            self.value = value  # 该信息没有实际意义，只是举例
+class SegmentTree(Tree, Number):
+    class Node(Tree.Node):
+        def __init__(self, low, high, value):
+            super(SegmentTree.Node, self).__init__(Interval(low, high), value)
 
-    def __init__(self, total=10000):
+    # @param: list 'lst' stores values of leaves
+    # @param: function 'up' updates the values of internal nodes
+    # @param: function 'get' retrieves the values of nodes
+    def __init__(self, lst, up=lambda x, y: None, get=lambda x, y: None):
         super(SegmentTree, self).__init__()
-        self.total = total + 1  # start from index 1
-        # 线段树是一颗接近完全的二叉树，因此使用数组来存储整棵树
-        self.root = [None for i in range(self.total)]
+        self.root = None
+        self.up = up
+        self.get = get
+        self._build(lst)
 
-    def build(self, (low, high)):
-        def _recur(sgt, (low, high)):
-            # 在创建节点的同时初始化其value
-            self.root[sgt] = self.__class__.Node(low, high)
-            if self.root[sgt].low != self.root[sgt].high:
-                mid = (self.root[sgt].low + self.root[sgt].high) >> 1
-                _recur(sgt << 1, (low, mid))
-                _recur(sgt << 1 | 1, (mid + 1, high))
-
-        assert (low <= high)
-        _recur(1, (low, high))
-
-    def query(self, (low, high)):
-        def _recur(sgt, (low, high)):
-            if self.root[sgt]:
-                if self.root[sgt].low == low and self.root[sgt].high == high:
-                    # e.g. 更新或返回当前节点的value
-                    return
-                # 1) top-down
-                pass
-                # 2) recursion
-                left, right = 0, 0
-                if ifIntervalsOverlapped((low, high), (self.root[sgt << 1].low, self.root[sgt << 1].high)):
-                    # travserse left subtree
-                    lval = _recur(sgt << 1, (low, high))  # 子树的遍历中可以选择性地将传入的区间范围缩小至仅与子树重叠的部分
-                if ifIntervalsOverlapped((low, high), (self.root[sgt << 1 | 1].low, self.root[sgt << 1 | 1].high)):
-                    # traverse right subtree
-                    rval = _recur(sgt << 1 | 1, (low, high))
-                # 3) bottom-up
-                # e.g. 基于子节点变更后的value来更新或返回当前节点的value
+    def _build(self, lst):
+        def recur(sgt, low, high):
+            if high - low < 1:
                 return
+            assert (sgt < len(self.root))
+            if high - low == 1:
+                self.root[sgt] = self.__class__.Node(low, high, lst[low])
+            else:
+                left, right = sgt << 1 | 1, (sgt + 1) << 1
+                mid = low + (high - low + 1) / 2
+                recur(left, low, mid)
+                recur(right, mid, high)
+                self.root[sgt] = self.__class__.Node(low, high,
+                                                     self.up(self.root[left].value,
+                                                             self.root[right].value if self.root[right] else None))
 
-        assert (low <= high)
-        return _recur(1, (low, high))
+        assert (not self.root)
+        self.root = [None] * (2 ** int(math.ceil(math.log(len(lst), 2)) + 1))
+        recur(0, 0, len(lst))
+
+    def search(self, low, high):
+        assert (low < high)
+
+        def recur(sgt):
+            if sgt < len(self.root) and self.root[sgt]:
+                if itv.contain(self.root[sgt].key):
+                    return self.root[sgt].value
+                else:
+                    # 1) top-down
+                    # 2) recursion
+                    left = recur(sgt << 1 | 1)
+                    right = recur((sgt + 1) << 1)
+                    # 3) bottom-up
+                    # self.root[sgt].value = self.up(self.root[sgt << 1 | 1].value, self.root[(sgt + 1) << 1].value)
+                    return self.get(left, right)
+            return None
+
+        itv = Interval(low, high)
+        return recur(0)
+
+
+class SegmentTreeTest(TreeTest, NumberTest):
+    def __init__(self, num):
+        assert (num > 0)
+        super(SegmentTreeTest, self).__init__(SegmentTree, 0, True, True)
+        self.tree = None
+        self.cases = self._gencase(each=1, total=num)
+        print '=' * 50
+        print "sample size:\t", len(self.cases)
+
+    def testcase(self):
+        # refer to rmq
+        pass
 
 
 if __name__ == '__main__':
-    t = SegmentTree()
-    t.build((1, 5))
+    SegmentTreeTest(100).testcase()
+    print 'done'
