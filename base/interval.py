@@ -11,6 +11,9 @@ class Interval(object):
         self.left = left
         self.right = right
 
+    def __len__(self):
+        return (self.right - self.left)
+
     def overlap(self, itv):
         assert (isinstance(itv, Interval))
         return (self.left < itv.right and self.right > itv.left)

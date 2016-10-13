@@ -89,7 +89,6 @@ class TrieTreeTest(TreeTest, StringTest):
     def __init__(self, num):
         assert (num > 0)
         super(TrieTreeTest, self).__init__(TrieTree, 0, True, True)
-        self.tree = None
         self.dic = {}
         cases = self._gencase(each=1, total=num)
         for case in cases:

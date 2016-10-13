@@ -21,6 +21,7 @@ class RangeMinimumQuery(NumberTest):
             self.main_segmentTree,
         ]
 
+    # @param: [i, j)
     def main_bruteForce(self, lst):
         # 1) preprocess: O(1)
         pass
@@ -31,11 +32,11 @@ class RangeMinimumQuery(NumberTest):
 
     def main_dynamic(self, lst):
         # 1) preprocess: O(n^2)
-        tab = [[None] * len(lst) for _ in range(len(lst))]
+        tab = [[None] * (len(lst) + 1) for _ in range(len(lst))]
         for i in range(len(lst)):
             tab[i][i] = lst[i]
-            for j in range(i + 1, len(lst)):
-                tab[i][j] = min(tab[i][j - 1], lst[j])
+            for j in range(i + 1, len(lst) + 1):
+                tab[i][j] = min(tab[i][j - 1], lst[j - 1])
         # 2) query: O(1)
         low, high = yield
         while True:
@@ -46,13 +47,13 @@ class RangeMinimumQuery(NumberTest):
         blk = int(len(lst) ** 0.5)
         tab = []
         for i in range(0, len(lst), blk):
-            tab.append(min(lst[i:i + blk]) if i + blk < len(lst) else min(lst[i:]))
+            tab.append(min(lst[i:i + blk]) if i + blk <= len(lst) else min(lst[i:]))
         # 2) query: O(n^0.5)
         low, high = yield
         while True:
             left, right = low / blk + 1, high / blk  # boundary of 'tab'
             if left < right:
-                m = tab[left:right] + lst[low:low + left * blk] + lst[right * blk:high]
+                m = tab[left:right] + lst[low:left * blk] + lst[right * blk:high]
             else:
                 assert (high - low < blk * 2)
                 m = lst[low:high]
@@ -79,7 +80,7 @@ class RangeMinimumQuery(NumberTest):
             low, high = yield min(tab[low][k], tab[high - (1 << k)][k])
 
     def main_segmentTree(self, lst):
-        def func(x, y):
+        def getMin(x, y):
             if x is not None and y is not None:
                 ret = min(x, y)
             elif x is not None:
@@ -91,7 +92,7 @@ class RangeMinimumQuery(NumberTest):
             return ret
 
         # 1) preprocess: O(n)
-        sgt = SegmentTree(lst, func, func)
+        sgt = SegmentTree(lst, up=getMin)
         # 2) query: O(logn)
         low, high = yield
         while True:
@@ -102,12 +103,12 @@ class RangeMinimumQuery(NumberTest):
             for case in cases:
                 funcs = [f(case) for f in self.funcs]
                 map(lambda f: f.next(), funcs)
-                for i in range(len(case) - 1):
-                    for j in range(i + 1, len(case)):
+                for i in range(len(case)):
+                    for j in range(i + 1, len(case) + 1):
                         ret = funcs[0].send((i, j))
-                        assert (ret == x for x in map(lambda f: f.send((i, j)), funcs[1:]))
+                        assert all(ret == x for x in map(lambda f: f.send((i, j)), funcs[1:]))
 
-        self._testcase(test, self._gencase(maxLen=100, each=1, total=500))
+        self._testcase(test, self._gencase(maxLen=100, each=1, total=300))
 
 
 if __name__ == '__main__':
