@@ -55,14 +55,14 @@ class TreeTest(Test):
         assert (issubclass(clsobj, Tree))
         super(TreeTest, self).__init__()
         self.tcls = clsobj
-        self.dic = {}
+        self.cases = {}
         assert (0 <= num < 100000)
         if num > 0:
             for i in range(num):
                 r = random.randint(0, 100000)
-                self.dic[r] = r + 1
+                self.cases[r] = r + 1
             print '=' * 50
-            print "sample size:\t", len(self.dic)
+            print "sample size:\t", len(self.cases)
         self.check = check
         if timer:
             if platform.system() == 'Windows':
@@ -77,7 +77,7 @@ class TreeTest(Test):
         tree = self.tcls()
         cost = 0.0
         cnt = 0
-        for i, j in self.dic.viewitems():
+        for i, j in self.cases.viewitems():
             if callable(self.timer):
                 start_t = self.timer()
             tree.insert(i, j)
@@ -89,7 +89,7 @@ class TreeTest(Test):
             assert (tree.search(i) == j)
             cnt += 1
             assert (cnt == len(tree))
-        assert (cnt == len(tree) == len(self.dic))
+        assert (cnt == len(tree) == len(self.cases))
         print 'insert:\t\t\t', cost
         return tree
 
@@ -125,7 +125,7 @@ class TreeTest(Test):
         print '-' * 50
         cost = 0.0
         cnt = len(tree)
-        for i, j in self.dic.viewitems():
+        for i, j in self.cases.viewitems():
             if callable(self.timer):
                 start_t = self.timer()
             tree.delete(i)

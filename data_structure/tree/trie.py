@@ -89,13 +89,12 @@ class TrieTreeTest(TreeTest, StringTest):
     def __init__(self, num):
         assert (num > 0)
         super(TrieTreeTest, self).__init__(TrieTree, 0, True, True)
-        self.dic = {}
-        cases = self._gencase(each=1, total=num)
-        for case in cases:
+        self.cases = {}
+        for case in self._gencase(each=1, total=num):
             s = case[0]
-            self.dic[s] = reduce(lambda v, c: v + ord(c), s, 0)
+            self.cases[s] = reduce(lambda v, c: v + ord(c), s, 0)
         print '=' * 50
-        print "sample size:\t", len(self.dic)
+        print "sample size:\t", len(self.cases)
 
     def deleteMaxMin(self):
         assert (False)
