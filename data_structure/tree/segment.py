@@ -18,6 +18,7 @@
 from base.tree import Tree, TreeTest
 from base.number import Number, NumberTest
 from base.interval import Interval
+from mathematical.bitwise import NumberAlgorithm
 import math
 
 
@@ -44,14 +45,15 @@ class SegmentTree(Tree, Number):
             if high - low == 1:
                 self.root[sgt] = self.__class__.Node(Interval(low, high), lst[low])
             else:
-                mid = low + (high - low + 1) / 2
+                mid = high - (high - low) / 2
                 self.root[sgt] = self.__class__.Node(Interval(low, high),
                                                      self.up(recur(sgt << 1 | 1, low, mid),
                                                              recur((sgt + 1) << 1, mid, high)))
             return self.root[sgt].value
 
         assert (not self.root)
-        self.root = [None] * (2 ** int(math.ceil(math.log(len(lst), 2)) + 1))
+        self.root = [None] * ((NumberAlgorithm.getNextPowerOfTwo(len(lst)) << 1) - 1)
+        assert (len(self.root) == len(lst) == 1 or len(self.root) > len(lst))
         recur(0, 0, len(lst))
 
     def search(self, low, high, up=None):
