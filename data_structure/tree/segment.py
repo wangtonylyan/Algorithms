@@ -19,7 +19,6 @@ from base.tree import Tree, TreeTest
 from base.number import Number, NumberTest
 from base.interval import Interval
 from mathematical.bitwise import NumberAlgorithm
-import math
 
 
 class SegmentTree(Tree, Number):
