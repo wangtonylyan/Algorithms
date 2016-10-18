@@ -131,10 +131,10 @@ class MinBinaryHeap(BinaryHeap):
 
 
 class BinaryHeapTest(NumberTest):
-    def __init__(self, clsobj):
-        assert (issubclass(clsobj, BinaryHeap))
+    def __init__(self, cls):
+        assert (issubclass(cls, BinaryHeap))
         super(BinaryHeapTest, self).__init__()
-        self.cls = clsobj
+        self.cls = cls
 
     def testcase(self):
         def test(cases):
@@ -142,12 +142,10 @@ class BinaryHeapTest(NumberTest):
                 hp = self.cls(case)
                 hp.check()
                 assert (len(hp) == len(case))
-
                 for i in case:
                     hp.replace(i, i + 1)
                     hp.check()
                 assert (len(hp) == len(case))
-
                 for i in range(len(case)):
                     hp.pop()
                     hp.check()

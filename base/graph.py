@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import copy
-from base import Test
+from test import Test
 
 
 class Enum(tuple):
