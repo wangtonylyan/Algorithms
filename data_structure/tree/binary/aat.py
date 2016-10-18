@@ -14,8 +14,8 @@ class AATree(SelfBalancingBinarySearchTree):
             super(AATree.Node, self).__init__(key, value)
             self.level = 1
 
-    def __init__(self):
-        super(AATree, self).__init__()
+    def __init__(self, cmp):
+        super(AATree, self).__init__(cmp)
 
     # AA树与红黑树的区别：
     # 1) 插入和删除过程都没有top-down阶段的提前准备，仅需在bottom-up时重新平衡
@@ -79,10 +79,10 @@ class AATree(SelfBalancingBinarySearchTree):
         def recur(aat, key, value):
             if not aat:
                 return self.__class__.Node(key, value)
-            if key < aat.key:
+            if self.cmp(key, aat.key) < 0:
                 aat.left = recur(aat.left, key, value)
                 aat = self._balance(aat)
-            elif key > aat.key:
+            elif self.cmp(key, aat.key) > 0:
                 aat.right = recur(aat.right, key, value)
                 aat = self._balance(aat)
             else:
@@ -96,10 +96,10 @@ class AATree(SelfBalancingBinarySearchTree):
         def recur(aat, key):
             if not aat:
                 return aat
-            if key < aat.key:
+            if self.cmp(key, aat.key) < 0:
                 aat.left = recur(aat.left, key)
                 aat = self._balance(aat)
-            elif key > aat.key:
+            elif self.cmp(key, aat.key) > 0:
                 aat.right = recur(aat.right, key)
                 aat = self._balance(aat)
             else:
@@ -159,5 +159,5 @@ class AATree(SelfBalancingBinarySearchTree):
 
 
 if __name__ == '__main__':
-    BinarySearchTreeTest(AATree, 1000).testcase()
+    BinarySearchTreeTest(AATree).testcase()
     print 'done'

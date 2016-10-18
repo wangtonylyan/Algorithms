@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import random
-from base import Test
+from test import Test
 
 
 class Number(object):
     alphabet = 10000  # [0, 10000]
+
+    def __init__(self):
+        super(Number, self).__init__()
 
 
 class NumberTest(Test):
@@ -24,7 +27,7 @@ class NumberTest(Test):
                 else:
                     assert (width <= Number.alphabet + 1)
                     low = random.randint(0, Number.alphabet - width)
-                    lst = [i for i in range(low, low + width + 1)]
+                    lst = [_ for _ in range(low, low + width)]
                     random.shuffle(lst)
                     case.append(lst)
             cases.append(case)

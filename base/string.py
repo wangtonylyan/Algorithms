@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import random
-from base import Test
+from test import Test
 
 
 class String(object):

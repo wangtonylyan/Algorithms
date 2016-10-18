@@ -16,12 +16,12 @@
 
 
 from base.tree import Tree, TreeTest
-from base.number import Number, NumberTest
+from base.number import NumberTest
 from base.interval import Interval
 from mathematical.bitwise import NumberAlgorithm
 
 
-class SegmentTree(Tree, Number):
+class SegmentTree(Tree):
     # @param: list 'lst' stores values of leaves
     # @param: function 'up' assembles the values of each piece of the whole interval during bottom-up
     # it shall be compatible with the 'None' parameter
@@ -104,14 +104,14 @@ class SegmentTree(Tree, Number):
 
 
 class SegmentTreeTest(TreeTest, NumberTest):
-    def __init__(self, num):
+    def __init__(self, num=500):
         assert (num > 0)
-        super(SegmentTreeTest, self).__init__(SegmentTree, 0, True, True)
+        super(SegmentTreeTest, self).__init__(SegmentTree, {}, 0, True, True)
         self.cases = self._gencase(each=1, total=num)
         print '=' * 50
         print "sample size:\t", len(self.cases)
 
-    def testcase(self):
+    def _testcase(self):
         # RMQ
         def test(cases):
             def get(x, y, m):
@@ -127,20 +127,19 @@ class SegmentTreeTest(TreeTest, NumberTest):
                 return x + 1
 
             for case in cases:
-                t1 = self.tcls(case, up=lambda x, y: get(x, y, min))
-                t2 = self.tcls(case, up=lambda x, y: get(x, y, max))
+                t1 = self.cls(case, up=lambda x, y: get(x, y, min))
+                t2 = self.cls(case, up=lambda x, y: get(x, y, max))
                 for i in range(len(case)):
                     for j in range(i + 1, len(case) + 1):
                         assert (t1.search(i, j) == t2.search(i, j, up=lambda x, y: get(x, y, min)))
 
                 t1.update(0, len(case), up=update)
-                t3 = self.tcls(map(update, case), up=lambda x, y: get(x, y, min))
+                t3 = self.cls(map(update, case), up=lambda x, y: get(x, y, min))
                 assert (t1.search(0, len(case)) == t3.search(0, len(case)))
 
         map(test, self.cases)
-        print 'pass:', self.__class__
 
 
 if __name__ == '__main__':
-    SegmentTreeTest(500).testcase()
+    SegmentTreeTest().testcase()
     print 'done'

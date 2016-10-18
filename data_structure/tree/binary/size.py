@@ -12,10 +12,10 @@ class SizeBalancedTree(SelfBalancingBinarySearchTree):
             super(SizeBalancedTree.Node, self).__init__(key, value)
             self.size = 0
 
-    def __init__(self):
-        super(SizeBalancedTree, self).__init__()
+    def __init__(self, cmp):
+        super(SizeBalancedTree, self).__init__(cmp)
 
 
 if __name__ == '__main__':
-    BinarySearchTreeTest(SizeBalancedTree, 1000).testcase()
+    BinarySearchTreeTest(SizeBalancedTree).testcase()
     print 'done'

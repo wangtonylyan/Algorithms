@@ -3,7 +3,7 @@
 import time
 import random
 import platform
-from base import Test
+from test import Test
 
 
 # abstract class
@@ -15,9 +15,10 @@ class Tree(object):
             self.key = key
             self.value = value
 
-    def __init__(self):
+    def __init__(self, cmp=None):
         super(Tree, self).__init__()
         self.root = None
+        self.cmp = cmp
 
     def __len__(self):
         assert (False)
@@ -51,10 +52,11 @@ class Tree(object):
 
 
 class TreeTest(Test):
-    def __init__(self, clsobj, num, check, timer):
-        assert (issubclass(clsobj, Tree))
+    def __init__(self, cls, args, num, check, timer):
+        assert (issubclass(cls, Tree) and isinstance(args, dict) and num >= 0)
         super(TreeTest, self).__init__()
-        self.tcls = clsobj
+        self.cls = cls
+        self.args = args
         self.cases = {}
         assert (0 <= num < 100000)
         if num > 0:
@@ -74,7 +76,7 @@ class TreeTest(Test):
 
     def insert(self):
         print '-' * 50
-        tree = self.tcls()
+        tree = self.cls(**self.args)
         cost = 0.0
         cnt = 0
         for i, j in self.cases.viewitems():
@@ -141,5 +143,9 @@ class TreeTest(Test):
         print 'delete:\t\t\t', cost
 
     def testcase(self):
+        self._testcase()
+        print 'pass:', self.cls
+
+    def _testcase(self):
         self.deleteMaxMin()
         self.delete()

@@ -21,8 +21,8 @@ from rbt import RedBlackTree
 # 但也可以规避，例如delete()的实现，在每次递归中，总是首先将当前层由左倾转换成右倾
 # 即在top-down阶段破坏左倾的特性，于是随后的操作就完全对称了
 class LeftLeaningRedBlackTree(RedBlackTree):
-    def __init__(self):
-        super(LeftLeaningRedBlackTree, self).__init__()
+    def __init__(self, cmp):
+        super(LeftLeaningRedBlackTree, self).__init__(cmp)
 
     # ------------------------------------------------------------------------------------
 
@@ -68,9 +68,9 @@ class LeftLeaningRedBlackTree(RedBlackTree):
             if rbt.left and rbt.left.color and rbt.right and rbt.right.color:
                 rbt = self._flipColor(rbt)
             # 2) recursion
-            if key < rbt.key:
+            if self.cmp(key, rbt.key) < 0:
                 rbt.left = recur(rbt.left, key, value)
-            elif key > rbt.key:
+            elif self.cmp(key, rbt.key) > 0:
                 rbt.right = recur(rbt.right, key, value)
             else:
                 rbt.value = value
@@ -102,7 +102,7 @@ class LeftLeaningRedBlackTree(RedBlackTree):
                 rbt = self._flipColor(rbt)
         else:
             rbt = self._rotateLeft(rbt)
-        assert (rbt.left.color or (rbt.left.left and rbt.left.left.color) \
+        assert (rbt.left.color or (rbt.left.left and rbt.left.left.color)
                 or (rbt.left.right or rbt.left.right.color))
         return rbt
 
@@ -120,7 +120,7 @@ class LeftLeaningRedBlackTree(RedBlackTree):
                 rbt = self._flipColor(rbt)
         else:
             rbt = self._rotateRight(rbt)
-        assert (rbt.right.color or (rbt.right.left and rbt.right.left.color) \
+        assert (rbt.right.color or (rbt.right.left and rbt.right.left.color)
                 or (rbt.right.right and rbt.right.right.color))
         return rbt
 
@@ -140,5 +140,5 @@ class LeftLeaningRedBlackTree(RedBlackTree):
 
 
 if __name__ == '__main__':
-    BinarySearchTreeTest(LeftLeaningRedBlackTree, 1000).testcase()
+    BinarySearchTreeTest(LeftLeaningRedBlackTree).testcase()
     print 'done'
