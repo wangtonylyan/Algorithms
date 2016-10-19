@@ -28,7 +28,7 @@ class Interval(Number):
         return (self.low < itv.high and self.high > itv.low)
         return (max(self.high, itv.high) - min(self.low, itv.low) < len(self) + len(itv))  # by distance
 
-    def contain(self, itv):
+    def envelop(self, itv):
         assert (isinstance(itv, Interval))
         return (self.low <= itv.low and self.high >= itv.high)
 

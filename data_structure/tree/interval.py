@@ -49,6 +49,19 @@ class IntervalTreeAugmented(RedBlackTree, IntervalTree):
 
     def search(self, low, high):
         def recur(ivt, key):
+            if not ivt:
+                return None
+            if key.overlap(ivt.value):
+                return ivt.value.low, ivt.value.high
+            elif ivt.left and ivt.left.max > key.low:
+                return recur(ivt.left, key)
+            else:
+                return recur(ivt.right, key)
+
+        return recur(self.root, Interval(low, high))
+
+    def search_all(self, low, high):
+        def recur(ivt, key):
             assert (ivt and key)
             ret = []
             if key.overlap(ivt.value):
@@ -85,7 +98,11 @@ class IntervalTreeTest(TreeTest, IntervalTest):
                     tree.insert(low, high)
                     if self.check:
                         tree.check()
-                    assert (all(Interval(low, high).overlap(Interval(x, y)) for x, y in tree.search(low, high)))
+                    ret = tree.search(low, high)
+                    rets = tree.search_all(low, high)
+                    assert (ret in rets)
+                    assert (all(Interval(low, high).overlap(Interval(x, y)) for x, y in rets))
+
                 assert (len(tree) <= len(case))
 
         map(test, self.cases)

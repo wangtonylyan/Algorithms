@@ -70,7 +70,7 @@ class SegmentTree(Tree):
                 else:
                     return None
             else:
-                if key.contain(self.root[sgt].key):
+                if key.envelop(self.root[sgt].key):
                     return self.root[sgt].value
                 elif key.overlap(self.root[sgt].key):
                     return self.up(recur(sgt << 1 | 1, key), recur((sgt + 1) << 1, key))
