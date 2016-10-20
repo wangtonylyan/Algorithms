@@ -134,8 +134,8 @@ class KnuthMorrisPratt(ZAlgorithm):
             elif j > 0:
                 j = jmp[j - 1]
             else:
-                assert (j == 0)
                 i += 1
+                assert (jmp[i] == j == 0)
         return jmp
 
         # 以下构建'jmp'的方式更为直观
@@ -234,7 +234,7 @@ class BoyerMoore(ZAlgorithm):
             pfx[len(pat) - 1] = 0
         for i in range(1, len(pat) - 1):
             pfx[len(pat) - (i + 1)] = i if tab[i] == i + 1 else pfx[len(pat) - i]
-        all(pfx[i] + 1 <= len(pat) - i for i in range(len(pfx) - 1))
+        assert (all(pfx[i] + 1 <= len(pat) - i for i in range(1, len(pat))))
         return sfx, pfx
 
     def main(self, txt, pat):

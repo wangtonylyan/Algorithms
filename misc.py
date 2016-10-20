@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import random
+import math
+from mathematical.bitwise import BitAlgorithm, NumberAlgorithm
 
 
 # @problem: Could one design a college admissions process,
@@ -61,6 +63,38 @@ class StableMatching():
         print 'pass:', self.__class__
 
 
+class Josephus():
+    def main_recur(self, n):
+        def recur(n):
+            if n == 1:
+                return 1
+            if n % 2 == 0:
+                return 2 * recur(n / 2) - 1
+            else:
+                return 2 * recur(n / 2) + 1
+
+        return recur(n)
+
+    def main_formula(self, n):
+        return 2 * (n - 2 ** int(math.log(n, 2))) + 1
+
+    def main_bitwise(self, n):
+        # get the leftmost bit
+        if n == BitAlgorithm.getRightmostSetBit(n):
+            m = n
+        else:
+            m = NumberAlgorithm.getNextPowerOfTwo(n) >> 1
+            assert (m < n)
+        # get rest bits except the leftmost one
+        n &= m - 1
+        return n << 1 | 1
+
+    def testcase(self):
+        for i in range(1, 256):
+            assert (self.main_recur(i) == self.main_formula(i) == self.main_bitwise(i))
+
+
 if __name__ == '__main__':
-    StableMatching().testcase()
+    # StableMatching().testcase()
+    Josephus().testcase()
     print 'done'
