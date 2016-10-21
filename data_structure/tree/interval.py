@@ -29,23 +29,20 @@ class IntervalTreeAugmented(RedBlackTree, IntervalTree):
             super(IntervalTreeAugmented.Node, self).__init__(key, value)
             self.max = value.high  # maximum of high endpoints of subtrees
 
+        def __call__(self):
+            super(IntervalTreeAugmented.Node, self).__call__()
+            # 'max' is compatible with None
+            self.max = max(self.value.high,
+                           self.left.max if self.left else None,
+                           self.right.max if self.right else None)
+            return self
+
     def __init__(self):
         super(IntervalTreeAugmented, self).__init__()
-
-    # 增强型树结构中对于additional information的维护应随着树的遍历而同步进行
-    # 但由于现有实现普遍都不支持augment，因此暂仅以以下实现方式为例
-    def _maintain(self, ivt):
-        if not ivt:
-            return None
-        # 'max' is compatible with None
-        ivt.max = max(ivt.value.high, self._maintain(ivt.left), self._maintain(ivt.right))
-        assert (ivt.max is not None)
-        return ivt.max
 
     def insert(self, low, high):
         assert (low <= high)
         super(IntervalTreeAugmented, self).insert(low, Interval(low, high))
-        self._maintain(self.root)
 
     def search(self, low, high):
         def recur(ivt, key):

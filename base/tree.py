@@ -15,6 +15,9 @@ class Tree(object):
             self.key = key
             self.value = value
 
+        def __call__(self, *args):
+            return self
+
     def __init__(self):
         super(Tree, self).__init__()
         self.root = None

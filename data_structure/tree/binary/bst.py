@@ -182,22 +182,38 @@ class SelfAdjustingBinarySearchTree(BinarySearchTree):
     def __init__(self):
         super(SelfAdjustingBinarySearchTree, self).__init__()
 
-    # rotate left与rotate right这两个操作是完全对称且互为可逆的
-    # always holds the symmetric order property
+    # 1) rotate left与rotate right这两个操作是完全对称且互为可逆的
+    # 2) always holds the symmetric order property
     def _rotateLeft(self, bst):
         if bst and bst.right:
-            tmp = bst.right
-            bst.right = tmp.left
-            tmp.left = bst
-            bst = tmp
+            bst = self._doRotateLeft(bst)
+            assert (bst.left)
+            if bst.left.right:
+                bst.left.right()
+            bst.left()
+        return bst
+
+    def _doRotateLeft(self, bst):
+        tmp = bst.right
+        bst.right = tmp.left
+        tmp.left = bst
+        bst = tmp
         return bst
 
     def _rotateRight(self, bst):
         if bst and bst.left:
-            tmp = bst.left
-            bst.left = tmp.right
-            tmp.right = bst
-            bst = tmp
+            bst = self._doRotateRight(bst)
+            assert (bst.right)
+            if bst.right.left:
+                bst.right.left()
+            bst.right()
+        return bst
+
+    def _doRotateRight(self, bst):
+        tmp = bst.left
+        bst.left = tmp.right
+        tmp.right = bst
+        bst = tmp
         return bst
 
 

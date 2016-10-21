@@ -26,18 +26,24 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
     # @invariant: rbt subtree is a red-black tree
     def _rotateLeft(self, rbt):
         assert (rbt and rbt.right)
-        rbt = super(RedBlackTree, self)._rotateLeft(rbt)
+        rbt = self._doRotateLeft(rbt)
         assert (rbt.left)
         rbt.color, rbt.left.color = rbt.left.color, rbt.color
-        return rbt
+        if rbt.left.right:
+            rbt.left.right()
+        rbt.left()
+        return rbt()
 
     # @invariant: rbt subtree is a red-black tree
     def _rotateRight(self, rbt):
         assert (rbt and rbt.left)
-        rbt = super(RedBlackTree, self)._rotateRight(rbt)
+        rbt = self._doRotateRight(rbt)
         assert (rbt.right)
         rbt.color, rbt.right.color = rbt.right.color, rbt.color
-        return rbt
+        if rbt.right.left:
+            rbt.right.left()
+        rbt.right()
+        return rbt()
 
     # @invariant: rbt subtree is a relaxed red-black tree
     # @what: turn rbt node from a 2-node into a 4-node, or reversely
@@ -46,7 +52,9 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
         rbt.color = not rbt.color
         rbt.left.color = not rbt.left.color
         rbt.right.color = not rbt.right.color
-        return rbt
+        rbt.left()
+        rbt.right()
+        return rbt()
 
     # ------------------------------------------------------------------------------------
 
@@ -68,7 +76,7 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
                 rbt = self._rotateLeft(rbt)
         if rbt.left and rbt.left.color and rbt.right and rbt.right.color:
             rbt = self._flipColor(rbt)
-        return rbt
+        return rbt()
 
     # ------------------------------------------------------------------------------------
 
