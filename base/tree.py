@@ -15,10 +15,9 @@ class Tree(object):
             self.key = key
             self.value = value
 
-    def __init__(self, cmp=None):
+    def __init__(self):
         super(Tree, self).__init__()
         self.root = None
-        self.cmp = cmp
 
     def __len__(self):
         assert (False)

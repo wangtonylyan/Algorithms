@@ -12,8 +12,8 @@ class SizeBalancedTree(SelfBalancingBinarySearchTree):
             super(SizeBalancedTree.Node, self).__init__(key, value)
             self.size = 0
 
-    def __init__(self, cmp):
-        super(SizeBalancedTree, self).__init__(cmp)
+    def __init__(self):
+        super(SizeBalancedTree, self).__init__()
 
 
 if __name__ == '__main__':

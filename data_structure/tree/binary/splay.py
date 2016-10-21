@@ -12,8 +12,8 @@ from bst import SelfAdjustingBinarySearchTree, BinarySearchTreeTest
 
 
 class SplayTree(SelfAdjustingBinarySearchTree):
-    def __init__(self, cmp):
-        super(SplayTree, self).__init__(cmp)
+    def __init__(self):
+        super(SplayTree, self).__init__()
         self._search = self._splay
 
     # 1) splay操作有两种实现策略：
@@ -34,7 +34,7 @@ class SplayTree(SelfAdjustingBinarySearchTree):
         self.root = self._search(self.root, key)
         assert (not self.root or (self.root.key is not None and
                                   self.root.value is not None))
-        return self.root.value if self.root and self.cmp(self.root.key, key) == 0 else None
+        return self.root.value if self.root and self.root.key == key else None
 
     def getMax(self):
         self.root = self._getMax(self.root)
@@ -54,16 +54,16 @@ class SplayTree(SelfAdjustingBinarySearchTree):
             self.root = self.__class__.Node(key, value)
         else:
             self.root = self._splay(self.root, key)
-            if self.cmp(self.root.key, key) == 0:
+            if self.root.key == key:
                 self.root.value = value
             else:
                 spt = self.__class__.Node(key, value)
-                if self.cmp(self.root.key, key) > 0:
+                if self.root.key > key:
                     spt.left = self.root.left
                     self.root.left = None
                     spt.right = self.root
                 else:
-                    assert (self.cmp(self.root.key, key) < 0)
+                    assert (self.root.key < key)
                     spt.right = self.root.right
                     self.root.right = None
                     spt.left = self.root
@@ -72,7 +72,7 @@ class SplayTree(SelfAdjustingBinarySearchTree):
     def delete(self, key):
         if self.root:
             self.root = self._splay(self.root, key)
-            if self.cmp(self.root.key, key) == 0:
+            if self.root.key == key:
                 if not self.root.left:
                     self.root = self.root.right
                 else:
@@ -97,8 +97,8 @@ class SplayTree(SelfAdjustingBinarySearchTree):
 
 
 class SplayTreeTopDown(SplayTree):
-    def __init__(self, cmp):
-        super(SplayTreeTopDown, self).__init__(cmp)
+    def __init__(self):
+        super(SplayTreeTopDown, self).__init__()
 
     def _splay(self, spt, key):
         if not spt:
@@ -115,32 +115,32 @@ class SplayTreeTopDown(SplayTree):
         # 2) 消除沿access path出现的zig-zig形状，而zig-zag形状则被自然地分解至了'left'和'right'子树中
         root = self.__class__.Node(None, None)
         left = right = root
-        while self.cmp(spt.key, key) != 0:
-            if self.cmp(key, spt.key) < 0:
+        while spt.key != key:
+            if key < spt.key:
                 if not spt.left:
                     break
                 # rotate
-                if self.cmp(key, spt.left.key) < 0:  # zig-zig
+                if key < spt.left.key:  # zig-zig
                     spt = self._rotateRight(spt)
                     if not spt.left:
                         break
                 # link
                 # 在保证下一步访问的是'spt.left'(且其存在)的前提下，将'spt'及其整棵右子树连接至'right'子树
-                assert (self.cmp(spt.key, key) > 0)
+                assert (spt.key > key)
                 right.left = spt
                 right = right.left
                 spt = spt.left
             else:
-                assert (self.cmp(key, spt.key) > 0)
+                assert (key > spt.key)
                 if not spt.right:
                     break
                 # rotate
-                if self.cmp(key, spt.right.key) > 0:  # zig-zig
+                if key > spt.right.key:  # zig-zig
                     spt = self._rotateLeft(spt)
                     if not spt.right:
                         break
                 # link
-                assert (self.cmp(spt.key, key) < 0)
+                assert (spt.key < key)
                 left.right = spt
                 left = left.right
                 spt = spt.right
@@ -152,8 +152,8 @@ class SplayTreeTopDown(SplayTree):
         spt.left = root.right
         spt.right = root.left
         # 'spt.key'与'key'的大小关系不确定，但'spt.left'和'spt.right'的构成则是完全根据'key'来划分的
-        assert (not spt.left or self.cmp(spt.left.key, key) < 0)
-        assert (not spt.right or self.cmp(spt.right.key, key) > 0)
+        assert (not spt.left or spt.left.key < key)
+        assert (not spt.right or spt.right.key > key)
         return spt
 
     def _getMax(self, spt):
@@ -190,19 +190,19 @@ class SplayTreeTopDown(SplayTree):
 
 
 class SplayTreeBottomUp(SplayTree):
-    def __init__(self, cmp):
-        super(SplayTreeBottomUp, self).__init__(cmp)
+    def __init__(self):
+        super(SplayTreeBottomUp, self).__init__()
 
     def _splay(self, spt, key):
         if not spt:
             return spt
-        if self.cmp(key, spt.key) < 0 and spt.left:
-            if self.cmp(key, spt.left.key) < 0:  # zig-zig
+        if key < spt.key and spt.left:
+            if key < spt.left.key:  # zig-zig
                 spt.left.left = self._splay(spt.left.left, key)
                 spt = self._rotateRight(spt)
                 if spt.left:
                     spt = self._rotateRight(spt)
-            # elif self.cmp(key, spt.left.key) > 0:  # zig-zag
+            # elif key > spt.left.key:  # zig-zag
             #    spt.left.right = self._splay(spt.left.right, key)
             #    if spt.left.right:
             #        spt.left = self._rotateLeft(spt.left)
@@ -210,13 +210,13 @@ class SplayTreeBottomUp(SplayTree):
             else:
                 spt.left = self._splay(spt.left, key)
                 spt = self._rotateRight(spt)
-        elif self.cmp(key, spt.key) > 0 and spt.right:
-            if self.cmp(key, spt.right.key) > 0:  # zig-zig
+        elif key > spt.key and spt.right:
+            if key > spt.right.key:  # zig-zig
                 spt.right.right = self._splay(spt.right.right, key)
                 spt = self._rotateLeft(spt)
                 if spt.right:
                     spt = self._rotateLeft(spt)
-            # elif self.cmp(key, spt.right.key) < 0:  # zig-zag
+            # elif key < spt.right.key:  # zig-zag
             #    spt.right.left = self._splay(spt.right.left, key)
             #    if spt.right.left:
             #        spt.right = self._rotateRight(spt.right)
@@ -224,8 +224,8 @@ class SplayTreeBottomUp(SplayTree):
             else:
                 spt.right = self._splay(spt.right, key)
                 spt = self._rotateLeft(spt)
-        assert (not spt.left or self.cmp(spt.left.key, key) < 0)
-        assert (not spt.right or self.cmp(spt.right.key, key) > 0)
+        assert (not spt.left or spt.left.key < key)
+        assert (not spt.right or spt.right.key > key)
         return spt
 
     def _getMax(self, spt):

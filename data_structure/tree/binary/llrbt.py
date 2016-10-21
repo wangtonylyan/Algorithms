@@ -21,8 +21,8 @@ from rbt import RedBlackTree
 # 但也可以规避，例如delete()的实现，在每次递归中，总是首先将当前层由左倾转换成右倾
 # 即在top-down阶段破坏左倾的特性，于是随后的操作就完全对称了
 class LeftLeaningRedBlackTree(RedBlackTree):
-    def __init__(self, cmp):
-        super(LeftLeaningRedBlackTree, self).__init__(cmp)
+    def __init__(self):
+        super(LeftLeaningRedBlackTree, self).__init__()
 
     # ------------------------------------------------------------------------------------
 
@@ -68,9 +68,9 @@ class LeftLeaningRedBlackTree(RedBlackTree):
             if rbt.left and rbt.left.color and rbt.right and rbt.right.color:
                 rbt = self._flipColor(rbt)
             # 2) recursion
-            if self.cmp(key, rbt.key) < 0:
+            if key < rbt.key:
                 rbt.left = recur(rbt.left, key, value)
-            elif self.cmp(key, rbt.key) > 0:
+            elif key > rbt.key:
                 rbt.right = recur(rbt.right, key, value)
             else:
                 rbt.value = value

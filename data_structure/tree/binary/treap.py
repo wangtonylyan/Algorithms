@@ -24,8 +24,8 @@ class Treap(SelfBalancingBinarySearchTree):
             super(Treap.Node, self).__init__(key, value)
             self.priority = priority
 
-    def __init__(self, cmp, total=1000):
-        super(Treap, self).__init__(cmp)
+    def __init__(self, total=1000):
+        super(Treap, self).__init__()
         self.total = total * 5
         # 利用该数组来维护priority的唯一性，有的实现也会利用哈希表
         self.prioritySet = [0] * self.total
@@ -49,10 +49,10 @@ class Treap(SelfBalancingBinarySearchTree):
                     priority = random.randint(0, self.total - 1)
                 self.prioritySet[priority] = 1
                 return self.__class__.Node(key, value, priority)  # insertion
-            if self.cmp(key, trp.key) < 0:
+            if key < trp.key:
                 trp.left = recur(trp.left, key, value)
                 trp = self._balance(trp)
-            elif self.cmp(key, trp.key) > 0:
+            elif key > trp.key:
                 trp.right = recur(trp.right, key, value)
                 trp = self._balance(trp)
             else:
@@ -67,9 +67,9 @@ class Treap(SelfBalancingBinarySearchTree):
         def recur(trp, key):
             if not trp:
                 return trp  # deletion fails
-            if self.cmp(key, trp.key) < 0:
+            if key < trp.key:
                 trp.left = recur(trp.left, key)
-            elif self.cmp(key, trp.key) > 0:
+            elif key > trp.key:
                 trp.right = recur(trp.right, key)
             else:  # == Heap.sink
                 if not trp.left and not trp.right:

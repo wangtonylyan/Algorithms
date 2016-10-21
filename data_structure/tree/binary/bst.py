@@ -13,8 +13,8 @@ class BinarySearchTree(Tree):
             self.left = None
             self.right = None
 
-    def __init__(self, cmp):
-        super(BinarySearchTree, self).__init__(cmp)
+    def __init__(self):
+        super(BinarySearchTree, self).__init__()
 
     def __len__(self):
         return self._len(self.root)
@@ -26,14 +26,14 @@ class BinarySearchTree(Tree):
 
     def search(self, key):
         bst = self._search(self.root, key)
-        assert (not bst or (self.cmp(bst.key, key) == 0 and bst.value is not None))
+        assert (not bst or (bst.key == key and bst.value is not None))
         return bst.value if bst else None
 
     def _search(self, bst, key):
         while bst:
-            if self.cmp(key, bst.key) < 0:
+            if key < bst.key:
                 bst = bst.left
-            elif self.cmp(key, bst.key) > 0:
+            elif key > bst.key:
                 bst = bst.right
             else:
                 break
@@ -87,9 +87,9 @@ class BinarySearchTree(Tree):
         def recur(bst, key, value):
             if not bst:
                 return self.__class__.Node(key, value)
-            if self.cmp(key, bst.key) < 0:
+            if key < bst.key:
                 bst.left = recur(bst.left, key, value)
-            elif self.cmp(key, bst.key) > 0:
+            elif key > bst.key:
                 bst.right = recur(bst.right, key, value)
             else:
                 bst.value = value
@@ -102,9 +102,9 @@ class BinarySearchTree(Tree):
         def recur(bst, key):
             if not bst:
                 return None
-            if self.cmp(key, bst.key) < 0:
+            if key < bst.key:
                 bst.left = recur(bst.left, key)
-            elif self.cmp(key, bst.key) > 0:
+            elif key > bst.key:
                 bst.right = recur(bst.right, key)
             else:
                 if not bst.left:
@@ -169,9 +169,9 @@ class BinarySearchTree(Tree):
             return 0
         # check symmetric order property
         if bst.left:
-            assert (self.cmp(bst.left.key, bst.key) < 0)
+            assert (bst.left.key < bst.key)
         if bst.right:
-            assert (self.cmp(bst.right.key, bst.key) > 0)
+            assert (bst.right.key > bst.key)
         # check size consistency
         if bst is self.root:
             assert (self._len(bst) == left + right + 1)
@@ -179,8 +179,8 @@ class BinarySearchTree(Tree):
 
 
 class SelfAdjustingBinarySearchTree(BinarySearchTree):
-    def __init__(self, cmp):
-        super(SelfAdjustingBinarySearchTree, self).__init__(cmp)
+    def __init__(self):
+        super(SelfAdjustingBinarySearchTree, self).__init__()
 
     # rotate left与rotate right这两个操作是完全对称且互为可逆的
     # always holds the symmetric order property
@@ -204,15 +204,15 @@ class SelfAdjustingBinarySearchTree(BinarySearchTree):
 # (自)平衡树大致分为两类：height-balanced和weight-balanced
 # 前者关注的是树的高度，后者关注的是树的重量(即树中节点的个数)
 class SelfBalancingBinarySearchTree(SelfAdjustingBinarySearchTree):
-    def __init__(self, cmp):
-        super(SelfBalancingBinarySearchTree, self).__init__(cmp)
+    def __init__(self):
+        super(SelfBalancingBinarySearchTree, self).__init__()
 
     def _balance(self, bst):
         assert (False)
 
 
 class BinarySearchTreeTest(TreeTest):
-    def __init__(self, cls, args={'cmp': cmp}, num=1000, check=True, time=True):
+    def __init__(self, cls, args={}, num=1000, check=True, time=True):
         assert (issubclass(cls, BinarySearchTree) and isinstance(args, dict) and num > 0)
         super(BinarySearchTreeTest, self).__init__(cls, args, num, check, time)
 

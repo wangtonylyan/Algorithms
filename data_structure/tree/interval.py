@@ -30,7 +30,7 @@ class IntervalTreeAugmented(RedBlackTree, IntervalTree):
             self.max = value.high  # maximum of high endpoints of subtrees
 
     def __init__(self):
-        super(IntervalTreeAugmented, self).__init__(cmp)
+        super(IntervalTreeAugmented, self).__init__()
 
     # 增强型树结构中对于additional information的维护应随着树的遍历而同步进行
     # 但由于现有实现普遍都不支持augment，因此暂仅以以下实现方式为例

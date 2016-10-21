@@ -12,8 +12,8 @@ class AVLTree(SelfBalancingBinarySearchTree):
             super(AVLTree.Node, self).__init__(key, value)
             self.factor = 0  # balance factor
 
-    def __init__(self, cmp):
-        super(AVLTree, self).__init__(cmp)
+    def __init__(self):
+        super(AVLTree, self).__init__()
 
     def _rotateLeft(self, avl):
         avl = super(AVLTree, self)._rotateLeft(avl)

@@ -14,8 +14,8 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
             # default color of a new leaf node is red
             self.color = True  # True if red else False (black)
 
-    def __init__(self, cmp):
-        super(RedBlackTree, self).__init__(cmp)
+    def __init__(self):
+        super(RedBlackTree, self).__init__()
 
     # ------------------------------------------------------------------------------------
 
@@ -80,9 +80,9 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
             # 1) top-down
             pass  # naturally no 4-node
             # 2) recursion: traverse
-            if self.cmp(key, rbt.key) < 0:
+            if key < rbt.key:
                 rbt.left = recur(rbt.left, key, value)
-            elif self.cmp(key, rbt.key) > 0:
+            elif key > rbt.key:
                 rbt.right = recur(rbt.right, key, value)
             else:
                 rbt.value = value  # override
@@ -172,14 +172,14 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
         if not rbt:  # termination of recursion
             return rbt  # deletion failed
         assert (rbt.color or (rbt.left and rbt.left.color) or (rbt.right and rbt.right.color))
-        if self.cmp(key, rbt.key) < 0:
+        if key < rbt.key:
             # 1) top-down
             rbt = self._makeLeftRed(rbt)
             # 2) recursion
             rbt.left = self._delete(rbt.left, key)
             # 3) bottom-up
             rbt = self._balance(rbt)
-        elif self.cmp(key, rbt.key) > 0:
+        elif key > rbt.key:
             rbt = self._makeRightRed(rbt)
             rbt.right = self._delete(rbt.right, key)
             rbt = self._balance(rbt)
@@ -190,7 +190,7 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
                 # 1) top-down
                 rbt = self._makeRightRed(rbt)
                 # 2) deletion or traversal
-                if self.cmp(rbt.key, key) != 0:  # if rbt node is no longer the one before _makeRightRed
+                if rbt.key != key:  # if rbt node is no longer the one before _makeRightRed
                     rbt.right = self._delete(rbt.right, key)  # go on traverse
                 else:
                     m = self._getMin(rbt.right)
@@ -252,9 +252,9 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
         if not rbt:
             return 0
         if rbt.left:
-            assert (self.cmp(rbt.key, rbt.left.key) > 0)
+            assert (rbt.key > rbt.left.key)
         if rbt.right:
-            assert (self.cmp(rbt.key, rbt.right.key) < 0)
+            assert (rbt.key < rbt.right.key)
         assert (left == right)  # left and right subtree hold the same black-height
         assert (not (rbt.left and rbt.left.color and rbt.right and rbt.right.color))
         if rbt is self.root:
