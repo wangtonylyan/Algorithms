@@ -220,6 +220,37 @@ class SelfBalancingBinarySearchTree(SelfAdjustingBinarySearchTree):
         assert (False)
 
 
+class AugmentedBinarySearchTreeWrapper(object):
+    def __init__(self):
+        super(AugmentedBinarySearchTreeWrapper, self).__init__()
+        assert (issubclass(self.__class__, BinarySearchTree))
+
+    def _augment(self, node):
+        if node is not None and isinstance(node, Tree.Node):
+            assert (callable(node))
+            node()
+
+    def _insert(self, *args):
+        ret = super(AugmentedBinarySearchTreeWrapper, self)._insert(*args)
+        self._augment(ret)
+        return ret
+
+    def _delete(self, *args):
+        ret = super(AugmentedBinarySearchTreeWrapper, self)._delete(*args)
+        self._augment(ret)
+        return ret
+
+    def _deleteMax(self, *args):
+        ret = super(AugmentedBinarySearchTreeWrapper, self)._deleteMax(*args)
+        self._augment(ret)
+        return ret
+
+    def _deleteMin(self, *args):
+        ret = super(AugmentedBinarySearchTreeWrapper, self)._deleteMin(*args)
+        self._augment(ret)
+        return ret
+
+
 class BinarySearchTreeTest(TreeTest):
     def __init__(self, cls, args={}, num=1000, check=True, time=True):
         assert (issubclass(cls, BinarySearchTree) and isinstance(args, dict) and num > 0)

@@ -3,8 +3,7 @@
 # 红黑树属于2-3(-4)树的一种变种
 
 
-from bst import SelfBalancingBinarySearchTree, BinarySearchTreeTest
-from base.tree import tree_node_augment_wrapper
+from bst import SelfBalancingBinarySearchTree, BinarySearchTreeTest, AugmentedBinarySearchTreeWrapper
 
 
 class RedBlackTree(SelfBalancingBinarySearchTree):
@@ -274,25 +273,9 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
         return left + 1
 
 
-class AugmentedRedBlackTree(RedBlackTree):
+class AugmentedRedBlackTree(AugmentedBinarySearchTreeWrapper, RedBlackTree):
     def __init__(self):
         super(AugmentedRedBlackTree, self).__init__()
-
-    @tree_node_augment_wrapper
-    def _insert(self, *args):
-        return super(AugmentedRedBlackTree, self)._insert(*args)
-
-    @tree_node_augment_wrapper
-    def _delete(self, *args):
-        return super(AugmentedRedBlackTree, self)._delete(*args)
-
-    @tree_node_augment_wrapper
-    def _deleteMax(self, *args):
-        return super(AugmentedRedBlackTree, self)._deleteMax(*args)
-
-    @tree_node_augment_wrapper
-    def _deleteMin(self, *args):
-        return super(AugmentedRedBlackTree, self)._deleteMin(*args)
 
 
 if __name__ == '__main__':

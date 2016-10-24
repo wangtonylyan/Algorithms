@@ -4,8 +4,7 @@
 # 每个节点中维护的level综合了AVL树和红黑树的特性
 
 
-from bst import SelfBalancingBinarySearchTree, BinarySearchTreeTest
-from base.tree import tree_node_augment_wrapper
+from bst import SelfBalancingBinarySearchTree, BinarySearchTreeTest, AugmentedBinarySearchTreeWrapper
 
 
 class AATree(SelfBalancingBinarySearchTree):
@@ -160,25 +159,9 @@ class AATree(SelfBalancingBinarySearchTree):
         return super(AATree, self)._check(aat, left, right)
 
 
-class AugmentedAATree(AATree):
+class AugmentedAATree(AugmentedBinarySearchTreeWrapper, AATree):
     def __init__(self):
         super(AugmentedAATree, self).__init__()
-
-    @tree_node_augment_wrapper
-    def _insert(self, *args):
-        return super(AugmentedAATree, self)._insert(*args)
-
-    @tree_node_augment_wrapper
-    def _delete(self, *args):
-        return super(AugmentedAATree, self)._delete(*args)
-
-    @tree_node_augment_wrapper
-    def _deleteMax(self, *args):
-        return super(AugmentedAATree, self)._deleteMax(*args)
-
-    @tree_node_augment_wrapper
-    def _deleteMin(self, *args):
-        return super(AugmentedAATree, self)._deleteMin(*args)
 
 
 if __name__ == '__main__':

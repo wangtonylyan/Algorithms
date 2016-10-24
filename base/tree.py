@@ -58,16 +58,16 @@ class Tree(object):
     def getMin(self, *args):
         assert (False)
 
-    def insert(self, *args):  # tree_node_augment_wrapper
+    def insert(self, *args):  # @tree_node_augment_wrapper
         assert (False)
 
-    def delete(self, *args):  # tree_node_augment_wrapper
+    def delete(self, *args):  # @tree_node_augment_wrapper
         assert (False)
 
-    def deleteMax(self, *args):  # tree_node_augment_wrapper
+    def deleteMax(self, *args):  # @tree_node_augment_wrapper
         assert (False)
 
-    def deleteMin(self, *args):  # tree_node_augment_wrapper
+    def deleteMin(self, *args):  # @tree_node_augment_wrapper
         assert (False)
 
     def clean(self):
