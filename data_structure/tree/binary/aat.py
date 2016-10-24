@@ -3,7 +3,9 @@
 # AA树可被视为是一种简化版的"右倾"红黑树
 # 每个节点中维护的level综合了AVL树和红黑树的特性
 
+
 from bst import SelfBalancingBinarySearchTree, BinarySearchTreeTest
+from base.tree import tree_node_augment_wrapper
 
 
 class AATree(SelfBalancingBinarySearchTree):
@@ -26,7 +28,7 @@ class AATree(SelfBalancingBinarySearchTree):
     # == rotateRight: turning 'aat.left.right' into left
     def _skew(self, aat):
         if aat.left and aat.left.level == aat.level:
-            aat = self._rotateRight(aat)
+            aat = self._rotateRight_(aat)
             assert (aat.level == aat.right.level)
         return aat
 
@@ -34,7 +36,7 @@ class AATree(SelfBalancingBinarySearchTree):
     def _split(self, aat):
         if aat.right and aat.right.right and aat.right.right.level == aat.level:
             assert (aat.level == aat.right.level == aat.right.right.level)
-            aat = self._rotateLeft(aat)
+            aat = self._rotateLeft_(aat)
             assert (aat.level == aat.left.level == aat.right.level)
             aat.level += 1
         return aat
@@ -76,48 +78,48 @@ class AATree(SelfBalancingBinarySearchTree):
         return aat
 
     def insert(self, key, value):
-        def recur(aat, key, value):
-            if not aat:
-                return self.__class__.Node(key, value)
-            if key < aat.key:
-                aat.left = recur(aat.left, key, value)
-                aat = self._balance(aat)
-            elif key > aat.key:
-                aat.right = recur(aat.right, key, value)
-                aat = self._balance(aat)
-            else:
-                aat.value = value
-            return aat
-
         assert (key is not None and value is not None)
-        self.root = recur(self.root, key, value)
+        self.root = self._insert(self.root, key, value)
+
+    def _insert(self, aat, key, value):
+        if not aat:
+            return self.__class__.Node(key, value)
+        if key < aat.key:
+            aat.left = self._insert(aat.left, key, value)
+            aat = self._balance(aat)
+        elif key > aat.key:
+            aat.right = self._insert(aat.right, key, value)
+            aat = self._balance(aat)
+        else:
+            aat.value = value
+        return aat
 
     def delete(self, key):
-        def recur(aat, key):
-            if not aat:
-                return aat
-            if key < aat.key:
-                aat.left = recur(aat.left, key)
-                aat = self._balance(aat)
-            elif key > aat.key:
-                aat.right = recur(aat.right, key)
-                aat = self._balance(aat)
-            else:
-                if aat.right:
-                    m = self._getMin(aat.right)
-                    aat.right = self._deleteMin(aat.right)
-                    assert (self._search(aat.right, m.key) is None)
-                    aat.key = m.key
-                    aat.value = m.value
-                    aat = self._balance(aat)
-                elif aat.left:
-                    aat = aat.left
-                else:
-                    assert (aat.level == 1)
-                    aat = None
-            return aat
+        self.root = self._delete(self.root, key)
 
-        self.root = recur(self.root, key)
+    def _delete(self, aat, key):
+        if not aat:
+            return aat
+        if key < aat.key:
+            aat.left = self._delete(aat.left, key)
+            aat = self._balance(aat)
+        elif key > aat.key:
+            aat.right = self._delete(aat.right, key)
+            aat = self._balance(aat)
+        else:
+            if aat.right:
+                m = self._getMin(aat.right)
+                aat.right = self._deleteMin(aat.right)
+                assert (self._search(aat.right, m.key) is None)
+                aat.key = m.key
+                aat.value = m.value
+                aat = self._balance(aat)
+            elif aat.left:
+                aat = aat.left
+            else:
+                assert (aat.level == 1)
+                aat = None
+        return aat
 
     def _deleteMax(self, aat):
         if aat:
@@ -156,6 +158,27 @@ class AATree(SelfBalancingBinarySearchTree):
                 assert (aat.left and aat.right)
         # 无需像红黑树那样统计左右子树的black height，因为level就已经对其约束了
         return super(AATree, self)._check(aat, left, right)
+
+
+class AugmentedAATree(AATree):
+    def __init__(self):
+        super(AugmentedAATree, self).__init__()
+
+    @tree_node_augment_wrapper
+    def _insert(self, *args):
+        return super(AugmentedAATree, self)._insert(*args)
+
+    @tree_node_augment_wrapper
+    def _delete(self, *args):
+        return super(AugmentedAATree, self)._delete(*args)
+
+    @tree_node_augment_wrapper
+    def _deleteMax(self, *args):
+        return super(AugmentedAATree, self)._deleteMax(*args)
+
+    @tree_node_augment_wrapper
+    def _deleteMin(self, *args):
+        return super(AugmentedAATree, self)._deleteMin(*args)
 
 
 if __name__ == '__main__':

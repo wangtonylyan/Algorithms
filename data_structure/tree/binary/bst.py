@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # data structure: binary search tree
 
+
 from base.tree import Tree, TreeTest
 
 
@@ -84,50 +85,50 @@ class BinarySearchTree(Tree):
         return recur(self.root)
 
     def insert(self, key, value):
-        def recur(bst, key, value):
-            if not bst:
-                return self.__class__.Node(key, value)
-            if key < bst.key:
-                bst.left = recur(bst.left, key, value)
-            elif key > bst.key:
-                bst.right = recur(bst.right, key, value)
-            else:
-                bst.value = value
-            return bst
-
         assert (key is not None and value is not None)
-        self.root = recur(self.root, key, value)
+        self.root = self._insert(self.root, key, value)
+
+    def _insert(self, bst, key, value):
+        if not bst:
+            return self.__class__.Node(key, value)
+        if key < bst.key:
+            bst.left = self._insert(bst.left, key, value)
+        elif key > bst.key:
+            bst.right = self._insert(bst.right, key, value)
+        else:
+            bst.value = value
+        return bst
 
     def delete(self, key):
-        def recur(bst, key):
-            if not bst:
-                return None
-            if key < bst.key:
-                bst.left = recur(bst.left, key)
-            elif key > bst.key:
-                bst.right = recur(bst.right, key)
-            else:
-                if not bst.left:
-                    bst = bst.right
-                elif not bst.right:
-                    bst = bst.left
-                else:
-                    if not bst.left.right:
-                        bst.left.right = bst.right
-                        bst = bst.left
-                    elif not bst.right.left:
-                        bst.right.left = bst.left
-                        bst = bst.right
-                    else:
-                        it = bst.left
-                        while it.right.right:
-                            it = it.right
-                        bst.key = it.right.key
-                        bst.value = it.right.value
-                        it.right = it.right.left
-            return bst
+        self.root = self._delete(self.root, key)
 
-        self.root = recur(self.root, key)
+    def _delete(self, bst, key):
+        if not bst:
+            return None
+        if key < bst.key:
+            bst.left = self._delete(bst.left, key)
+        elif key > bst.key:
+            bst.right = self._delete(bst.right, key)
+        else:
+            if not bst.left:
+                bst = bst.right
+            elif not bst.right:
+                bst = bst.left
+            else:
+                if not bst.left.right:
+                    bst.left.right = bst.right
+                    bst = bst.left
+                elif not bst.right.left:
+                    bst.right.left = bst.left
+                    bst = bst.right
+                else:
+                    it = bst.left
+                    while it.right.right:
+                        it = it.right
+                    bst.key = it.right.key
+                    bst.value = it.right.value
+                    it.right = it.right.left
+        return bst
 
     def deleteMax(self):
         self.root = self._deleteMax(self.root)
@@ -186,35 +187,27 @@ class SelfAdjustingBinarySearchTree(BinarySearchTree):
     # 2) always holds the symmetric order property
     def _rotateLeft(self, bst):
         if bst and bst.right:
-            bst = self._doRotateLeft(bst)
+            bst = self._rotateLeft_(bst)
             assert (bst.left)
-            if bst.left.right:
-                bst.left.right()
-            bst.left()
         return bst
 
-    def _doRotateLeft(self, bst):
-        tmp = bst.right
-        bst.right = tmp.left
-        tmp.left = bst
-        bst = tmp
-        return bst
+    def _rotateLeft_(self, bst):
+        ret = bst.right
+        bst.right = ret.left
+        ret.left = bst
+        return ret
 
     def _rotateRight(self, bst):
         if bst and bst.left:
-            bst = self._doRotateRight(bst)
+            bst = self._rotateRight_(bst)
             assert (bst.right)
-            if bst.right.left:
-                bst.right.left()
-            bst.right()
         return bst
 
-    def _doRotateRight(self, bst):
-        tmp = bst.left
-        bst.left = tmp.right
-        tmp.right = bst
-        bst = tmp
-        return bst
+    def _rotateRight_(self, bst):
+        ret = bst.left
+        bst.left = ret.right
+        ret.right = bst
+        return ret
 
 
 # (自)平衡树大致分为两类：height-balanced和weight-balanced

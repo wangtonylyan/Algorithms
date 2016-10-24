@@ -34,9 +34,9 @@ class Treap(SelfBalancingBinarySearchTree):
         assert (trp)
         # binary search tree + minimum heap
         if trp.left and trp.left.priority < trp.priority:
-            trp = self._rotateRight(trp)
+            trp = self._rotateRight_(trp)
         elif trp.right and trp.right.priority < trp.priority:
-            trp = self._rotateLeft(trp)
+            trp = self._rotateLeft_(trp)
         return trp
 
     def insert(self, key, value):
@@ -76,18 +76,18 @@ class Treap(SelfBalancingBinarySearchTree):
                     self.prioritySet[trp.priority] = 0
                     trp = None  # deletion
                 elif not trp.left:
-                    trp = self._rotateLeft(trp)
+                    trp = self._rotateLeft_(trp)
                     trp.left = recur(trp.left, key)
                 elif not trp.right:
-                    trp = self._rotateRight(trp)
+                    trp = self._rotateRight_(trp)
                     trp.right = recur(trp.right, key)
                 else:
                     if trp.left.priority < trp.right.priority:
-                        trp = self._rotateRight(trp)
+                        trp = self._rotateRight_(trp)
                         trp.right = recur(trp.right, key)
                     else:
                         assert (trp.left.priority > trp.right.priority)
-                        trp = self._rotateLeft(trp)
+                        trp = self._rotateLeft_(trp)
                         trp.left = recur(trp.left, key)
             return trp
 

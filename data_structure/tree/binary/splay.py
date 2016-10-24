@@ -121,7 +121,7 @@ class SplayTreeTopDown(SplayTree):
                     break
                 # rotate
                 if key < spt.left.key:  # zig-zig
-                    spt = self._rotateRight(spt)
+                    spt = self._rotateRight_(spt)
                     if not spt.left:
                         break
                 # link
@@ -136,7 +136,7 @@ class SplayTreeTopDown(SplayTree):
                     break
                 # rotate
                 if key > spt.right.key:  # zig-zig
-                    spt = self._rotateLeft(spt)
+                    spt = self._rotateLeft_(spt)
                     if not spt.right:
                         break
                 # link
@@ -162,8 +162,8 @@ class SplayTreeTopDown(SplayTree):
             left = root
             while spt.right:
                 if spt.right.right:
-                    spt = self._rotateLeft(spt)
-                spt = self._rotateLeft(spt)
+                    spt = self._rotateLeft_(spt)
+                spt = self._rotateLeft_(spt)
                 if spt.right:
                     left.right = spt
                     left = left.right
@@ -178,8 +178,8 @@ class SplayTreeTopDown(SplayTree):
             right = root
             while spt.left:
                 if spt.left.left:
-                    spt = self._rotateRight(spt)
-                spt = self._rotateRight(spt)
+                    spt = self._rotateRight_(spt)
+                spt = self._rotateRight_(spt)
                 if spt.left:
                     right.left = spt
                     right = right.left
@@ -199,31 +199,31 @@ class SplayTreeBottomUp(SplayTree):
         if key < spt.key and spt.left:
             if key < spt.left.key:  # zig-zig
                 spt.left.left = self._splay(spt.left.left, key)
-                spt = self._rotateRight(spt)
+                spt = self._rotateRight_(spt)
                 if spt.left:
-                    spt = self._rotateRight(spt)
+                    spt = self._rotateRight_(spt)
             # elif key > spt.left.key:  # zig-zag
             #    spt.left.right = self._splay(spt.left.right, key)
             #    if spt.left.right:
-            #        spt.left = self._rotateLeft(spt.left)
-            #    spt = self._rotateRight(spt)
+            #        spt.left = self._rotateLeft_(spt.left)
+            #    spt = self._rotateRight_(spt)
             else:
                 spt.left = self._splay(spt.left, key)
-                spt = self._rotateRight(spt)
+                spt = self._rotateRight_(spt)
         elif key > spt.key and spt.right:
             if key > spt.right.key:  # zig-zig
                 spt.right.right = self._splay(spt.right.right, key)
-                spt = self._rotateLeft(spt)
+                spt = self._rotateLeft_(spt)
                 if spt.right:
-                    spt = self._rotateLeft(spt)
+                    spt = self._rotateLeft_(spt)
             # elif key < spt.right.key:  # zig-zag
             #    spt.right.left = self._splay(spt.right.left, key)
             #    if spt.right.left:
-            #        spt.right = self._rotateRight(spt.right)
-            #    spt = self._rotateLeft(spt)
+            #        spt.right = self._rotateRight_(spt.right)
+            #    spt = self._rotateLeft_(spt)
             else:
                 spt.right = self._splay(spt.right, key)
-                spt = self._rotateLeft(spt)
+                spt = self._rotateLeft_(spt)
         assert (not spt.left or spt.left.key < key)
         assert (not spt.right or spt.right.key > key)
         return spt
@@ -231,17 +231,17 @@ class SplayTreeBottomUp(SplayTree):
     def _getMax(self, spt):
         if spt and spt.right:
             spt.right.right = self._getMax(spt.right.right)
-            spt = self._rotateLeft(spt)
+            spt = self._rotateLeft_(spt)
             if spt.right:
-                spt = self._rotateLeft(spt)
+                spt = self._rotateLeft_(spt)
         return spt
 
     def _getMin(self, spt):
         if spt and spt.left:
             spt.left.left = self._getMin(spt.left.left)
-            spt = self._rotateRight(spt)
+            spt = self._rotateRight_(spt)
             if spt.left:
-                spt = self._rotateRight(spt)
+                spt = self._rotateRight_(spt)
         return spt
 
 

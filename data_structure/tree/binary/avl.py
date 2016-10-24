@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # data structure: AVL (Georgy Adelson-Velsky and Evgenii Landis) tree
 
+
 from bst import SelfBalancingBinarySearchTree, BinarySearchTreeTest
 
 
@@ -16,13 +17,13 @@ class AVLTree(SelfBalancingBinarySearchTree):
         super(AVLTree, self).__init__()
 
     def _rotateLeft(self, avl):
-        avl = super(AVLTree, self)._rotateLeft(avl)
+        avl = self._rotateLeft_(avl)
         avl.factor -= 1
         avl.right.factor += 1
         return avl
 
     def _rotateRight(self, avl):
-        avl = super(AVLTree, self)._rotateRight(avl)
+        avl = self._rotateRight_(avl)
         avl.factor += 1
         avl.left.factor -= 1
         return avl

@@ -6,17 +6,41 @@ import platform
 from test import Test
 
 
+# augment when tree node has been traversed
+def tree_node_augment_wrapper(func):
+    def f(*args):
+        ret = func(*args)
+        if ret is not None and isinstance(ret, Tree.Node):
+            assert (callable(ret))
+            ret()
+        return ret
+
+    return f
+
+
 # abstract class
 class Tree(object):
     class Node(object):
         __slots__ = ['key', 'value']
 
         def __init__(self, key, value):
+            super(Tree.Node, self).__init__()
+            # assert (not hasattr(self, 'key') and not hasattr(self, 'value'))
             self.key = key
             self.value = value
+            # assert (hasattr(self, 'key') and hasattr(self, 'value'))
+
+        def __setattr__(self, name, value):
+            if hasattr(self, name):  # assignment
+                val = getattr(self, name)
+                if val != value:
+                    super(Tree.Node, self).__setattr__(name, value)
+                    self()  # augment when tree structure has been changed
+            else:  # initialization
+                super(Tree.Node, self).__setattr__(name, value)
 
         def __call__(self, *args):
-            return self
+            pass  # interpreter optimization
 
     def __init__(self):
         super(Tree, self).__init__()
@@ -34,16 +58,16 @@ class Tree(object):
     def getMin(self, *args):
         assert (False)
 
-    def insert(self, *args):
+    def insert(self, *args):  # tree_node_augment_wrapper
         assert (False)
 
-    def delete(self, *args):
+    def delete(self, *args):  # tree_node_augment_wrapper
         assert (False)
 
-    def deleteMax(self, *args):
+    def deleteMax(self, *args):  # tree_node_augment_wrapper
         assert (False)
 
-    def deleteMin(self, *args):
+    def deleteMin(self, *args):  # tree_node_augment_wrapper
         assert (False)
 
     def clean(self):

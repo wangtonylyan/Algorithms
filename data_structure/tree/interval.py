@@ -9,7 +9,7 @@
 # 3) 区间树的实现不仅限于增强的平衡二叉搜索树，还可使用多叉树
 
 
-from binary.rbt import RedBlackTree
+from binary.rbt import AugmentedRedBlackTree
 from base.interval import Interval, IntervalTest
 from base.tree import TreeTest
 
@@ -20,8 +20,10 @@ class IntervalTree(object):
         super(IntervalTree, self).__init__()
 
 
-class IntervalTreeAugmented(RedBlackTree, IntervalTree):
-    class Node(RedBlackTree.Node):
+class IntervalTreeAugmented(AugmentedRedBlackTree, IntervalTree):
+    class Node(AugmentedRedBlackTree.Node):
+        __slots__ = ['max']
+
         # a whole interval as the value, whose low endpoint as the key
         # 目前实现的缺陷是不支持存在多个low endpoint相同的区间
         def __init__(self, key, value):
@@ -42,7 +44,7 @@ class IntervalTreeAugmented(RedBlackTree, IntervalTree):
 
     def insert(self, low, high):
         assert (low <= high)
-        super(IntervalTreeAugmented, self).insert(low, Interval(low, high))
+        return super(IntervalTreeAugmented, self).insert(low, Interval(low, high))
 
     def search(self, low, high):
         def recur(ivt, key):

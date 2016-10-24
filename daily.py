@@ -548,7 +548,7 @@ def testsplay():
                     if spt.left is None:
                         break
                     if key < spt.left.key:
-                        spt = self._rotateRight(spt)
+                        spt = self._rotateRight_(spt)
                         if spt.left is None:
                             break
                     right.left = spt
@@ -558,7 +558,7 @@ def testsplay():
                     if spt.right is None:
                         break
                     if key > spt.right.key:
-                        spt = self._rotateLeft(spt)
+                        spt = self._rotateLeft_(spt)
                         if spt.right is None:
                             break
                     left.right = spt
