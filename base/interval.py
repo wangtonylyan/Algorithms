@@ -37,7 +37,13 @@ class IntervalTest(Test):
     def __init__(self):
         super(IntervalTest, self).__init__()
 
-    def _gencase(self, maxLen=100, each=1, total=100, overlap=True):
+    @classmethod
+    def _testcase(cls, test, cases):
+        map(test, cases)
+        print 'pass:', cls, '-', len(cases)
+
+    @classmethod
+    def _gencase(cls, maxLen=100, each=1, total=100, overlap=True):
         cases = []
         for _ in range(total):
             case = []
@@ -49,14 +55,10 @@ class IntervalTest(Test):
                         high = random.randint(low + 1, Number.alphabet + 1)
                         lst.append((low, high))
                     else:
-                        pass
+                        pass  # TODO
                 case.append(lst)
             cases.append(case)
         return cases
-
-    def _testcase(self, test, cases):
-        map(test, cases)
-        print 'pass:', self.__class__, '-', len(cases)
 
 
 if __name__ == '__main__':

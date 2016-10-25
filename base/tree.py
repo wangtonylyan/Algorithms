@@ -49,25 +49,25 @@ class Tree(object):
     def __len__(self):
         assert (False)
 
-    def search(self, *args):
+    def search(*args):
         assert (False)
 
-    def getMax(self, *args):
+    def getMax(*args):
         assert (False)
 
-    def getMin(self, *args):
+    def getMin(*args):
         assert (False)
 
-    def insert(self, *args):  # @tree_node_augment_wrapper
+    def insert(*args):  # @tree_node_augment_wrapper
         assert (False)
 
-    def delete(self, *args):  # @tree_node_augment_wrapper
+    def delete(*args):  # @tree_node_augment_wrapper
         assert (False)
 
-    def deleteMax(self, *args):  # @tree_node_augment_wrapper
+    def deleteMax(*args):  # @tree_node_augment_wrapper
         assert (False)
 
-    def deleteMin(self, *args):  # @tree_node_augment_wrapper
+    def deleteMin(*args):  # @tree_node_augment_wrapper
         assert (False)
 
     def clean(self):

@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
 # data structure: trie tree
-# 字典树，典型的"空间换时间"的设计，多适用于字符串相关问题
+# 字典树，是典型的"空间换时间"的设计
 # The term "trie" comes from retrieval, which is sometimes pronounced "try" to avoid confusion with "tree".
+# 用于存储字符串时，每个节点的键是character；用于存储数字时，每个节点的键则是digit或bit
 
 
 from base.tree import Tree, TreeTest
 from base.string import String, StringTest
+from base.number import Number, NumberTest
 
 
-class TrieTree(Tree, String):
-    class Node(Tree.Node):
-        def __init__(self):  # initialized as a void node
-            # key is a character as the index of 'self.key' array
-            super(TrieTree.Node, self).__init__([None] * TrieTree.alphabet, None)
-
+class TrieTree(Tree):
     def __init__(self):
         super(TrieTree, self).__init__()
+
+    def _iter(self):
+        assert (False)
 
     def __len__(self):
         def recur(trie):
@@ -27,41 +27,45 @@ class TrieTree(Tree, String):
 
     def search(self, key):
         trie = self.root
-        for c in key:
+        for k in self._iter(key):
             if not trie:
                 break
-            trie = trie.key[self.ord(c)]
-        if not trie or trie.value is None:  # 这两个条件都表示该字符串不存在
+            trie = trie.key[k]
+        if not trie or trie.value is None:  # 这两个条件都表示该key不存在
             return None
         return trie.value
 
     def insert(self, key, value):
-        assert (isinstance(key, str) and len(key) > 0 and value is not None)
+        assert (key is not None and value is not None)
+        return self._insert(key, value)
+
+    def _insert(self, key, value, *args):
         if not self.root:
-            self.root = self.__class__.Node()
+            self.root = self.__class__.Node(*args)
         trie = self.root
-        for c in key:
-            if not trie.key[self.ord(c)]:
-                trie.key[self.ord(c)] = self.__class__.Node()
-            trie = trie.key[self.ord(c)]
+        for k in self._iter(key):
+            if not trie.key[k]:
+                trie.key[k] = self.__class__.Node(*args)
+            trie = trie.key[k]
         trie.value = value
         assert (self.root.value is None)
-        return
 
     def delete(self, key):
-        def recur(trie, ind):
-            if not trie:
-                return None
-            if ind == len(key):
+        self.root = self._delete(self.root, self._iter(key))
+
+    def _delete(self, trie, key):
+        try:
+            k = key.next()
+            if trie:
+                trie.key[k] = self._delete(trie.key[k], key)
+        except StopIteration:
+            if trie:
                 assert (trie.value is not None)
                 trie.value = None  # find it
-            else:
-                trie.key[self.ord(key[ind])] = recur(trie.key[self.ord(key[ind])], ind + 1)
-            if trie.value is None and all(not i for i in trie.key):
-                return None  # delete the 'trie' subtree
+        finally:
+            if trie and trie.value is None and all(not i for i in trie.key):
+                return None  # delete 'trie' subtree
             return trie
-
-        self.root = recur(self.root, 0)
 
     def check(self):
         def recur(trie):
@@ -85,14 +89,60 @@ class TrieTree(Tree, String):
         assert (not self.root or self.root.value is None)
 
 
-class TrieTreeTest(TreeTest, StringTest):
-    def __init__(self, num=500):
-        assert (num > 0)
-        super(TrieTreeTest, self).__init__(TrieTree, {}, 0, True, True)
+class StringTrieTree(TrieTree, String):
+    class Node(TrieTree.Node):
+        def __init__(self):
+            super(StringTrieTree.Node, self).__init__([None] * StringTrieTree.alphabet, None)
+
+    def __init__(self):
+        super(StringTrieTree, self).__init__()
+
+    def _iter(self, key):
+        assert (isinstance(key, str) and len(key) > 0)
+        for c in key:
+            yield self.ord(c)
+        raise StopIteration
+
+
+class DigitTrieTree(TrieTree, Number):
+    class Node(TrieTree.Node):
+        def __init__(self, radix):
+            super(DigitTrieTree.Node, self).__init__([None] * radix, None)
+
+    def __init__(self, radix=10):
+        super(DigitTrieTree, self).__init__()
+        self.radix = radix
+
+    def _iter(self, key):
+        assert (isinstance(key, int) and key >= 0)
+        yield key % self.radix
+        key /= self.radix
+        while key > 0:
+            yield key % self.radix
+            key /= self.radix
+        raise StopIteration
+
+    def insert(self, key, value):
+        return self._insert(key, value, self.radix)
+
+
+class BitTrieTree(TrieTree, Number):
+    pass
+
+
+class TrieTreeTest(TreeTest):
+    def __init__(self, cls, args={}, num=1000, check=True, time=True):
+        assert (issubclass(cls, TrieTree) and isinstance(args, dict) and num > 0)
+        super(TrieTreeTest, self).__init__(cls, args, 0, check, time)
         self.cases = {}
-        for case in self._gencase(each=1, total=num):
-            s = case[0]
-            self.cases[s] = reduce(lambda v, c: v + ord(c), s, 0)
+        if issubclass(self.cls, StringTrieTree):
+            for case in StringTest()._gencase(maxLen=20, each=1, total=num):
+                c = case[0]
+                self.cases[c] = reduce(lambda v, c: v + ord(c), c, 0)
+        elif issubclass(self.cls, DigitTrieTree) or issubclass(self.cls, BitTrieTree):
+            for case in NumberTest()._gencase(fixed=True, maxLen=1, each=1, total=num):
+                c = case[0][0]
+                self.cases[c] = c + 1
         print '=' * 50
         print "sample size:\t", len(self.cases)
 
@@ -101,5 +151,7 @@ class TrieTreeTest(TreeTest, StringTest):
 
 
 if __name__ == '__main__':
-    TrieTreeTest().testcase()
+    TrieTreeTest(StringTrieTree, num=200).testcase()
+    TrieTreeTest(DigitTrieTree).testcase()
+    # TrieTreeTest(BitTrieTree).testcase()
     print 'done'

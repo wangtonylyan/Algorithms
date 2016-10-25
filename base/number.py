@@ -15,7 +15,13 @@ class NumberTest(Test):
     def __init__(self):
         super(NumberTest, self).__init__()
 
-    def _gencase(self, fixed=False, maxLen=50, each=50, total=100, dup=True):
+    @classmethod
+    def _testcase(cls, test, cases):
+        map(test, cases)
+        print 'pass:', cls, '-', len(cases)
+
+    @classmethod
+    def _gencase(cls, fixed=False, maxLen=50, each=50, total=100, dup=True):
         cases = []
         for _ in range(total):
             case = []
@@ -32,10 +38,6 @@ class NumberTest(Test):
                     case.append(lst)
             cases.append(case)
         return cases
-
-    def _testcase(self, test, cases):
-        map(test, cases)
-        print 'pass:', self.__class__, '-', len(cases)
 
 
 if __name__ == '__main__':

@@ -5,11 +5,14 @@ class Test(object):
     def __init__(self):
         super(Test, self).__init__()
 
-    def testcase(self, *args):
+    def testcase(*args):
         assert (False)
 
-    def _testcase(self, *args):
+    def _testcase(*args):
         assert (False)
 
-    def _gencase(self, *args):
+    def gencase(*args):
+        assert (False)
+
+    def _gencase(*args):
         assert (False)

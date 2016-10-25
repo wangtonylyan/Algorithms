@@ -13,7 +13,13 @@ class StringTest(Test):
     def __init__(self):
         super(StringTest, self).__init__()
 
-    def _gencase(self, fixed=False, maxLen=40, each=50, total=100):
+    @classmethod
+    def _testcase(cls, test, cases):
+        map(test, cases)
+        print 'pass:', cls, '-', len(cases)
+
+    @classmethod
+    def _gencase(cls, fixed=False, maxLen=40, each=50, total=100):
         cases = []
         for _ in range(total):
             case = []
@@ -23,10 +29,6 @@ class StringTest(Test):
                 case.append(''.join([chr(random.randint(ord('a'), ord('z'))) for _ in range(width)]))
             cases.append(case)
         return cases
-
-    def _testcase(self, test, cases):
-        map(test, cases)
-        print 'pass:', self.__class__, '-', len(cases)
 
 
 if __name__ == '__main__':
