@@ -73,7 +73,7 @@ class Tree(object):
     def clean(self):
         self.root = None
 
-    def check(self):
+    def check(*args):
         assert (False)
 
 

@@ -21,13 +21,13 @@ class NumberTest(Test):
         print 'pass:', cls, '-', len(cases)
 
     @classmethod
-    def _gencase(cls, fixed=False, maxLen=50, each=50, total=100, dup=True):
+    def _gencase(cls, fixed=False, minLen=1, maxLen=50, each=50, total=100, dup=True):
         cases = []
         for _ in range(total):
             case = []
-            width = random.randint(1, maxLen) if fixed else None
+            width = random.randint(minLen, maxLen) if fixed else None
             for _ in range(each):
-                width = width if fixed else random.randint(1, maxLen)
+                width = width if fixed else random.randint(minLen, maxLen)
                 if dup:
                     case.append([random.randint(0, Number.alphabet) for _ in range(width)])
                 else:

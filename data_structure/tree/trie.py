@@ -14,7 +14,7 @@ class TrieTree(Tree):
     def __init__(self):
         super(TrieTree, self).__init__()
 
-    def _iter(self):
+    def _iter(*args):
         assert (False)
 
     def __len__(self):
@@ -89,6 +89,7 @@ class TrieTree(Tree):
         assert (not self.root or self.root.value is None)
 
 
+# character partitioning
 class StringTrieTree(TrieTree, String):
     class Node(TrieTree.Node):
         def __init__(self):
@@ -104,8 +105,14 @@ class StringTrieTree(TrieTree, String):
         raise StopIteration
 
 
-class DigitTrieTree(TrieTree, Number):
-    class Node(TrieTree.Node):
+# abstract class
+class NumberTrieTree(TrieTree, Number):
+    pass
+
+
+# digit partitioning
+class DigitTrieTree(NumberTrieTree):
+    class Node(NumberTrieTree.Node):
         def __init__(self, radix):
             super(DigitTrieTree.Node, self).__init__([None] * radix, None)
 
@@ -114,8 +121,8 @@ class DigitTrieTree(TrieTree, Number):
         self.radix = radix
 
     def _iter(self, key):
-        assert (isinstance(key, int) and key >= 0)
-        yield key % self.radix
+        assert (isinstance(key, int) and 0 <= key <= self.alphabet)
+        yield key % self.radix  # LSD first
         key /= self.radix
         while key > 0:
             yield key % self.radix
@@ -126,8 +133,28 @@ class DigitTrieTree(TrieTree, Number):
         return self._insert(key, value, self.radix)
 
 
-class BitTrieTree(TrieTree, Number):
-    pass
+# bit partitioning
+class BitTrieTree(NumberTrieTree):
+    class Node(NumberTrieTree.Node):
+        def __init__(self, bit):
+            super(BitTrieTree.Node, self).__init__([None] * (1 << bit), None)
+
+    def __init__(self, bit=4):
+        super(BitTrieTree, self).__init__()
+        self.bit = bit
+        self.mask = (1 << bit) - 1
+
+    def _iter(self, key):
+        assert (isinstance(key, int) and 0 <= key <= self.alphabet)
+        yield key & self.mask  # LSB first
+        key >>= self.bit
+        while key > 0:
+            yield key & self.mask
+            key >>= self.bit
+        raise StopIteration
+
+    def insert(self, key, value):
+        return self._insert(key, value, self.bit)
 
 
 class TrieTreeTest(TreeTest):
@@ -139,9 +166,9 @@ class TrieTreeTest(TreeTest):
             for case in StringTest()._gencase(maxLen=20, each=1, total=num):
                 c = case[0]
                 self.cases[c] = reduce(lambda v, c: v + ord(c), c, 0)
-        elif issubclass(self.cls, DigitTrieTree) or issubclass(self.cls, BitTrieTree):
-            for case in NumberTest()._gencase(fixed=True, maxLen=1, each=1, total=num):
-                c = case[0][0]
+        elif issubclass(self.cls, NumberTrieTree):
+            cases = NumberTest()._gencase(minLen=num, maxLen=num, each=1, total=1, dup=False)
+            for c in cases[0][0]:
                 self.cases[c] = c + 1
         print '=' * 50
         print "sample size:\t", len(self.cases)
@@ -151,7 +178,7 @@ class TrieTreeTest(TreeTest):
 
 
 if __name__ == '__main__':
-    TrieTreeTest(StringTrieTree, num=200).testcase()
+    TrieTreeTest(StringTrieTree, num=300).testcase()
     TrieTreeTest(DigitTrieTree).testcase()
-    # TrieTreeTest(BitTrieTree).testcase()
+    TrieTreeTest(BitTrieTree).testcase()
     print 'done'
