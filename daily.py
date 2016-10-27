@@ -4,6 +4,7 @@ import copy
 import random
 import time
 from data_structure.heap.binary import MinBinaryHeap
+from data_structure.disjoint import DisjointSetForest
 
 
 def testsortint():
@@ -148,29 +149,17 @@ def testgraph():
             for i in range(len(grp)):
                 for j, w in grp[i]:
                     m, n = min(i, j), max(i, j)
-                    if ((m, n), w) not in edge:
-                        edge.append(((m, n), w))
+                    if (m, n, w) not in edge:
+                        edge.append((m, n, w))
             assert (len(edge) == sum(map(len, grp)) / 2)
-            edge.sort(key=lambda x: x[1])
-
-            def find(ds, n):
-                while n != ds[n]:
-                    n = ds[n]
-                return n
-
-            def union(ds, n1, n2):
-                p1 = find(ds, n1)
-                p2 = find(ds, n2)
-                if p1 != p2:
-                    ds[p2] = p1
-                return p1
-
+            edge.sort(key=lambda x: x[2])
             ret = []
-            ds = [i for i in range(len(grp))]
-            for (i, j), w in edge:
-                if find(ds, i) != find(ds, j):
-                    union(ds, i, j)
+            ds = DisjointSetForest(len(grp))
+            for i, j, w in edge:
+                if ds.find(i) != ds.find(j):
                     ret.append(w)
+                    ds.union(i, j)
+            assert (len(ret) == len(grp) - 1)
             return sum(ret)
 
         def main_2(grp, src):

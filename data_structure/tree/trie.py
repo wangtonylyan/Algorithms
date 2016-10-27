@@ -60,11 +60,10 @@ class TrieTree(Tree):
                 trie.key[k] = self._delete(trie.key[k], key)
         except StopIteration:
             if trie:
-                assert (trie.value is not None)
-                trie.value = None  # find it
+                trie.value = None  # find it (or it may not exist)
         finally:
-            if trie and trie.value is None and all(not i for i in trie.key):
-                return None  # delete 'trie' subtree
+            if trie and trie.value is None and all(not _ for _ in trie.key):
+                trie = None  # delete 'trie' subtree
             return trie
 
     def check(self):

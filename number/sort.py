@@ -8,6 +8,7 @@
 # counting, radix, bucket
 # 思想就是建立被排序的数与其排序后的索引值之间的映射
 
+
 from base.number import NumberTest
 from data_structure.heap.binary import MaxBinaryHeap
 
@@ -30,40 +31,31 @@ class Sort(NumberTest):
 class SelectionSort(Sort):
     def __init__(self):
         super(SelectionSort, self).__init__()
-        self.funcs.append(self.main_iter_min)
-        self.funcs.append(self.main_iter_max)
+        self.funcs.append(self.main_iter)
         self.funcs.append(self.main_recur)
 
-    def main_iter_min(self, lst):
-        for i in range(0, len(lst) - 1):
-            m = i  # minimum
+    def main_iter(self, lst):
+        for i in range(len(lst) - 1):
+            m = i
             for j in range(i + 1, len(lst)):
                 if lst[j] < lst[m]:
                     m = j
-            lst[i], lst[m] = lst[m], lst[i]
-        return lst
-
-    def main_iter_max(self, lst):
-        for i in range(len(lst) - 1, 0, -1):
-            m = i  # maximum
-            for j in range(0, i):
-                if lst[j] > lst[m]:
-                    m = j
-            lst[i], lst[m] = lst[m], lst[i]
+            if m != i:
+                lst[i], lst[m] = lst[m], lst[i]
         return lst
 
     def main_recur(self, lst):
         # inner loop: select the minimum of lst[ind:] and return its index
-        def _select(ind):
+        def select(ind):
             if ind >= len(lst) - 1:
                 return ind
-            m = _select(ind + 1)
+            m = select(ind + 1)
             return ind if lst[ind] <= lst[m] else m
 
         # outer loop: select and (tail) recursion
         if len(lst) < 2:
             return lst
-        m = _select(0)
+        m = select(0)
         lst[0], lst[m] = lst[m], lst[0]
         return [lst[0]] + self.main_recur(lst[1:])
 
@@ -87,17 +79,17 @@ class BubbleSort(Sort):
 
     def main_recur(self, lst):
         # inner loop: bubble up the maximum into lst[-1]
-        def _bubble(lst):
+        def bubble(lst):
             if len(lst) < 2:
                 return lst
             if lst[0] > lst[1]:
                 lst[0], lst[1] = lst[1], lst[0]
-            return [lst[0]] + _bubble(lst[1:])
+            return [lst[0]] + bubble(lst[1:])
 
         # outer loop: bubble and (tail) recursion
         if len(lst) < 2:
             return lst
-        lst = _bubble(lst)
+        lst = bubble(lst)
         return self.main_recur(lst[:-1]) + [lst[-1]]
 
 
