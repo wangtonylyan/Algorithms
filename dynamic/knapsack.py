@@ -86,7 +86,7 @@ class CompleteKnapsack(Knapsack):
             # 下一个将要被加入items中的该种物品的重量：w<<k
             # 因此就有：
             # while weight - ((w << k) - w) >= w << k:
-            while (w << k + 1) - w <= weight:
+            while (w << (k + 1)) - w <= weight:
                 dup.append((w << k, v << k))
                 k += 1
             if (w << k) - w <= weight - w:  # 弥补上述while条件失效后的空隙
