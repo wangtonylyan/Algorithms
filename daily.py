@@ -591,7 +591,7 @@ def testsplay():
                     self.root.left.right = self.root.right
                     self.root = self.root.left
 
-    BinarySearchTreeTest(SplayTree, 1000).delete()
+    BinarySearchTreeTest(SplayTree).delete()
 
 
 if __name__ == '__main__':

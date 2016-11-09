@@ -75,6 +75,8 @@ class SplayTree(SelfAdjustingBinarySearchTree):
             if self.root.key == key:
                 if not self.root.left:
                     self.root = self.root.right
+                elif not self.root.right:
+                    self.root = self.root.left
                 else:
                     self.root.left = self._splay(self.root.left, key)
                     assert (not self.root.left.right)
