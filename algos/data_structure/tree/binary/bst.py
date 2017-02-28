@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# data structure: binary search tree
 
 
 from algos.data_structure.tree.tree import Tree
@@ -8,7 +9,6 @@ class BinarySearchTree(Tree):
     class Node(Tree.Node):
         __slots__ = ['left', 'right']
 
-        # acts as both constructor and copy constructor
         def __init__(self, key, value, left=None, right=None):
             super().__init__(key, value)
             self.left = left
@@ -98,27 +98,33 @@ class BinarySearchTree(Tree):
                             find=lambda tree: tree.right)
 
     def _iter_(self, tree, which, find, down=None, up=None):
+        # 2) iteration: traversal
         while tree:
-            tree = down(tree) if down and tree else tree
+            # 1) top-down
+            tree = down(tree) if callable(down) else tree
             if find(tree):
+                # 3) bottom-up
+                tree = up(tree) if callable(up) else tree
                 break
             tree = which(tree)
-        tree = up(tree) if up and tree else tree
         return tree
 
     def _recur_(self, tree, which, find, miss=None, down=None, up=None):
-        tree = down(tree) if down and tree else tree
         if tree:
-            dir = which(tree)
-            if dir < 0:
+            # 1) top-down
+            tree = down(tree) if callable(down) else tree
+            # 2) recursion: traversal
+            cmp = which(tree)
+            if cmp < 0:
                 tree.left = self._recur_(tree.left, which, find, miss, down, up)
-            elif dir > 0:
+            elif cmp > 0:
                 tree.right = self._recur_(tree.right, which, find, miss, down, up)
             else:
                 tree = find(tree)
+            # 3) bottom-up
+            tree = up(tree) if callable(up) else tree
         else:
-            tree = miss() if miss else None
-        tree = up(tree) if up and tree else tree
+            tree = miss() if callable(miss) else tree
         return tree
 
 
