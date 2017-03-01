@@ -12,14 +12,16 @@ class RedBlackTreeTest(BinarySearchTreeTest):
 
     @staticmethod
     def check(self, size):
-        # BinarySearchTreeTest.check(self, size)
-        assert not (root and root.color)
+        BinarySearchTreeTest.check(self, size)
+        assert not (self.root and self.root.color)
 
     @staticmethod
     def check_root(self, tree, left=0, right=0):
-        # BinarySearchTreeTest.check_root(self, tree, left, right)
         if not tree:
             return 0
+        # check symmetric order property
+        assert not tree.left or tree.cmp(tree.left.key) < 0
+        assert not tree.right or tree.cmp(tree.right.key) > 0
         # the following assertions cover the same cases as the black-height invariant, just for illustration
         assert not (tree.left and tree.left.color and tree.right and tree.right.color)
         assert not (not tree.left and tree.right and not tree.right.color)
@@ -43,23 +45,11 @@ class RedBlackTreeTest(BinarySearchTreeTest):
     def check_tree(self, tree):
         if not tree:
             return self.check_root(tree)
-        # check size consistency
         left = self.check_tree(tree.left)
         right = self.check_tree(tree.right)
         return self.check_root(tree, left, right)
 
 
 if __name__ == '__main__':
-    bst = RedBlackTreeTest()
-    bst = bst.cls()
-    print(dir(bst))
-    for i in range(10):
-        bst.insert(1, 'ha' + str(i))
-
-    print(len(bst))
-
-    #    for i in range(10):
-    #        bst.delmax()
-    print(len(bst))
-
+    RedBlackTreeTest().main()
     print('done')

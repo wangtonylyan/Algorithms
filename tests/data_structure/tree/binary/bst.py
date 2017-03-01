@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 
-import random, timeit
 from tests.data_structure.tree.tree import TreeTest
 from algos.data_structure.tree.binary.bst import BinarySearchTree
 
@@ -22,7 +21,7 @@ class BinarySearchTreeTest(TreeTest):
             return 0
         # check symmetric order property
         assert not tree.left or tree.cmp(tree.left.key) < 0
-        assert not tree.left or tree.cmp(tree.right.key) > 0
+        assert not tree.right or tree.cmp(tree.right.key) > 0
         return left + right + 1  # size
 
     @staticmethod
@@ -41,7 +40,7 @@ class BinarySearchTreeTest(TreeTest):
 
         def _iter_(self, tree, which, find, down=None, up=None):
             def wrapper(tree):
-                tree = up(tree) if up and tree else tree
+                tree = up(tree) if callable(up) and tree else tree
                 getattr(self, check)(tree)
                 return tree
 
@@ -49,7 +48,7 @@ class BinarySearchTreeTest(TreeTest):
 
         def _recur_(self, tree, which, find, miss=None, down=None, up=None):
             def wrapper(tree):
-                tree = up(tree) if up and tree else tree
+                tree = up(tree) if callable(up) and tree else tree
                 getattr(self, check)(tree)
                 return tree
 
@@ -64,25 +63,7 @@ class BinarySearchTreeTest(TreeTest):
                 setattr(self.cls, rename(m), getattr(self.cls, m))
                 setattr(self.cls, m, locals()[m])
 
-    def create(num):
-        cases = {}
-        for i in range(num):
-            rand = random.randint(num * 1000)
-            cases[rand] = rand + 1
-        return cases
-
 
 if __name__ == '__main__':
-    bst = BinarySearchTreeTest()
-    bst = bst.cls()
-    print(dir(bst))
-    for i in range(10):
-        bst.insert(1, 'ha' + str(i))
-
-    print(len(bst))
-
-    for i in range(10):
-        bst.delmax()
-    print(len(bst))
-
+    BinarySearchTreeTest().main()
     print('done')
