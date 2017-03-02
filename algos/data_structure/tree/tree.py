@@ -6,17 +6,23 @@ class Tree:
     class Node:
         __slots__ = ['key', 'value']
 
-        # as both init and copy constructor
         def __init__(self, key, value):
-            super().__init__()
             self.key = key
             self.value = value
+
+        def __str__(self):
+            return f'key={str(self.key)}, value={str(self.value)}'
 
         def cmp(self, key):
             return -1 if key < self.key else 1 if key > self.key else 0
 
+        def set(self, **kwargs):
+            for k, v in kwargs:
+                if hasattr(self, k):
+                    setattr(self, k, v)
+            return self
+
     def __init__(self):
-        super().__init__()
         self.root = None
 
     def __len__(self):

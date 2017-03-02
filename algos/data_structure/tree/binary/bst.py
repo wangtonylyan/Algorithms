@@ -9,13 +9,15 @@ class BinarySearchTree(Tree):
     class Node(Tree.Node):
         __slots__ = ['left', 'right']
 
-        def __init__(self, key, value, left=None, right=None):
+        def __init__(self, key, value):
             super().__init__(key, value)
-            self.left = left
-            self.right = right
+            self.left = None
+            self.right = None
 
-    def __init__(self):
-        super().__init__()
+        def __str__(self):
+            return super().__str__() + ', ' + \
+                   f'left={str(self.left.key) if self.left else None}, ' + \
+                   f'right={str(self.right.key) if self.right else None}'
 
     def __len__(self):
         return self._len(self.root)
@@ -68,7 +70,7 @@ class BinarySearchTree(Tree):
     def _insert(self, tree, key, value):
         return self._recur_(tree,
                             which=lambda tree: tree.cmp(key),
-                            find=lambda tree: self.__class__.Node(tree.key, value, tree.left, tree.right),
+                            find=lambda tree: tree.set(value=value),
                             miss=lambda: self.__class__.Node(key, value))
 
     def _delete(self, tree, key):
@@ -165,3 +167,6 @@ class SelfBalancingBinarySearchTree(SelfAdjustingBinarySearchTree):
 
     def _balance(*args):
         assert False
+
+    def _recur_(self, tree, which, find, miss=None, down=None, up=None):
+        return super()._recur_(tree, which, find, miss, down, up if callable(up) else self._balance)

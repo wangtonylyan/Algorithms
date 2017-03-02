@@ -6,9 +6,9 @@ from algos.data_structure.tree.binary.rbt import RedBlackTree
 
 
 class RedBlackTreeTest(BinarySearchTreeTest):
-    def __init__(self, cls=RedBlackTree, args={}, num=1000, time=True, check=True):
+    def __init__(self, cls=RedBlackTree, args={}):
         assert issubclass(cls, RedBlackTree)
-        super().__init__(cls, args, num, time, check)
+        super().__init__(cls, args)
 
     @staticmethod
     def check(self, size):
@@ -17,11 +17,9 @@ class RedBlackTreeTest(BinarySearchTreeTest):
 
     @staticmethod
     def check_root(self, tree, left=0, right=0):
+        BinarySearchTreeTest.check_root(self, tree)
         if not tree:
             return 0
-        # check symmetric order property
-        assert not tree.left or tree.cmp(tree.left.key) < 0
-        assert not tree.right or tree.cmp(tree.right.key) > 0
         # the following assertions cover the same cases as the black-height invariant, just for illustration
         assert not (tree.left and tree.left.color and tree.right and tree.right.color)
         assert not (not tree.left and tree.right and not tree.right.color)

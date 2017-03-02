@@ -25,9 +25,11 @@ class TreeTest:
 
     def _run_cases(self, cases, before, main, after, finish):
         for k, v in cases.items():
-            r1 = before(k, v)
-            r2 = main(k, v)
-            after(k, v, r1, r2)
+            r = before(k, v)
+            assert r is not None
+            main(k, v)
+            r = after(k, v, r)
+            assert r is not None
         finish()
 
     def insert(self):
@@ -37,38 +39,48 @@ class TreeTest:
 
     def _insert(self, tree, cases):
         self._run_cases(cases,
-                        before=lambda k, v: tree.search(k) is None,
+                        before=lambda k, v: v if tree.search(k) is None else None,
                         main=lambda k, v: tree.insert(k, v),
-                        after=lambda k, v, *_: tree.search(k) == v,
+                        after=lambda k, v, *_: v if tree.search(k) == v else None,
                         finish=lambda: tree.check(len(cases)))
+        print('insert:', len(cases))
 
     def delete(self):
         cases = self._create_cases()
         tree = self._create_tree()
         self._insert(tree, cases)
         self._run_cases(cases,
-                        before=lambda k, v: tree.search(k) == v,
+                        before=lambda k, v: v if tree.search(k) == v else None,
                         main=lambda k, v: tree.delete(k),
-                        after=lambda k, v, *_: tree.search(k) is None,
+                        after=lambda k, v, *_: v if tree.search(k) is None else None,
                         finish=lambda: tree.check(0))
+        print('delete:', len(cases))
 
     def delmax(self):
-        self._delmaxmin('getmax', 'delmax')
+        self._delmaxmin('getmax', 'delmax', lambda r, m: r < m)
 
     def delmin(self):
-        self._delmaxmin('getmin', 'delmin')
+        self._delmaxmin('getmin', 'delmin', lambda r, m: r > m)
 
-    def _delmaxmin(self, get, dlt):
+    def _delmaxmin(self, get, dlt, cmp):
+        def after(k, v, m, *_):
+            r = getattr(tree, get)()
+            return m if r is None or cmp(r, m) else None
+
         cases = self._create_cases()
         tree = self._create_tree()
         self._insert(tree, cases)
         self._run_cases(cases,
                         before=lambda k, v: getattr(tree, get)(),
                         main=lambda k, v: getattr(tree, dlt)(),
-                        after=lambda k, v, m, *_: getattr(tree, get)() == m,
+                        after=after,
                         finish=lambda: tree.check(0))
+        print(dlt + ':', len(cases))
 
     def main(self):
-        self.delete()
-        self.delmax()
-        self.delmin()
+        print('=' * 30)
+        print(self.cls.__name__)
+        for f in [self.delete, self.delmax, self.delmin]:
+            print('-' * 30)
+            f()
+        print('=' * 30)

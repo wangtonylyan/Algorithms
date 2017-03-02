@@ -9,7 +9,7 @@ class BinarySearchTreeTest(TreeTest):
     def __init__(self, cls=BinarySearchTree, args={}, num=1000, time=True, check=True):
         assert issubclass(cls, BinarySearchTree)
         super().__init__(cls, args, num, time)
-        self.apply_check_method(check)
+        self.embed_check_method(BinarySearchTree, check)
 
     @staticmethod
     def check(self, size):
@@ -34,9 +34,9 @@ class BinarySearchTreeTest(TreeTest):
         assert self._len(tree) == left + right + 1
         return self.check_root(tree, left, right)
 
-    def apply_check_method(self, check):
-        check = 'check_tree' if check else 'check_root'
+    def embed_check_method(self, cls, check):
         rename = lambda x: x + '_'
+        check = 'check_tree' if check else 'check_root'
 
         def _iter_(self, tree, which, find, down=None, up=None):
             def wrapper(tree):
@@ -54,14 +54,14 @@ class BinarySearchTreeTest(TreeTest):
 
             return getattr(self, rename('_recur_'))(tree, which, find, miss, down, wrapper)
 
-        self.cls = type('_' + self.cls.__name__ + '_', (self.cls,),
-                        {'check': self.check,
-                         'check_tree': self.check_tree,
-                         'check_root': self.check_root})
         for m in ['_iter_', '_recur_']:
-            if hasattr(self.cls, m):
-                setattr(self.cls, rename(m), getattr(self.cls, m))
-                setattr(self.cls, m, locals()[m])
+            assert hasattr(cls, m)
+            setattr(cls, rename(m), getattr(cls, m))
+            setattr(cls, m, locals()[m])
+        self.cls = type('_' + self.cls.__name__ + '_', (self.cls,),
+                        {'check': self.__class__.check,
+                         'check_tree': self.__class__.check_tree,
+                         'check_root': self.__class__.check_root})
 
 
 if __name__ == '__main__':

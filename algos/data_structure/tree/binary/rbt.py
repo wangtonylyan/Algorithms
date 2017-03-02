@@ -10,15 +10,17 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
     class Node(SelfBalancingBinarySearchTree.Node):
         __slots__ = ['color']
 
-        def __init__(self, key, value, left=None, right=None, color=True):
-            super().__init__(key, value, left, right)
-            # default color of a new leaf node is red
+        def __init__(self, key, value):
+            super().__init__(key, value)
             # True if red else (black) False
-            self.color = color
+            self.color = True  # default color of a new leaf node is red
 
-    def __init__(self):
-        super().__init__()
+        def __str__(self):
+            return super().__str__() + ', ' + f'color={str(self.color)}'
 
+    # 1) top-down: naturally no 4-node
+    # 2) recursion: insert or override
+    # 3) bottom-up: rebalance
     def insert(self, key, value):
         assert key is not None
         self.root = self._insert(self.root, key, value)
@@ -44,16 +46,9 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
     def delmin(self):
         self._apply_del_func(self._delmin)
 
-    def _insert(self, tree, key, value):
-        # 1) top-down: naturally no 4-node
-        # 2) recursion: insert or override
-        # 3) bottom-up: rebalance
-        return self._recur_(tree,
-                            which=lambda tree: tree.cmp(key),
-                            find=lambda tree: self.__class__.Node(tree.key, value, tree.left, tree.right, tree.color),  # override
-                            miss=lambda: self.__class__.Node(key, value),  # insert
-                            up=self._balance)
-
+    # 1) top-down: make 'tree.left' or 'tree.right' a 3-node
+    # 2) recursion: delete or fail
+    # 3) buttom-up: rebalance
     def _delete(self, tree, key):
         def find(tree):
             if not tree.left:
@@ -66,7 +61,7 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
                 return tree.left
             # 用左子树中的最大节点或右子树中的最小节点来替换要被删除的目标节点：_delmax(tree.left) vs. _delmin(tree.right)
             # 两种策略的实现方式是完全对称的，但对于LLRB树而言，由于其左倾的特性，选择后者效率会略高
-            tree = _make_right_red(tree)
+            tree = self._make_right_red(tree)
             if key != tree.key:  # if 'tree' node is no longer the one before _make_right_red()
                 tree.right = self._delete(tree.right, key)  # continue traversing
             else:
@@ -79,19 +74,12 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
         def down(tree):
             cmp = tree.cmp(key)
             if cmp < 0:
-                tree = _make_left_red(tree)
+                tree = self._make_left_red(tree)
             elif cmp > 0:
-                tree = _make_right_red(tree)
+                tree = self._make_right_red(tree)
             return tree
 
-        # 1) top-down: make 'tree.left' or 'tree.right' a 3-node
-        # 2) recursion: delete or fail
-        # 3) buttom-up: rebalance
-        return self._recur_(tree,
-                            which=lambda tree: tree.cmp(key),
-                            find=find,
-                            down=down,
-                            up=self._balance)
+        return self._recur_(tree, which=lambda tree: tree.cmp(key), find=find, down=down)
 
     def _delmax(self, tree):
         def find(tree):
@@ -99,11 +87,7 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
                 tree.left.color = tree.color
             return tree.left
 
-        return self._recur_(tree,
-                            which=lambda tree: 1 if tree.right else 0,
-                            find=find,
-                            down=self._make_right_red,
-                            up=self._balance)
+        return self._recur_(tree, which=lambda tree: 1 if tree.right else 0, find=find, down=self._make_right_red)
 
     def _delmin(self, tree):
         def find(tree):
@@ -111,11 +95,7 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
                 tree.right.color = tree.color
             return tree.right
 
-        return self._recur_(tree,
-                            which=lambda tree: -1 if tree.left else 0,
-                            find=find,
-                            down=self._make_left_red,
-                            up=self._balance)
+        return self._recur_(tree, which=lambda tree: -1 if tree.left else 0, find=find, down=self._make_left_red)
 
     # 1) rotate left：no side-effect
     # 2) rotate right：no side-effect
