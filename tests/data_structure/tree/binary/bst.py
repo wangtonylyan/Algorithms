@@ -56,8 +56,9 @@ class BinarySearchTreeTest(TreeTest):
 
         for m in ['_iter_', '_recur_']:
             assert hasattr(cls, m)
-            setattr(cls, rename(m), getattr(cls, m))
-            setattr(cls, m, locals()[m])
+            if not hasattr(cls, rename(m)):
+                setattr(cls, rename(m), getattr(cls, m))
+                setattr(cls, m, locals()[m])
         self.cls = type('_' + self.cls.__name__ + '_', (self.cls,),
                         {'check': self.__class__.check,
                          'check_tree': self.__class__.check_tree,

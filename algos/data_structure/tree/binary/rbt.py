@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-# data structure: red-black tree
+# data structure: red-black tree, left-leaning red-black (LLRB) tree
 # 红黑树属于2-3(-4)树的一种变种
+# 左倾红黑树增加了"左倾"这一约束，使得实现上需要讨论的情况减少了
 
 
 from algos.data_structure.tree.binary.bst import SelfBalancingBinarySearchTree
@@ -186,6 +187,111 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
             if tree.left.right and tree.left.right.color:
                 tree.left = self._rotate_left(tree.left)
             if tree.left.left and tree.left.left.color:
+                tree = self._rotate_right(tree)
+                tree = self._flip_color(tree)
+        else:
+            assert tree.left.color
+            tree = self._rotate_right(tree)
+        assert tree.right.color or \
+               (tree.right.left and tree.right.left.color) or \
+               (tree.right.right and tree.right.right.color)
+        return tree
+
+
+# LLRB树的实现涉及有以下几种策略上的选择：
+# 选择不同的策略意味着树的表现特征会有所区别，从而导致实现上的些许差异
+# 1) 2-3 tree vs. 2-3-4 tree
+# 前者要求在破坏树的结构后，在bottom-up阶段重新平衡树并消除4-node
+# 即允许4-node存在的relaxed red-black tree
+# 后者要求在破坏树的结构后，在bottom-up阶段重新平衡树即可
+# 目前采用的实现方式是基于2-3树，分类讨论的情形可以略微简单点
+# 2) left-leaning vs. right-leaning
+# 两种实现方式完全对称，没有实质性的区别
+# 只是由于倾向了一侧，所以对左右子树的处理可能会略有不同，但也可以规避
+# 例如在当前delete()的实现中，每次递归都总是先将当前子树由左/右倾转变成右/左倾
+# 即在top-down阶段破坏leaning invariant，于是随后的操作就完全对称了
+class LeftLeaningRedBlackTree(RedBlackTree):
+    # this implementation only of use for relaxed LLRB tree is just for illustration here
+    # 1) top-down: split 4-node
+    # 2) recursion
+    # 3) bottom-up: accept 4-node
+    def _insert_relaxed(self, tree, key, value):
+        def split4node(tree):
+            if tree.left and tree.left.color and tree.right and tree.right.color:
+                tree = self._flip_color(tree)
+            return tree
+
+        def balance(tree):
+            if tree.right and tree.right.color:
+                tree = self._rotateLeft(tree)
+            if tree.left and tree.left.color and tree.left.left and tree.left.left.color:
+                tree = self._rotateRight(tree)
+            return tree
+
+        return self._recur_(tree,
+                            which=lambda tree: tree.cmp(key),
+                            find=lambda tree: tree.set(value=value),
+                            miss=lambda: self.__class__.Node(key, value),
+                            down=split4node,
+                            up=balance)
+
+    # 相比于传统的红黑树，三个基本操作所产生的额外副作用
+    # 1) rotate left: 将tree.right.left这棵左子树变成了右子树
+    # 2) rotate right: 可能将tree从一颗左子树变成了右子树
+    # 3) flip color: 无
+    # 注意这三个基本操作是同时适用于2-3和2-3-4 tree、left-和right-leaning策略的
+    # 因为其没有维护这些策略的各自特征，具体实现哪种策略取决于这些操作之间的组合
+
+    def _balance(self, tree):
+        if not tree:
+            return tree
+        # @case: a; b+c; a+b+c(==c)
+        if tree.right and tree.right.color:  # a
+            tree = self._rotate_left(tree)
+        if tree.left and tree.left.color and tree.left.left and tree.left.left.color:  # b
+            tree = self._rotate_right(tree)
+        if tree.left and tree.left.color and tree.right and tree.right.color:  # c
+            tree = self._flip_color(tree)
+        return tree
+
+    # @what: turn 'tree.left' into a 3- or 4- node, regardless of its leaning characteristic
+    def _make_left_red(self, tree):
+        if not tree or not tree.left:
+            return tree
+        assert tree.color or tree.left.color or (tree.right and tree.right.color)
+        if tree.left.color or \
+                (tree.left.left and tree.left.left.color) or \
+                (tree.left.right and tree.left.right.color):
+            return tree
+        assert tree.right  # black-height invariant
+        if tree.color:
+            tree = self._flip_color(tree)
+            assert not tree.right.right or not tree.right.right.color  # left-leaning invariant
+            if tree.right.left and tree.right.left.color:
+                tree.right = self._rotate_right(tree.right)  # keep left-leaning invariant of 'tree.right' subtree
+                tree = self._rotate_left(tree)
+                tree = self._flip_color(tree)
+        else:
+            assert tree.right.color
+            tree = self._rotate_left(tree)
+        assert tree.left.color or \
+               (tree.left.left and tree.left.left.color) or \
+               (tree.left.right and tree.left.right.color)
+        return tree
+
+    def _make_right_red(self, tree):
+        if not tree or not tree.right:
+            return tree
+        assert tree.color or tree.right.color or (tree.left and tree.left.color)
+        if tree.right.color or \
+                (tree.right.left and tree.right.left.color) or \
+                (tree.right.right and tree.right.right.color):
+            return tree
+        assert tree.left
+        if tree.color:
+            tree = self._flip_color(tree)
+            assert not tree.left.right or not tree.left.right.color
+            if tree.left and tree.left.left and tree.left.left.color:
                 tree = self._rotate_right(tree)
                 tree = self._flip_color(tree)
         else:

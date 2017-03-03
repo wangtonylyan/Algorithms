@@ -2,7 +2,7 @@
 
 
 from tests.data_structure.tree.binary.bst import BinarySearchTreeTest
-from algos.data_structure.tree.binary.rbt import RedBlackTree
+from algos.data_structure.tree.binary.rbt import RedBlackTree, LeftLeaningRedBlackTree
 
 
 class RedBlackTreeTest(BinarySearchTreeTest):
@@ -17,7 +17,7 @@ class RedBlackTreeTest(BinarySearchTreeTest):
 
     @staticmethod
     def check_root(self, tree, left=0, right=0):
-        BinarySearchTreeTest.check_root(self, tree)
+        BinarySearchTreeTest.check_root(self, tree, left, right)
         if not tree:
             return 0
         # the following assertions cover the same cases as the black-height invariant, just for illustration
@@ -48,6 +48,22 @@ class RedBlackTreeTest(BinarySearchTreeTest):
         return self.check_root(tree, left, right)
 
 
+class LeftLeaningRedBlackTreeTest(RedBlackTreeTest):
+    def __init__(self, cls=LeftLeaningRedBlackTree, args={}):
+        assert issubclass(cls, LeftLeaningRedBlackTree)
+        super().__init__(cls, args)
+
+    @staticmethod
+    def check_root(self, tree, left=0, right=0):
+        if tree:
+            # left-leaning invariant
+            assert not (tree.right and tree.right.color)
+            # black-height invariant
+            assert not (tree.right and not tree.left)
+        return RedBlackTreeTest.check_root(self, tree, left, right)
+
+
 if __name__ == '__main__':
     RedBlackTreeTest().main()
+    LeftLeaningRedBlackTreeTest().main()
     print('done')
