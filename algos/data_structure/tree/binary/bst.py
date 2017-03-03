@@ -16,7 +16,7 @@ class BinarySearchTree(Tree):
 
         def __str__(self):
             return super().__str__() + ', ' + \
-                   f'left={str(self.left.key) if self.left else None}, ' + \
+                   f'left={str(self.left.key) if self.left else None}' + ', ' + \
                    f'right={str(self.right.key) if self.right else None}'
 
     def __len__(self):

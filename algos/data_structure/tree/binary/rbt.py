@@ -83,20 +83,16 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
         return self._recur_(tree, which=lambda tree: tree.cmp(key), find=find, down=down)
 
     def _delmax(self, tree):
-        def find(tree):
-            if tree.left:
-                tree.left.color = tree.color
-            return tree.left
-
-        return self._recur_(tree, which=lambda tree: 1 if tree.right else 0, find=find, down=self._make_right_red)
+        return self._recur_(tree,
+                            which=lambda tree: 1 if tree.right else 0,
+                            find=lambda tree: tree.left.set(color=tree.color) if tree.left else tree.left,
+                            down=self._make_right_red)
 
     def _delmin(self, tree):
-        def find(tree):
-            if tree.right:
-                tree.right.color = tree.color
-            return tree.right
-
-        return self._recur_(tree, which=lambda tree: -1 if tree.left else 0, find=find, down=self._make_left_red)
+        return self._recur_(tree,
+                            which=lambda tree: -1 if tree.left else 0,
+                            find=lambda tree: tree.right.set(color=tree.color) if tree.right else tree.right,
+                            down=self._make_left_red)
 
     # 1) rotate left：no side-effect
     # 2) rotate right：no side-effect

@@ -17,7 +17,7 @@ class Tree:
             return -1 if key < self.key else 1 if key > self.key else 0
 
         def set(self, **kwargs):
-            for k, v in kwargs:
+            for k, v in kwargs.items():
                 if hasattr(self, k):
                     setattr(self, k, v)
             return self
