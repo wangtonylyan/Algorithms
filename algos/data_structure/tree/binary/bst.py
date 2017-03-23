@@ -131,9 +131,6 @@ class BinarySearchTree(Tree):
 
 
 class SelfAdjustingBinarySearchTree(BinarySearchTree):
-    def __init__(self):
-        super().__init__()
-
     def _rotate_left(self, tree):
         if tree and tree.right:
             tree = self._rotate_left_(tree)
@@ -162,9 +159,6 @@ class SelfAdjustingBinarySearchTree(BinarySearchTree):
 # (自)平衡树大致分为两类：height-balanced和weight-balanced
 # 前者关注的是树的高度，后者关注的是树的重量(即树中节点的个数)
 class SelfBalancingBinarySearchTree(SelfAdjustingBinarySearchTree):
-    def __init__(self):
-        super().__init__()
-
     def _balance(*args):
         assert False
 

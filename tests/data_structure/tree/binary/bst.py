@@ -9,7 +9,8 @@ class BinarySearchTreeTest(TreeTest):
     def __init__(self, cls=BinarySearchTree, args={}, num=1000, time=True, check=True):
         assert issubclass(cls, BinarySearchTree)
         super().__init__(cls, args, num, time)
-        self.embed_check_method(BinarySearchTree, check)
+        check = 'check_tree' if check else 'check_root'
+        self.embed_check_method(check, lambda x: x + '_')
 
     @staticmethod
     def check(self, size):
@@ -34,10 +35,7 @@ class BinarySearchTreeTest(TreeTest):
         assert self._len(tree) == left + right + 1
         return self.check_root(tree, left, right)
 
-    def embed_check_method(self, cls, check):
-        rename = lambda x: x + '_'
-        check = 'check_tree' if check else 'check_root'
-
+    def embed_check_method(self, check, rename):
         def _iter_(self, tree, which, find, down=None, up=None):
             def wrapper(tree):
                 tree = up(tree) if callable(up) and tree else tree
@@ -54,11 +52,12 @@ class BinarySearchTreeTest(TreeTest):
 
             return getattr(self, rename('_recur_'))(tree, which, find, miss, down, wrapper)
 
+        base = BinarySearchTree
         for m in ['_iter_', '_recur_']:
-            assert hasattr(cls, m)
-            if not hasattr(cls, rename(m)):  # else the check method has been embedded
-                setattr(cls, rename(m), getattr(cls, m))
-                setattr(cls, m, locals()[m])
+            assert hasattr(base, m)
+            if not hasattr(base, rename(m)):  # else the check method has been embedded
+                setattr(base, rename(m), getattr(base, m))
+                setattr(base, m, locals()[m])
         self.cls = type('_' + self.cls.__name__ + '_', (self.cls,),
                         {'check': self.__class__.check,
                          'check_tree': self.__class__.check_tree,
