@@ -100,6 +100,7 @@ class ZAlgorithm(StringMatch):
         return tab
 
     def main(self, txt, pat):
+        assert '$' not in txt
         concat = pat + '$' + txt
         tab = self._preprocess_fundamental(concat)
         ret = []
