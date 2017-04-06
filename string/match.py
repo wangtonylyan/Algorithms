@@ -3,6 +3,7 @@
 # solution: brute force, KMP, BM, Rabin-Karp
 # 返回值是所有匹配子字符串的偏移量
 
+
 import random
 import re
 from base.string import String, StringTest
@@ -26,7 +27,7 @@ class StringMatch(String, StringTest):
         return ret
 
     def main(self, txt, pat):
-        assert (False)
+        assert False
 
     def _gencase(self, total=500):
         cases = [
@@ -46,20 +47,20 @@ class StringMatch(String, StringTest):
             for j in range(total):
                 s += chr(random.randint(ord('a'), ord('d')))
             patlen = random.randint(1, 20)
-            assert (patlen < len(s))
+            assert patlen < len(s)
             start = random.randint(0, len(s) - patlen)
-            assert (start + patlen <= len(s))
+            assert start + patlen <= len(s)
             p = s[start:start + patlen]
-            assert (len(s) >= len(p) and s.find(p) != -1)
+            assert len(s) >= len(p) and s.find(p) != -1
             cases.append((s, p))
         return cases
 
     def testcase(self):
         def test(case):
-            assert (len(self.funcs) > 0)
+            assert len(self.funcs) > 0
             ret = self.funcs[0](case[0], case[1])  # the brute-force algorithm
-            assert (len(ret) > 0)  # necessary only for current test cases
-            assert (all(f(case[0], case[1]) == ret for f in self.funcs[1:]))
+            assert len(ret) > 0  # necessary only for current test cases
+            assert all(f(case[0], case[1]) == ret for f in self.funcs[1:])
 
         self._testcase(test, self._gencase())
 
@@ -75,17 +76,17 @@ class ZAlgorithm(StringMatch):
         # 目的是为了在从左至右的遍历顺序下，尽可能多地预知右边仍未被访问到的字符
         # 简而言之'high'越大，对于'tab'中已有数据的可利用率就越高
         for i in range(1, len(pat)):
-            assert (low < i and low <= high <= len(pat))
+            assert low < i and low <= high <= len(pat)
             if i < high:
-                assert (pat[i:high] == pat[i - low:high - low])
-                assert (high == len(pat) or pat[high] != pat[high - low])
+                assert pat[i:high] == pat[i - low:high - low]
+                assert high == len(pat) or pat[high] != pat[high - low]
                 if high - i > tab[i - low]:
-                    assert (pat[i:i + tab[i - low]] == pat[i - low:i - low + tab[i - low]] == pat[:tab[i - low]])
-                    assert (pat[i + tab[i - low]] == pat[i - low + tab[i - low]] != pat[tab[i - low]])
+                    assert pat[i:i + tab[i - low]] == pat[i - low:i - low + tab[i - low]] == pat[:tab[i - low]]
+                    assert pat[i + tab[i - low]] == pat[i - low + tab[i - low]] != pat[tab[i - low]]
                     tab[i] = tab[i - low]
                     continue
                 elif high - i < tab[i - low]:
-                    assert (high == len(pat) or pat[high] != pat[high - i])
+                    assert high == len(pat) or pat[high] != pat[high - i]
                     tab[i] = high - i
                     continue
                 else:
@@ -127,7 +128,7 @@ class KnuthMorrisPratt(ZAlgorithm):
         jmp = [0] * len(pat)  # [0,-1], length, but will be used as index
         i, j = 0, jmp[0]
         while i < len(pat) - 1:
-            assert (j <= i)
+            assert j <= i
             if pat[j] == pat[i + 1]:
                 i += 1
                 j += 1
@@ -136,7 +137,7 @@ class KnuthMorrisPratt(ZAlgorithm):
                 j = jmp[j - 1]
             else:
                 i += 1
-                assert (jmp[i] == j == 0)
+                assert jmp[i] == j == 0
         return jmp
 
         # 以下构建'jmp'的方式更为直观
@@ -194,13 +195,10 @@ class BoyerMoore(ZAlgorithm):
         tab = [0] * len(pat)  # [0,-1), length
         low, high = len(pat) - 1, len(pat) - 1
         for i in range(len(pat) - 2, -1, -1):
-            assert (low <= high and i < high)
+            assert low <= high and i < high
             if i > low:
-                if i - low > tab[len(pat) - 1 - (high - i)]:
-                    tab[i] = tab[len(pat) - 1 - (high - i)]
-                    continue
-                elif i - low < tab[len(pat) - 1 - (high - i)]:
-                    tab[i] = i - low
+                if i - low != tab[len(pat) - 1 - (high - i)]:
+                    tab[i] = min(i - low, tab[len(pat) - 1 - (high - i)])
                     continue
                 else:
                     j = len(pat) - 1 - (i - low)
@@ -211,7 +209,7 @@ class BoyerMoore(ZAlgorithm):
                 j -= 1
             tab[i] = len(pat) - 1 - j  # mismatch at 'j'
             low, high = i - tab[i], i
-        assert (tab == self._preprocess_fundamental(pat[::-1])[::-1])
+        assert tab == self._preprocess_fundamental(pat[::-1])[::-1]
         return tab
 
     def _preprocess_badCharacter(self, pat):
@@ -227,7 +225,7 @@ class BoyerMoore(ZAlgorithm):
         # 此时整个'pat'可移至当前已比较过的所有'txt'字符的右边
         sfx = [-1] * len(pat)  # (0,-1], index
         for i in range(len(pat) - 1):
-            assert (i < tab[i] or pat[i - tab[i]] != pat[len(pat) - 1 - tab[i]])
+            assert i < tab[i] or pat[i - tab[i]] != pat[len(pat) - 1 - tab[i]]
             if tab[i] > 0:
                 sfx[len(pat) - tab[i]] = i
         pfx = [-1] * len(pat)  # (0,-1], index
@@ -235,7 +233,7 @@ class BoyerMoore(ZAlgorithm):
             pfx[len(pat) - 1] = 0
         for i in range(1, len(pat) - 1):
             pfx[len(pat) - (i + 1)] = i if tab[i] == i + 1 else pfx[len(pat) - i]
-        assert (all(pfx[i] + 1 <= len(pat) - i for i in range(1, len(pat))))
+        assert all(pfx[i] + 1 <= len(pat) - i for i in range(1, len(pat)))
         return sfx, pfx
 
     def main(self, txt, pat):
@@ -257,13 +255,13 @@ class BoyerMoore(ZAlgorithm):
                 # pfxs[0]没有意义，pfxs[1]则是最长前缀(同样适用于缺省值-1)
                 i += len(pat) - 1 - pfxs[1] if len(pfxs) > 1 else 1
             else:
-                assert (txt[i + j] != pat[j])
+                assert txt[i + j] != pat[j]
                 # bad character shift rule
                 bad = bads[self.ord(txt[i + j])]
                 k = 0  # closest to the left of 'j'
                 while k < len(bad) and bad[k] > j:
                     k += 1
-                assert (k == len(bad) or bad[k] != j)
+                assert k == len(bad) or bad[k] != j
                 bcShift = j - bad[k] if k < len(bad) else j + 1
                 # good suffix shift rule
                 if j == len(pat) - 1:
@@ -296,12 +294,12 @@ class RabinKarp(StringMatch):
         self.prime = 6999997
 
     def _hash(self, str, strLen):
-        assert (strLen <= len(str))
+        assert strLen <= len(str)
         # 1) prepare
         factor = 1  # == d^(m-1)
         for i in range(1, strLen):
             factor = (factor * self.alphabet) % self.prime
-        assert (factor == pow(self.alphabet, strLen - 1) % self.prime)
+        assert factor == pow(self.alphabet, strLen - 1) % self.prime
         # 2) caculate hash value of the first strLen-length substring in str
         ret = 0
         for c in str[:strLen]:
@@ -360,11 +358,9 @@ class SuffixArrayBased(StringMatch):
         def test(case):
             ret1 = self.main_1(case[0], case[1])
             # ret2 = self.main_2(case[0], case[1])
-            assert (0 <= ret1 < len(case[0]) and ret1 + len(case[1]) <= len(case[0]))
-            # assert (0 <= ret2 < len(case[0]) and ret2 + len(case[1]) <= len(case[0]))
-            assert (case[0][ret1:ret1 + len(case[1])]
-                    # == case[0][ret2:ret2 + len(case[1])]
-                    == case[1])
+            assert 0 <= ret1 < len(case[0]) and ret1 + len(case[1]) <= len(case[0])
+            # assert 0 <= ret2 < len(case[0]) and ret2 + len(case[1]) <= len(case[0])
+            assert case[0][ret1:ret1 + len(case[1])] == case[1]  # == case[0][ret2:ret2 + len(case[1])]
 
         self._testcase(test, self._gencase(total=300))
 
@@ -400,13 +396,13 @@ class PatternWithWildcard():
 
     def testcase(self):
         def test(case):
-            assert (self.main(case[0], case[1]) == True if re.search(case[1], case[0]) else False)
+            assert self.main(case[0], case[1]) == True if re.search(case[1], case[0]) else False
 
         cases = [('cabccbbcbacab', 'ab*ba*c'),
                  ('abcabcabcde', 'abcd'),
                  ]
         map(test, cases)
-        print 'pass:', self.__class__
+        print('pass:', self.__class__)
 
 
 if __name__ == '__main__':
@@ -417,4 +413,4 @@ if __name__ == '__main__':
     SuffixArrayBased().testcase()
 
     PatternWithWildcard().testcase()
-    print 'done'
+    print('done')
