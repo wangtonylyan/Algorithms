@@ -10,7 +10,8 @@ class BinarySearchTreeTest(TreeTest):
         assert issubclass(cls, BinarySearchTree)
         super().__init__(cls, args, num, time)
         check = 'check_tree' if check else 'check_root'
-        self.embed_check_method(check, lambda x: x + '_')
+        rename = lambda x: x + '_'
+        self.embed_check_method(check, rename)
 
     @staticmethod
     def check(self, size):
