@@ -1,25 +1,37 @@
 # -*- coding: utf-8 -*-
 
 import random
-from test import Test
+import unittest
 
 
-class Number(object):
-    alphabet = 10000  # [0, 10000]
+# self.assertEqual(1, 1)
+# self.assertTrue(1)
+# self.assertFalse(0)
+# self.assertRaises(TypeError)
+class NumberTestCase(unittest.TestCase):
+    def __init__(self, alphabet=[0, 10000]):
+        super().__init__()
+        self.config = {
+            'minlen': 1,
+            'maxlen': 50,
+            'alphabet': alphabet,
+        }
 
-    def __init__(self):
-        super(Number, self).__init__()
+    @classmethod
+    def setUpClass(cls):
+        # generate test cases
+        self.cases = []
+        for _ in range():
+            pass
+
+    def setUp(self):
+        print('setup')
+
+    def tearDown(self):
+        print('teardown')
 
 
 class NumberTest(Test):
-    def __init__(self):
-        super(NumberTest, self).__init__()
-
-    @classmethod
-    def _testcase(cls, test, cases):
-        map(test, cases)
-        print 'pass:', cls, '-', len(cases)
-
     @classmethod
     def _gencase(cls, fixed=False, minLen=1, maxLen=50, each=50, total=100, dup=True):
         cases = []
@@ -29,7 +41,8 @@ class NumberTest(Test):
             for _ in range(each):
                 width = width if fixed else random.randint(minLen, maxLen)
                 if dup:
-                    case.append([random.randint(0, Number.alphabet) for _ in range(width)])
+                    case.append([random.randint(0, Number.alphabet)
+                                 for _ in range(width)])
                 else:
                     assert (width <= Number.alphabet + 1)
                     low = random.randint(0, Number.alphabet - width)
@@ -43,10 +56,13 @@ class NumberTest(Test):
 if __name__ == '__main__':
     cases = NumberTest()._gencase()
     for case in cases:
-        print case
+        # print case
         assert (isinstance(case, list) and len(case) > 0)
         for lst in case:
             assert (isinstance(lst, list) and len(lst) > 0)
-            assert (all(isinstance(i, int) and 0 <= i <= Number.alphabet for i in lst))
-    print len(cases)
-    print 'done'
+            assert (all(isinstance(i, int) and 0 <=
+                        i <= Number.alphabet for i in lst))
+    # print len(cases)
+    # print 'done'
+
+    unittest.main(verbosity=2)

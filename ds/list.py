@@ -13,23 +13,52 @@
 # 存在O(1)与O(n)的区别
 
 
-class List(object):
-    class Node():
-        def __init__(self, key=None, value=None):
-            self.next = None
-            self.key = key
+class List:
+    class Node:
+        def __init__(self, value=None, next=None):
             self.value = value
+            self.next = next
 
     def __init__(self):
         self.head = None
-        self.count = 0
-
-    def __del__(self):
-        self.head = None
-        self.count = 0
+        self.size = 0
 
     def __len__(self):
-        return self.count
+        return self.size
+
+    def __iter__(self):
+        return self.__class__.Iterator(self)
+
+    def insert(self, value):
+        self.head = self.__class__.Node(value, self.head)
+
+    def remove(self):
+
+
+    class Iterator():
+        def __init__(self, list):
+            self.list = list
+            # self.iter = None
+
+        def __iter__(self):
+            return self
+
+        def __next__(self):
+            if not self.list:
+                raise StopIteration
+
+            if self.iter:
+                self.iter = self.list.next
+            else:
+                self.iter = self.list.head
+
+            if self.iter:
+                return self.iter
+
+            raise StopIteration
+
+
+class List2(object):
 
     def add(self, key, value):
         if self.head:
@@ -66,8 +95,8 @@ class List(object):
     # @problem: 判断两个无环的单向链表是否有共同的节点
     # solution: 两个链表都走到底，比较最后一个节点是否相同
 
-
     # @problem: reverse
+
     def reverse(self):
         iter = self.head
         self.head = None
@@ -76,3 +105,10 @@ class List(object):
             iter.next = self.head
             self.head = iter
             iter = next
+
+
+if __name__ == '__main__':
+    lst = List()
+    lst.add(1, 1)
+    for i in lst:
+        print(i)

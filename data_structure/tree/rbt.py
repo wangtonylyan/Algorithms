@@ -3,30 +3,76 @@
 # 红黑树属于2-3(-4)树的一种变种
 # 左倾红黑树增加了"左倾"这一约束，使得实现上需要讨论的情况减少了
 
+if __name__ == '__main__':
+    import sys
+    import os
+    sys.path.append(os.path.abspath('.'))
 
-from algos.data_structure.tree.binary.bst import SelfBalancingBinarySearchTree
+from data_structure.tree.bst import SelfBalancingBST
 
 
-class RedBlackTree(SelfBalancingBinarySearchTree):
-    class Node(SelfBalancingBinarySearchTree.Node):
+class RedBlackTree(SelfBalancingBST):
+    class Node(SelfBalancingBST.Node):
         __slots__ = ['color']
 
         def __init__(self, key, value):
             super().__init__(key, value)
             # True if red else (black) False
-            self.color = True  # default color of a new leaf node is red
+            self.color = True  # default color of a new leaf node
 
         def __str__(self):
             return super().__str__() + ', ' + f'color={str(self.color)}'
 
-    # 1) top-down: naturally no 4-node
-    # 2) recursion: insert or override
-    # 3) bottom-up: rebalance
+    # top-down中，天然地不存在有4结点
+    # insertion中，新增结点会导致，2或3结点变为3或4结点
+    # bottom-up中，消除4结点
     def insert(self, key, value):
-        assert key is not None
-        self.root = self._insert(self.root, key, value)
-        if self.root.color:
-            self.root.color = False
+        super().insert(key, value)
+        self.root.color = False
+
+    # [invariant] 'tree' is a red-black tree
+    @classmethod
+    def rotateleft(cls, tree):
+        tree = cls._rotateleft_(tree)
+        # concerning the augment
+        tree.color, tree.left.color = tree.left.color, tree.color
+        return tree
+
+    @classmethod
+    def rotateright(cls, tree):
+        tree = cls._rotateright_(tree)
+        tree.color, tree.right.color = tree.right.color, tree.color
+        return tree
+
+    # [invariant] 'tree' is a relaxed red-black tree
+    # [what] turn 'tree' from a 2-node into a 4-node, or reversely
+    # [side-effect] increase or decrease 'tree' height by 1
+    @classmethod
+    def flipcolor(cls, tree):
+        tree.left.color = not tree.left.color
+        tree.right.color = not tree.right.color
+        tree.color = not tree.color
+        return tree
+
+    # [premise] at most one of 'tree', 'tree.left' and 'tree.right' is a 4-node
+    # [what] eliminate 4-node, resulting in the 'tree' balance
+    @classmethod
+    def balance(cls, tree):
+        if tree.left and tree.left.color:
+            if tree.left.right and tree.left.right.color:
+                tree.left = cls.rotateleft(tree.left)
+            if tree.left.left and tree.left.left.color:
+                tree = cls.rotateright(tree)
+        elif tree.right and tree.right.color:
+            if tree.right.left and tree.right.left.color:
+                tree.right = cls.rotateright(tree.right)
+            if tree.right.right and tree.right.right.color:
+                tree = cls.rotateleft(tree)
+        if tree.left and tree.left.color and tree.right and tree.right.color:
+            tree = cls.flipcolor(tree)
+        return tree
+
+    ###########################################################################
 
     def _apply_del_func(self, func, *args, **kwargs):
         if self.root:
@@ -37,6 +83,9 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
             if self.root and self.root.color:
                 self.root.color = False
 
+    # top-down中，下沉3或4结点
+    # deletion中，删除结点会导致，3或4结点变为2结点
+    # bottom-up中，消除4结点
     def delete(self, key):
         assert key is not None
         self._apply_del_func(self._delete, key)
@@ -85,60 +134,16 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
     def _delmax(self, tree):
         return self._recur_(tree,
                             which=lambda tree: 1 if tree.right else 0,
-                            find=lambda tree: tree.left.set(color=tree.color) if tree.left else tree.left,
+                            find=lambda tree: tree.left.set(
+                                color=tree.color) if tree.left else tree.left,
                             down=self._make_right_red)
 
     def _delmin(self, tree):
         return self._recur_(tree,
                             which=lambda tree: -1 if tree.left else 0,
-                            find=lambda tree: tree.right.set(color=tree.color) if tree.right else tree.right,
+                            find=lambda tree: tree.right.set(
+                                color=tree.color) if tree.right else tree.right,
                             down=self._make_left_red)
-
-    # 1) rotate left：no side-effect
-    # 2) rotate right：no side-effect
-    # 3) flip color：increase or decrease tree's height by one
-
-    # @invariant: 'tree' is a red-black tree
-    def _rotate_left(self, tree):
-        assert tree and tree.right
-        tree = self._rotate_left_(tree)
-        # concerning the augment
-        tree.color, tree.left.color = tree.left.color, tree.color
-        return tree
-
-    def _rotate_right(self, tree):
-        assert tree and tree.left
-        tree = self._rotate_right_(tree)
-        tree.color, tree.right.color = tree.right.color, tree.color
-        return tree
-
-    # @invariant: 'tree' is a relaxed red-black tree
-    # @what: turn 'tree' from a 2-node into a 4-node, or reversely
-    def _flip_color(self, tree):
-        assert tree and tree.left and tree.right
-        tree.left.color = not tree.left.color
-        tree.right.color = not tree.right.color
-        tree.color = not tree.color
-        return tree
-
-    # @premise: at most one of 'tree', 'tree.left' and 'tree.right' is a 4-node
-    # @what: eliminate 4-node, resulting in the balance of 'tree'
-    def _balance(self, tree):
-        if not tree:
-            return tree
-        if tree.left and tree.left.color:
-            if tree.left.right and tree.left.right.color:
-                tree.left = self._rotate_left(tree.left)
-            if tree.left.left and tree.left.left.color:
-                tree = self._rotate_right(tree)
-        elif tree.right and tree.right.color:
-            if tree.right.left and tree.right.left.color:
-                tree.right = self._rotate_right(tree.right)
-            if tree.right.right and tree.right.right.color:
-                tree = self._rotate_left(tree)
-        if tree.left and tree.left.color and tree.right and tree.right.color:
-            tree = self._flip_color(tree)
-        return tree
 
     # @premise: 'tree' is a 3-node
     # @invariant: 'tree.right' is a balanced red-black tree, which will be neither traversed nor rebalanced after return
@@ -163,10 +168,11 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
                 tree = self._flip_color(tree)
         else:
             assert tree.right.color
-            tree = self._rotate_left(tree)  # move red from 'tree.right' node to 'tree.left' node
+            # move red from 'tree.right' node to 'tree.left' node
+            tree = self._rotate_left(tree)
         assert tree.left.color or \
-               (tree.left.left and tree.left.left.color) or \
-               (tree.left.right and tree.left.right.color)
+            (tree.left.left and tree.left.left.color) or \
+            (tree.left.right and tree.left.right.color)
         return tree
 
     def _make_right_red(self, tree):
@@ -189,8 +195,8 @@ class RedBlackTree(SelfBalancingBinarySearchTree):
             assert tree.left.color
             tree = self._rotate_right(tree)
         assert tree.right.color or \
-               (tree.right.left and tree.right.left.color) or \
-               (tree.right.right and tree.right.right.color)
+            (tree.right.left and tree.right.left.color) or \
+            (tree.right.right and tree.right.right.color)
         return tree
 
 
@@ -264,15 +270,16 @@ class LeftLeaningRedBlackTree(RedBlackTree):
             tree = self._flip_color(tree)
             assert not tree.right.right or not tree.right.right.color  # left-leaning invariant
             if tree.right.left and tree.right.left.color:
-                tree.right = self._rotate_right(tree.right)  # keep left-leaning invariant of 'tree.right' subtree
+                # keep left-leaning invariant of 'tree.right' subtree
+                tree.right = self._rotate_right(tree.right)
                 tree = self._rotate_left(tree)
                 tree = self._flip_color(tree)
         else:
             assert tree.right.color
             tree = self._rotate_left(tree)
         assert tree.left.color or \
-               (tree.left.left and tree.left.left.color) or \
-               (tree.left.right and tree.left.right.color)
+            (tree.left.left and tree.left.left.color) or \
+            (tree.left.right and tree.left.right.color)
         return tree
 
     def _make_right_red(self, tree):
@@ -294,6 +301,6 @@ class LeftLeaningRedBlackTree(RedBlackTree):
             assert tree.left.color
             tree = self._rotate_right(tree)
         assert tree.right.color or \
-               (tree.right.left and tree.right.left.color) or \
-               (tree.right.right and tree.right.right.color)
+            (tree.right.left and tree.right.left.color) or \
+            (tree.right.right and tree.right.right.color)
         return tree

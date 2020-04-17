@@ -13,9 +13,6 @@ class Tree:
         def __str__(self):
             return f'key={str(self.key)}, value={str(self.value)}'
 
-        def cmp(self, key):
-            return -1 if key < self.key else 1 if key > self.key else 0
-
         def set(self, **kwargs):
             for k, v in kwargs.items():
                 if hasattr(self, k):
@@ -28,23 +25,26 @@ class Tree:
     def __len__(self):
         assert False
 
-    def search(*args):
+    def __str__(self):
         assert False
 
-    def getmax(*args):
+    def search(self, *args, **kwargs):
         assert False
 
-    def getmin(*args):
+    def getmax(self, *args, **kwargs):
         assert False
 
-    def insert(*args):
+    def getmin(self, *args, **kwargs):
         assert False
 
-    def delete(*args):
+    def insert(self, *args, **kwargs):
         assert False
 
-    def delmax(*args):
+    def delete(self, *args, **kwargs):
         assert False
 
-    def delmin(*args):
+    def delmax(self, *args, **kwargs):
+        assert False
+
+    def delmin(self, *args, **kwargs):
         assert False
