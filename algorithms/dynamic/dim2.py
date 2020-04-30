@@ -218,7 +218,7 @@ class Problem1(Problem):
             dp[j] = mat[0][0] if j >= mat[0][1] else 0
 
         for i in range(1, m):
-            for j in range(n, 0, -1):  # 注意反向遍历，以避免过早修改第i个金矿
+            for j in range(n, 0, -1):  # 注意反向遍历，以避免过早修改第i-1个金矿
                 dp[j] = max(dp[j - mat[i][1]] + mat[i][0], dp[j]) \
                     if j >= mat[i][1] else dp[j]
 
