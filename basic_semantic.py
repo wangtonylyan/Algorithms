@@ -71,5 +71,7 @@ if __name__ == '__main__':
     print(2 in it) # False，从3开始遍历至结束
     print(3 in it) # false，迭代器it已遍历结束
 
+    list(iterator) # 接受迭代器传参，返回列表
+
     f = (lambda: 1)
     f()

@@ -7,7 +7,7 @@ if __name__ == '__main__':
     sys.path.append(os.path.abspath('.'))
 
 
-from algorithms.utility import identity
+from algorithms.utility import *
 from data_structure.tree.tree import Tree
 
 
@@ -63,7 +63,7 @@ class BinarySearchTree(Tree):
 
     @classmethod
     def _len_(cls, tree):
-        return cls._len_(tree.left) + cls._len_(tree.right) + 1 if tree else 0
+        return len(cls.preorder(tree))
 
     @classmethod
     def _search_(cls, tree, key):
@@ -110,7 +110,7 @@ class BinarySearchTree(Tree):
                          lambda tree: -1 if tree.left else 0,
                          lambda tree: tree.right)
 
-    # iterative walk
+    ## iterative walk
     @classmethod
     def walk(cls, tree, which, find=identity, *, down=None):
         while tree:
@@ -126,7 +126,7 @@ class BinarySearchTree(Tree):
                 break
         return tree
 
-    # recursive walk
+    ## recursive walk
     @classmethod
     def rwalk(cls, tree, which, find=identity, miss=None, *, down=None, up=None):
         if not tree:
@@ -148,6 +148,22 @@ class BinarySearchTree(Tree):
         if tree and callable(up):
             tree = up(tree)
         return tree
+
+    ## recursive traverse
+    @classmethod
+    def preorder(cls, tree, find=identity):
+        return [find(tree)] + cls.preorder(tree.left) + \
+            cls.preorder(tree.right) if tree else []
+
+    @classmethod
+    def inorder(cls, tree, find=identity):
+        return cls.inorder(tree.left) + [find(tree)] + \
+            cls.inorder(tree.right) if tree else []
+
+    @classmethod
+    def postorder(cls, tree, find=identity):
+        return cls.postorder(tree.left) + cls.postorder(tree.right) + \
+            [find(tree)] if tree else []
 
 
 class SelfAdjustingBST(BinarySearchTree):
@@ -203,3 +219,19 @@ if __name__ == '__main__':
     print(len(bst))
     bst.delete(1)
     print(len(bst))
+
+    print(len([None]))
+
+
+
+# 二叉树遍历题：
+
+# 1. 遍历
+
+# 1.1. 镜像二叉树
+
+
+# 2. 给出遍历的结果，反推二叉树
+
+# 2.1. 给出不同的遍历结果，检查是否对应于同一课树，
+# 是否构成一棵二叉树
