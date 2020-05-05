@@ -3,7 +3,7 @@ if __name__ == '__main__':
     import os
     sys.path.append(os.path.abspath('.'))
 
-from algorithms.utility import Problem
+from algorithms.utility import *
 
 
 #########################################################################################
@@ -45,6 +45,20 @@ class LeetCode63(Problem):
 
         return dp[-1][-1]
 
+    def solution3(self, mat):
+        m, n = len(mat), len(mat[0])
+        dp = [0] * n
+
+        if not mat[0][0]:
+            dp[0] = 1
+
+        for i in range(m):
+            dp[0] = dp[0] if not mat[i][0] else 0
+            for j in range(1, n):
+                dp[j] = dp[j - 1] + dp[j] if not mat[i][j] else 0
+
+        return dp[-1]
+
 
 ## LeetCode 64
 ## 给定存满了数字的m*n网格，每次只能向右或向下移动一格，求最小路径和
@@ -81,6 +95,20 @@ class LeetCode64(Problem):
 
         return dp[-1][-1]
 
+    def solution3(self, mat):
+        m, n = len(mat), len(mat[0])
+        dp = mat[0][:]
+
+        for j in range(1, n):
+            dp[j] += dp[j - 1]
+
+        for i in range(1, m):
+            dp[0] += mat[i][0]
+            for j in range(1, n):
+                dp[j] = min(dp[j - 1], dp[j]) + mat[i][j]
+
+        return dp[-1]
+
 
 ## LeetCode 120
 ## 给定一个三角形，找出自顶向下的最小路径和
@@ -92,6 +120,7 @@ class LeetCode120(Problem):
         def recur(i, j):
             if i == 0:
                 return mat[0][0]
+
             if j == 0:
                 return recur(i - 1, j) + mat[i][j]
             if j == i:
@@ -115,8 +144,21 @@ class LeetCode120(Problem):
 
         return min(dp[-1])
 
-    # bottom-up
     def solution3(self, mat):
+        dp = [None] * len(mat)
+
+        dp[0] = mat[0][0]
+
+        for i in range(1, len(mat)):
+            dp[i] = dp[i - 1] + mat[i][i]
+            for j in range(i - 1, 0, -1):
+                dp[j] = min(dp[j - 1], dp[j]) + mat[i][j]
+            dp[0] += mat[i][0]
+
+        return min(dp)
+
+    # bottom-up
+    def solution4(self, mat):
         dp = mat[-1][:]
 
         for i in range(len(mat) - 2, -1, -1):
@@ -151,6 +193,21 @@ class LeetCode221(Problem):
                     if mat[i][j] else 0
 
         return max(map(max, dp))
+
+    def solution2(self, mat):
+        m, n = len(mat), len(mat[0])
+
+        dp = mat[0][:]
+        maxlen = max(dp)
+
+        for i in range(1, m):
+            diag, dp[0] = dp[0], mat[i][0]
+            for j in range(1, n):
+                diag, dp[j] = dp[j], min(dp[j], dp[j - 1], diag) + 1 \
+                    if mat[i][j] else 0
+            maxlen = max(maxlen, max(dp))
+
+        return maxlen
 
 
 #########################################################################################

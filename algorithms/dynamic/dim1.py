@@ -3,23 +3,10 @@ if __name__ == '__main__':
     import os
     sys.path.append(os.path.abspath('.'))
 
-from algorithms.utility import Problem
+from algorithms.utility import *
 
 
-## dp[i]可以存储两种结果，
-## 即input[i]的瞬间结果，例如子序列中包含当前字符、当前房子被偷、空间遍历到达点
-## 以及input[:i]的累积结果
-## 根据将input[i]加入input[:i]时，所需面对的情况，来选择记录哪种结果
-# 1. 采用前者
-# 1.1. 目标就是求出input[-1]时的瞬间结果，此时的dp[-1]往往就是最终结果
-#      例如：阶梯问题(1, 1_1)，单个终点的遍历路径
-# 1.2. 目标是求出某个input[i]时的瞬间结果，而并不严格地依赖于input[-1]
-#      此外，仅根据input[i]又难以从input[:i]中得出累计结果
-#      例如：子序列问题(2, 2_1, 3)，多个终点的遍历路径
-# 2. 采用后者
-# 2.1.
-
-
+#########################################################################################
 ## LeetCode 70
 ## 给定n级阶梯，每次1或2级，总共有几种达顶方式
 class Problem1(Problem):
@@ -45,6 +32,17 @@ class Problem1(Problem):
 
         return dp[-1]
 
+    def solution3(self, n):
+        if n <= 2:
+            return n
+
+        i, j = 1, 2
+
+        for _ in range(3, n + 1):
+            i, j = j, i + j
+
+        return j
+
 
 ## LeetCode 746
 ## 给定每个阶梯的花费，每次1或2级，求达顶时的最小路径和
@@ -62,6 +60,17 @@ class Problem1_1(Problem):
 
         return min(dp[-2], dp[-1])
 
+    def solution2(self, lst):
+        if len(lst) <= 2:
+            return min(lst)
+
+        i, j = lst[0], lst[1]
+
+        for k in range(2, len(lst)):
+            i, j = j, min(i, j) + lst[k]
+
+        return min(i, j)
+
 
 ## LeetCode 53
 ## 给定序列，找到连续子序列的最大和
@@ -78,6 +87,15 @@ class Problem2(Problem):
             dp[i] = max(dp[i - 1], 0) + lst[i]
 
         return max(dp)
+
+    def solution2(self, lst):
+        maxval, last = lst[0], lst[0]
+
+        for i in range(1, len(lst)):
+            last = max(last, 0) + lst[i]
+            maxval = max(maxval, last)
+
+        return maxval
 
 
 ## LeetCode 300

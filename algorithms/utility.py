@@ -1,3 +1,6 @@
+pinfty = float('+inf')  # positive infinity
+ninfty = float('-inf')  # negative infinity
+
 
 def identity(x):
     return x
