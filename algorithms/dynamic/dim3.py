@@ -11,5 +11,4 @@ from algorithms.utility import *
 
 if __name__ == "__main__":
     Problem.testsuit([
-
     ])

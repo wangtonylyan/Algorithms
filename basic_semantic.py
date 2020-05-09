@@ -36,6 +36,10 @@ class Class:
 # 多次遍历只需调用多次iter()即可
 
 
+# 判断对象是否是None：x is None or x is not None
+# 建议避免：x == None or not x is None
+
+
 class Container:
     def __init__(self, size):
         self.size = size

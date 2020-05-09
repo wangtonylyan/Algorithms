@@ -12,8 +12,9 @@ from algorithms.utility import *
 class Problem1(Problem):
     def check(self, n):
         assert n >= 1
+        return n
 
-    def solution1(self, n):
+    def algo1(self, n):
         def recur(n):
             if n <= 2:
                 return n
@@ -22,7 +23,7 @@ class Problem1(Problem):
 
         return recur(n)
 
-    def solution2(self, n):
+    def algo2(self, n):
         dp = [None] * (n + 1)
 
         dp[0], dp[1], dp[2] = 0, 1, 2
@@ -32,7 +33,7 @@ class Problem1(Problem):
 
         return dp[-1]
 
-    def solution3(self, n):
+    def algo3(self, n):
         if n <= 2:
             return n
 
@@ -49,8 +50,9 @@ class Problem1(Problem):
 class Problem1_1(Problem):
     def check(self, lst):
         assert len(lst) >= 2
+        return lst
 
-    def solution1(self, lst):
+    def algo1(self, lst):
         dp = [None] * len(lst)
 
         dp[0], dp[1] = lst[0], lst[1]
@@ -60,7 +62,7 @@ class Problem1_1(Problem):
 
         return min(dp[-2], dp[-1])
 
-    def solution2(self, lst):
+    def algo2(self, lst):
         if len(lst) <= 2:
             return min(lst)
 
@@ -76,9 +78,9 @@ class Problem1_1(Problem):
 ## 给定序列，找到连续子序列的最大和
 class Problem2(Problem):
     def check(self, lst):
-        return self.check_list(lst)
+        return self.check_list_nonempty(lst)
 
-    def solution1(self, lst):
+    def algo1(self, lst):
         dp = [None] * len(lst)
 
         dp[0] = lst[0]
@@ -88,7 +90,7 @@ class Problem2(Problem):
 
         return max(dp)
 
-    def solution2(self, lst):
+    def algo2(self, lst):
         maxval, last = lst[0], lst[0]
 
         for i in range(1, len(lst)):
@@ -102,9 +104,9 @@ class Problem2(Problem):
 ## 给定序列，找到最长递增子序列
 class Problem2_1(Problem):
     def check(self, lst):
-        return self.check_list(lst)
+        return self.check_list_nonempty(lst)
 
-    def solution1(self, lst):
+    def algo1(self, lst):
         dp = [1] * len(lst)
 
         for i in range(1, len(lst)):
@@ -121,6 +123,7 @@ class Problem2_1(Problem):
 class Problem3(Problem):
     def check(self, lst):
         assert len(lst) >= 4  # 三个及以下的情况，都只能偷一个
+        return lst
 
     # 此问题的难点在于两处：环形排列，以及非相邻的约束
 
@@ -133,7 +136,7 @@ class Problem3(Problem):
     # --x-, x-x-, -x-x, x--x
 
     # 实现1：dp[i]记录第i个房子被偷时的最大金额，此时依赖的子结构是dp[i-3]和dp[i-2]
-    def solution1(self, lst):
+    def algo1(self, lst):
         dp1, dp2 = [None] * len(lst), [None] * len(lst)
 
         dp1[0], dp1[1], dp1[2] = lst[0], lst[1], lst[0] + lst[2]
@@ -149,7 +152,7 @@ class Problem3(Problem):
     # 实现2：dp[i]记录前i个房子的最优解，此时依赖的子结构是dp[i-2]和dp[i-1]
     # 对于dp[i-2]，由于第i-1个房子不偷，因此必然有dp[i]=dp[i-2]+lst[i]
     # 对于dp[i-1]，只需考虑第i-1个房子被偷的情况，因此有有dp[i]=dp[i-1]
-    def solution2(self, lst):
+    def algo2(self, lst):
         dp1, dp2 = [None] * len(lst), [None] * len(lst)
 
         dp1[0], dp1[1] = lst[0], max(lst[0], lst[1])

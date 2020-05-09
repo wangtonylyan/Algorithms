@@ -1,8 +1,11 @@
+import re
+
 pinfty = float('+inf')  # positive infinity
 ninfty = float('-inf')  # negative infinity
 
 
-def identity(x):
+# Python有内置函数id()，但其返回的是对象的唯一标识号
+def identity(x, *args, **kwargs):
     return x
 
 
@@ -12,46 +15,44 @@ def const(x):
 
 class Problem:
     def __init__(self):
-        # 执行以solution为前缀名的函数，并记录结果
-        # 比较所有结果是否相等
-        pass
+        self.solutions = list(filter(lambda x: re.match('^algo.*', x), dir(self)))
 
-    def check(self, testcase):
-        assert testcase
+    def check(self, *args):
+        return tuple(args)
 
-    def check_list(self, lst):
+    @staticmethod
+    def check_list_nonempty(lst):
         assert len(lst) > 0
+        return lst[:]  # avoid in-place modification
 
-    def check_matrix(self, mat):
+    @staticmethod
+    def check_matrix_nonempty(mat):
         m, n = len(mat), len(mat[0])
         assert m > 0 and n > 0 and all(map(lambda x: len(x) == n, mat))
+        return [mat[i][:] for i in range(len(mat))]
 
     def run(self, *args):
-        self.check(*args)
-        ret = [self.solution1(*args),
-               self.solution2(*args),
-               self.solution3(*args), ]
+        assert len(self.solutions) > 0
+        print('-' * 20)
+        print(self.solutions)
+
+        def apply(f):
+            r = self.check(*args)
+            return getattr(self, f)(*r) if isinstance(r, tuple) \
+                else getattr(self, f)(r)
+        ret = map(apply, self.solutions)
 
         ret = list(filter(lambda x: x is not None, ret))
         assert len(ret) > 0
 
-        print('-' * 20)
         if not all(map(lambda x: x == ret[0], ret)):
             print('solutions: ', ret)
+            print('-' * 20)
             assert False
         else:
             print(ret[0])
             print('-' * 20)
         return ret[0]
-
-    def solution1(self, *args):
-        pass
-
-    def solution2(self, *args):
-        pass
-
-    def solution3(self, *args):
-        pass
 
     @staticmethod
     def testsuit(suit):

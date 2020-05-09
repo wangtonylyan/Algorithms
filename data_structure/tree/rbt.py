@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# data structure: red-black tree, left-leaning red-black (LLRB) tree
+## data structure: red-black tree, left-leaning red-black (LLRB) tree
 # 红黑树属于2-3(-4)树的一种变种
 # 左倾红黑树增加了"左倾"这一约束，使得实现上需要讨论的情况减少了
 
@@ -7,6 +6,7 @@ if __name__ == '__main__':
     import sys
     import os
     sys.path.append(os.path.abspath('.'))
+
 
 from data_structure.tree.bst import SelfBalancingBST
 

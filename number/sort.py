@@ -1,49 +1,5 @@
-# -*- coding: utf-8 -*-
-# problem: sorting (into increasing order)
-# solution:
-# (a) comparison based
-# insertion, shell, selection, bubble, quick, merge, heap
-# 实际中推荐使用快速排序(随机访问，倾向数组)和合并排序(顺序访问，倾向链表)
-# (b) non-comparison based
-# counting, radix, bucket
-# 思想就是建立被排序的数与其排序后的索引值之间的映射
-
-
-from base.number import NumberTest
-from data_structure.heap.binary import MaxBinaryHeap
-
-
-class Sort(NumberTest):
-    def __init__(self):
-        super(Sort, self).__init__()
-        self.funcs = []
-
-    def testcase(self):
-        def test(cases):
-            for case in cases:
-                ret = case[:]
-                ret.sort()
-                assert (all(x == ret for x in map(lambda f: f(case[:]), self.funcs)))
-
-        self._testcase(test, self._gencase(maxLen=100, each=1, total=500))
-
 
 class SelectionSort(Sort):
-    def __init__(self):
-        super(SelectionSort, self).__init__()
-        self.funcs.append(self.main_iter)
-        self.funcs.append(self.main_recur)
-
-    def main_iter(self, lst):
-        for i in range(len(lst) - 1):
-            m = i
-            for j in range(i + 1, len(lst)):
-                if lst[j] < lst[m]:
-                    m = j
-            if m != i:
-                lst[i], lst[m] = lst[m], lst[i]
-        return lst
-
     def main_recur(self, lst):
         # inner loop: select the minimum of lst[ind:] and return its index
         def select(ind):
@@ -61,22 +17,6 @@ class SelectionSort(Sort):
 
 
 class BubbleSort(Sort):
-    def __init__(self):
-        super(BubbleSort, self).__init__()
-        self.funcs.append(self.main_iter)
-        self.funcs.append(self.main_recur)
-
-    def main_iter(self, lst):
-        for i in range(len(lst) - 1, 0, -1):
-            swap = False
-            for j in range(0, i):
-                if lst[j] > lst[j + 1]:
-                    lst[j], lst[j + 1] = lst[j + 1], lst[j]
-                    swap = True
-            if not swap:
-                break  # small optimization
-        return lst
-
     def main_recur(self, lst):
         # inner loop: bubble up the maximum into lst[-1]
         def bubble(lst):
@@ -173,7 +113,7 @@ class BucketSort(Sort):
     def main(self, lst):
         # 哈希算法本身还需要维护不同bucket中数据之间的相对顺序
         # 例如bucket[0]中的数据都必须小于bucket[1]中的，以此类推
-        hash = lambda x: x / 10  # for simplicity
+        def hash(x): return x / 10  # for simplicity
         bucket = [[] for _ in range(hash(max(lst)) + 1)]
         for i in lst:
             bucket[hash(i)].append(i)
@@ -226,14 +166,3 @@ class FindClosestPair():
         assert (self.main([1, 4, 5, 7], [10, 20, 30, 40], 50) == 3)
         print 'pass:', self.__class__
 
-
-if __name__ == '__main__':
-    SelectionSort().testcase()
-    BubbleSort().testcase()
-    HeapSort().testcase()
-    CountingSort().testcase()
-    RadixSort().testcase()
-    BucketSort().testcase()
-
-    FindClosestPair().testcase()
-    print 'done'

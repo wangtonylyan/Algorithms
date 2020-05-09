@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# data structure: binary search tree
+## data structure: binary search tree
 
 if __name__ == '__main__':
     import sys
@@ -9,6 +8,7 @@ if __name__ == '__main__':
 
 from algorithms.utility import *
 from data_structure.tree.tree import Tree
+from collections.abc import Iterable
 
 
 class BinarySearchTree(Tree):
@@ -28,11 +28,14 @@ class BinarySearchTree(Tree):
         def cmp(self, key):
             return -1 if key < self.key else 1 if key > self.key else 0
 
+    def __str__(self):  # TODO: traverse
+        return str(self.root)
+
     def __len__(self):
         return self._len_(self.root)
 
-    def __str__(self):  # TODO: traverse
-        return str(self.root)
+    def height(self):
+        return self._height_(self.root)
 
     def search(self, key):
         assert key
@@ -49,21 +52,33 @@ class BinarySearchTree(Tree):
 
     def insert(self, key, value):
         assert key
-        self.root = self._insert_(self.root, key, value)
+        if isinstance(key, Iterable) and isinstance(value, Iterable):
+            for k, v in zip(key, value):
+                self.root = self._insert_(self.root, k, v)
+        else:
+            self.root = self._insert_(self.root, key, value)
+        return self
 
     def delete(self, key):
         assert key
         self.root = self._delete_(self.root, key)
+        return self
 
     def delmax(self):
         self.root = self._delmax_(self.root)
+        return self
 
     def delmin(self):
         self.root = self._delmin_(self.root)
+        return self
 
     @classmethod
     def _len_(cls, tree):
-        return len(cls.preorder(tree))
+        return len(cls.widthfirst(tree))
+
+    @classmethod
+    def _height_(cls, tree):  # 单个节点树的高度为1，以与空树相区分
+        return max(cls.widthfirst(tree, lambda _, d: d), default=0)
 
     @classmethod
     def _search_(cls, tree, key):
@@ -133,10 +148,10 @@ class BinarySearchTree(Tree):
             if callable(miss):
                 tree = miss()
             return tree
-        # 1) top-down
+        # top-down
         if callable(down):
             tree = down(tree)
-        # 2) recursion
+        # recursion
         cmp = which(tree)
         if cmp < 0:
             tree.left = cls.rwalk(tree.left, which, find, miss, down=down, up=up)
@@ -144,26 +159,51 @@ class BinarySearchTree(Tree):
             tree.right = cls.rwalk(tree.right, which, find, miss, down=down, up=up)
         else:
             tree = find(tree)
-        # 3) bottom-up
+        # bottom-up
         if tree and callable(up):
             tree = up(tree)
         return tree
 
-    ## recursive traverse
+    ## iterative traverse
     @classmethod
-    def preorder(cls, tree, find=identity):
-        return [find(tree)] + cls.preorder(tree.left) + \
-            cls.preorder(tree.right) if tree else []
+    def widthfirst(cls, tree, find=identity):
+        if not tree:
+            return []
+        que, lst = [(tree, 1)], []
+        while len(que) > 0:
+            tree, depth = que.pop(0)
+            lst.append((find(tree, depth)))
+            if tree.left:
+                que.append((tree.left, depth + 1))
+            if tree.right:
+                que.append((tree.right, depth + 1))
+        return lst
 
     @classmethod
-    def inorder(cls, tree, find=identity):
-        return cls.inorder(tree.left) + [find(tree)] + \
-            cls.inorder(tree.right) if tree else []
-
-    @classmethod
-    def postorder(cls, tree, find=identity):
-        return cls.postorder(tree.left) + cls.postorder(tree.right) + \
-            [find(tree)] if tree else []
+    def depthfirst(cls, tree, order, find=identity):
+        if not tree:
+            return []
+        stk, lst = [(tree, 0)], []
+        while len(stk) > 0:
+            tree, state = stk[-1]
+            if state == 0:  # first-time visit
+                if order == 'preorder':
+                    lst.append(find(tree, len(stk)))
+                stk[-1] = tree, state + 1
+                if tree.left:
+                    stk.append((tree.left, 0))
+            elif state == 1:  # second-time visit
+                if order == 'inorder':
+                    lst.append(find(tree, len(stk)))
+                stk[-1] = tree, state + 1
+                if tree.right:
+                    stk.append((tree.right, 0))
+            else:  # last-time visit
+                assert state == 2
+                if order == 'postorder':
+                    lst.append(find(tree, len(stk)))
+                stk.pop()
+        return lst
 
 
 class SelfAdjustingBST(BinarySearchTree):
@@ -222,16 +262,7 @@ if __name__ == '__main__':
 
     print(len([None]))
 
-
-
-# 二叉树遍历题：
-
-# 1. 遍历
-
-# 1.1. 镜像二叉树
-
-
+# TODO
 # 2. 给出遍历的结果，反推二叉树
-
 # 2.1. 给出不同的遍历结果，检查是否对应于同一课树，
 # 是否构成一棵二叉树

@@ -12,9 +12,9 @@ from algorithms.utility import *
 # 当没有障碍物时，就是m*n网格内合法的路径总数
 class LeetCode63(Problem):
     def check(self, mat):
-        return self.check_matrix(mat)
+        return self.check_matrix_nonempty(mat)
 
-    def solution1(self, mat):
+    def algo1(self, mat):
         def recur(i, j):
             if mat[i][j]:
                 return 0
@@ -29,7 +29,7 @@ class LeetCode63(Problem):
 
         return recur(len(mat) - 1, len(mat[0]) - 1)
 
-    def solution2(self, mat):
+    def algo2(self, mat):
         m, n = len(mat), len(mat[0])
         dp = [[None] * n for _ in range(m)]
 
@@ -45,7 +45,7 @@ class LeetCode63(Problem):
 
         return dp[-1][-1]
 
-    def solution3(self, mat):
+    def algo3(self, mat):
         m, n = len(mat), len(mat[0])
         dp = [0] * n
 
@@ -64,9 +64,9 @@ class LeetCode63(Problem):
 ## 给定存满了数字的m*n网格，每次只能向右或向下移动一格，求最小路径和
 class LeetCode64(Problem):
     def check(self, mat):
-        return self.check_matrix(mat)
+        return self.check_matrix_nonempty(mat)
 
-    def solution1(self, mat):
+    def algo1(self, mat):
         def recur(i, j):
             if i == 0 and j == 0:
                 return mat[0][0]
@@ -79,7 +79,7 @@ class LeetCode64(Problem):
 
         return recur(len(mat) - 1, len(mat[0]) - 1)
 
-    def solution2(self, mat):
+    def algo2(self, mat):
         m, n = len(mat), len(mat[0])
         dp = [[None] * n for _ in range(m)]
 
@@ -95,7 +95,7 @@ class LeetCode64(Problem):
 
         return dp[-1][-1]
 
-    def solution3(self, mat):
+    def algo3(self, mat):
         m, n = len(mat), len(mat[0])
         dp = mat[0][:]
 
@@ -114,9 +114,9 @@ class LeetCode64(Problem):
 ## 给定一个三角形，找出自顶向下的最小路径和
 class LeetCode120(Problem):
     def check(self, mat):
-        return self.check_list(mat)
+        return self.check_list_nonempty(mat)
 
-    def solution1(self, mat):
+    def algo1(self, mat):
         def recur(i, j):
             if i == 0:
                 return mat[0][0]
@@ -131,7 +131,7 @@ class LeetCode120(Problem):
         return min([recur(len(mat) - 1, j) for j in range(len(mat))])
 
     # top-down
-    def solution2(self, mat):
+    def algo2(self, mat):
         dp = [[None] * (i + 1) for i in range(len(mat))]
 
         dp[0][0] = mat[0][0]
@@ -144,7 +144,7 @@ class LeetCode120(Problem):
 
         return min(dp[-1])
 
-    def solution3(self, mat):
+    def algo3(self, mat):
         dp = [None] * len(mat)
 
         dp[0] = mat[0][0]
@@ -158,7 +158,7 @@ class LeetCode120(Problem):
         return min(dp)
 
     # bottom-up
-    def solution4(self, mat):
+    def algo4(self, mat):
         dp = mat[-1][:]
 
         for i in range(len(mat) - 2, -1, -1):
@@ -172,9 +172,9 @@ class LeetCode120(Problem):
 ## 给定仅存储了零和非零的m*n网格，求由非零数字所组成的最大正方形的边长
 class LeetCode221(Problem):
     def check(self, mat):
-        return self.check_matrix(mat)
+        return self.check_matrix_nonempty(mat)
 
-    def solution1(self, mat):
+    def algo1(self, mat):
         m, n = len(mat), len(mat[0])
         dp = [[None] * n for _ in range(m)]
 
@@ -194,7 +194,7 @@ class LeetCode221(Problem):
 
         return max(map(max, dp))
 
-    def solution2(self, mat):
+    def algo2(self, mat):
         m, n = len(mat), len(mat[0])
 
         dp = mat[0][:]
@@ -217,9 +217,9 @@ class LeetCode221(Problem):
 ## 求出最少的花费
 class LeetCode265(Problem):
     def check(self, mat):
-        return self.check_matrix(mat)
+        return self.check_matrix_nonempty(mat)
 
-    def solution1(self, mat):
+    def algo1(self, mat):
         m, n = len(mat), len(mat[0])
         dp = [[None] * n for _ in range(m)]
 
@@ -235,9 +235,9 @@ class LeetCode265(Problem):
 ## 国王与金矿
 class Problem1(Problem):
     def check(self, mat, n):
-        return self.check_matrix(mat)
+        return self.check_matrix_nonempty(mat), n
 
-    def solution1(self, mat, n):
+    def algo1(self, mat, n):
         def recur(mat, n):
             if n == 0:
                 return 0
@@ -250,7 +250,7 @@ class Problem1(Problem):
 
         return recur(mat, n)
 
-    def solution2(self, mat, n):
+    def algo2(self, mat, n):
         m = len(mat)
         dp = [[None] * (n + 1) for _ in range(m)]
 
@@ -267,7 +267,7 @@ class Problem1(Problem):
 
         return dp[-1][-1]
 
-    def solution3(self, mat, n):
+    def algo3(self, mat, n):
         m = len(mat)
         dp = [None] * (n + 1)
 
