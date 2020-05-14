@@ -11,8 +11,6 @@ from algorithms.utility import *
 from data_structure.tree.bst import BinarySearchTree
 
 
-
-
 ###############################################################################
 
 
@@ -20,44 +18,46 @@ def fliptree(tree):
     def flip(t):
         t.left, t.right = t.right, t.left
 
-    BinarySearchTree.widthfirst(tree, flip)
+    BinarySearchTree.breadthfirst(tree, flip)
 
 
 # 注意二叉树是否平衡取决于每个子树是否平衡，而不能仅考虑树根处的情况
 def isbalanced(tree):
-    stk = [tree.root]
-    ban = [(None, None)]
+    stk = [(tree, None, None)]
     while len(stk) > 0:
-        t = stk[-1]
-        lh, rh = ban[-1]
-        if lh is None:
-            if t.left:
-                stk.append(t.left)
-                ban.append((None, None))
+        tree, left, right = stk[-1]
+        if left is None:
+            if tree.left is None:
+                stk[-1] = tree, 0, right
             else:
-                ban[-1] = (0, rh)
-        elif rh is None:
-            if t.right:
-                stk.append(t.right)
-                ban.append((None, None))
+                stk.append((tree.left, None, None))
+        elif right is None:
+            if tree.right is None:
+                stk[-1] = tree, left, 0
             else:
-                ban[-1] = (lh, 0)
+                stk.append((tree.right, None, None))
         else:
-            stk.pop()
-            ban.pop()
-            if lh - rh > 1 or rh - lh > 1:
+            if abs(left - right) > 1:
                 return False
+            stk.pop()
             if len(stk) > 0:
-                llh, rrh = ban[-1]
-                if llh is None:
-                    ban[-1] = (lh + rh + 1, rrh)
-                elif rrh is None:
-                    ban[-1] = (llh, lh + rh + 1)
+                if stk[-1][1] is None:
+                    stk[-1] = stk[-1][0], max(left, right) + 1, stk[-1][2]
                 else:
-                    assert False
+                    assert stk[-1][2] is None
+                    stk[-1] = stk[-1][0], stk[-1][1], max(left, right) + 1
     return True
 
 
 if __name__ == '__main__':
-    t = BinarySearchTree()
-    l = [5, 6, 4, 1, 2, 3]
+    #t = BinarySearchTree()
+    #l = [5, 6, 4, 1, 2, 3]
+    class Father:
+        def __init__(self, v1, v2):
+            print(v1, v2)
+
+    class Son(Father):
+        def __init__(self, v1, v2):
+            super().__init__(v1, v2)
+
+    Son(1, 2)

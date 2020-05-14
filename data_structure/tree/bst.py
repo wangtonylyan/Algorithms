@@ -11,22 +11,19 @@ from data_structure.tree.tree import Tree
 from collections.abc import Iterable
 
 
-class BinarySearchTree(Tree):
+class BinaryTree(Tree):
     class Node(Tree.Node):
         __slots__ = ['left', 'right']
 
-        def __init__(self, key, value):
+        def __init__(self, key, value, left=None, right=None):
             super().__init__(key, value)
-            self.left = None
-            self.right = None
+            self.left = left
+            self.right = right
 
         def __str__(self):
             return super().__str__() + ', ' + \
                 f'left={str(self.left.key) if self.left else None}' + ', ' + \
                 f'right={str(self.right.key) if self.right else None}'
-
-        def cmp(self, key):
-            return -1 if key < self.key else 1 if key > self.key else 0
 
     def __str__(self):  # TODO: traverse
         return str(self.root)
@@ -34,8 +31,69 @@ class BinarySearchTree(Tree):
     def __len__(self):
         return self._len_(self.root)
 
-    def height(self):
+    def height(self):  # 单节点树的高度为1，以与空树相区分
         return self._height_(self.root)
+
+    @classmethod
+    def _len_(cls, tree):
+        return len(cls.breadthfirst(tree))
+
+    @classmethod
+    def _height_(cls, tree):
+        return max(cls.breadthfirst(tree, lambda _, d: d), default=0)
+
+    ## iterative traverse
+    @classmethod
+    def breadthfirst(cls, tree, find=identity):
+        que, lst = [], []
+        if tree:
+            que.append((tree, 1))
+        while len(que) > 0:
+            tree, depth = que.pop(0)
+            lst.append(find(tree, depth))
+            if tree.left:
+                que.append((tree.left, depth + 1))
+            if tree.right:
+                que.append((tree.right, depth + 1))
+        return lst
+
+    @classmethod
+    def depthfirst(cls, tree, order, find=identity):
+        stk, lst = [], []
+        if tree:
+            stk.append((tree, 0))
+        while len(stk) > 0:
+            tree, state = stk[-1]
+            if state == 0:  # first-time visit
+                if order == 'preorder':
+                    lst.append(find(tree, len(stk)))
+                stk[-1] = tree, state + 1
+                # 还可直接将当前节点出栈，并以先右后左的顺序，将其左右节点同时入栈
+                # 优点是，每个节点只会被访问一次，因此也就无需维护访问次数了
+                # 缺点是，会丢失当前节点的父节点信息，且仅支持前序遍历
+                if tree.left:
+                    stk.append((tree.left, 0))
+            elif state == 1:  # second-time visit
+                if order == 'inorder':
+                    lst.append(find(tree, len(stk)))
+                stk[-1] = tree, state + 1
+                if tree.right:
+                    stk.append((tree.right, 0))
+            else:  # last-time visit
+                assert state == 2
+                if order == 'postorder':
+                    lst.append(find(tree, len(stk)))
+                stk.pop()
+        return lst
+
+
+class BinarySearchTree(BinaryTree):
+    class Node(BinaryTree.Node):
+        def __init__(self, key, value, left=None, right=None):
+            super().__init__(key, value, left, right)
+
+        def cmp(self, key):
+            return -1 if key < self.key else 1 if key > self.key else 0
 
     def search(self, key):
         assert key
@@ -71,14 +129,6 @@ class BinarySearchTree(Tree):
     def delmin(self):
         self.root = self._delmin_(self.root)
         return self
-
-    @classmethod
-    def _len_(cls, tree):
-        return len(cls.widthfirst(tree))
-
-    @classmethod
-    def _height_(cls, tree):  # 单个节点树的高度为1，以与空树相区分
-        return max(cls.widthfirst(tree, lambda _, d: d), default=0)
 
     @classmethod
     def _search_(cls, tree, key):
@@ -163,47 +213,6 @@ class BinarySearchTree(Tree):
         if tree and callable(up):
             tree = up(tree)
         return tree
-
-    ## iterative traverse
-    @classmethod
-    def widthfirst(cls, tree, find=identity):
-        if not tree:
-            return []
-        que, lst = [(tree, 1)], []
-        while len(que) > 0:
-            tree, depth = que.pop(0)
-            lst.append((find(tree, depth)))
-            if tree.left:
-                que.append((tree.left, depth + 1))
-            if tree.right:
-                que.append((tree.right, depth + 1))
-        return lst
-
-    @classmethod
-    def depthfirst(cls, tree, order, find=identity):
-        if not tree:
-            return []
-        stk, lst = [(tree, 0)], []
-        while len(stk) > 0:
-            tree, state = stk[-1]
-            if state == 0:  # first-time visit
-                if order == 'preorder':
-                    lst.append(find(tree, len(stk)))
-                stk[-1] = tree, state + 1
-                if tree.left:
-                    stk.append((tree.left, 0))
-            elif state == 1:  # second-time visit
-                if order == 'inorder':
-                    lst.append(find(tree, len(stk)))
-                stk[-1] = tree, state + 1
-                if tree.right:
-                    stk.append((tree.right, 0))
-            else:  # last-time visit
-                assert state == 2
-                if order == 'postorder':
-                    lst.append(find(tree, len(stk)))
-                stk.pop()
-        return lst
 
 
 class SelfAdjustingBST(BinarySearchTree):
